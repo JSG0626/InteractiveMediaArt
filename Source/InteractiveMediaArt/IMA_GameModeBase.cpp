@@ -3,3 +3,6 @@
 
 #include "IMA_GameModeBase.h"
 
+void AIMA_GameModeBase::BeginPlay()
+{
+}

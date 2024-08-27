@@ -14,4 +14,5 @@ class INTERACTIVEMEDIAART_API AIMA_GameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+	virtual void BeginPlay() override;
 };

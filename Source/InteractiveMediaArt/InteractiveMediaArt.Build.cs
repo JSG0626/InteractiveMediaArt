@@ -8,7 +8,8 @@ public class InteractiveMediaArt : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"
+		, "Networking", "Sockets"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

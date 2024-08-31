@@ -59,6 +59,9 @@ public:
 
 	bool isMouseButtonDown;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UNiagaraComponent* SmokeNiagaraComp;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ALHM_SphereCollision> collision;
 

@@ -14,6 +14,8 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputAction.h"
 #include "LHM_SphereCollision.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
 
 
 // Sets default values
@@ -60,6 +62,19 @@ ALHM_Player::ALHM_Player()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
+	SmokeNiagaraComp->SetupAttachment(RootComponent);
+	SmokeNiagaraComp->SetRelativeLocation(FVector(0, 0, 20));
+	SmokeNiagaraComp->SetRelativeScale3D(FVector(0.5, 0.5, 0.7));
+
+	/*ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraSystemAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/HRC/Effects/NS_Smoke.NS_Smoke'"));
+	
+	if (NiagaraSystemAsset.Succeeded())
+	{
+		SmokeNiagaraComp->SetAsset(NiagaraSystemAsset.Object);
+	}*/
+	
 
 	isMouseButtonDown = false;
 
@@ -167,7 +182,7 @@ void ALHM_Player::SpawnNiagaraEffect()
 
 		if (pc && pc->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
 		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NiagaraEffect, HitResult.Location, FRotator::ZeroRotator, FVector(1.0f), true, true, ENCPoolMethod::None, true);
+			//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NiagaraEffect, HitResult.Location, FRotator::ZeroRotator, FVector(1.0f), true, true, ENCPoolMethod::None, true);
 
 			if (collision)
 			{

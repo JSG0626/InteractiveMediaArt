@@ -9,8 +9,12 @@
 #include "SocketSubsystem.h"
 #include "Interfaces/IPv4/IPv4Address.h"
 #include "Sockets.h"
+#include "SocketSubSystem.h"
 #include "Windows/WindowsPlatformProcess.h"
 #include "Kismet/GameplayStatics.h"
+
+#include "SG_JsonUtilityLibrary.h"
+#include "SG_Player.h"
 
 // Sets default values
 ASG_ServerManager::ASG_ServerManager()
@@ -25,10 +29,9 @@ ASG_ServerManager::ASG_ServerManager()
 void ASG_ServerManager::BeginPlay()
 {
 	Super::BeginPlay();
-	//RunPythonScript(TEXT("C:\\Work\\InteractiveMediaArt\\Content\\Python\\Cat_HelloWorld.py"));
-	//RunPythonScript(TEXT("Cat_HelloWorld.py"));
-	//RunPythonScript(TEXT("while.py"));
-	RunPythonScript(TEXT("Cat_HelloWorld.py"));
+	RunPythonScript(PyConnectServer);
+
+	
 }
 
 void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -42,13 +45,14 @@ void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		FPlatformProcess::TerminateProc(ServerProcHandle);
 		FPlatformProcess::CloseProc(ServerProcHandle);
 	}
+
+	Disconnect();
 }
 
 // Called every frame
 void ASG_ServerManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("%d"), ServerProcHandle.IsValid()));
 }
 
 void ASG_ServerManager::RunPythonScript(const FString& Path)
@@ -58,7 +62,6 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 
 	if (FPaths::FileExists(pythonExePath) && FPaths::FileExists(scriptPath))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("File Exists")));
 		FString params = FString::Printf(TEXT("\"%s\""), *scriptPath);
 		ServerProcHandle = FPlatformProcess::CreateProc(*pythonExePath,
 		*params,
@@ -70,13 +73,6 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 		nullptr,
 		nullptr
 		);
-
-		if (ServerProcHandle.IsValid())
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 300.f, FColor::Green, FString::Printf(TEXT("CreateProc %u"), ServerPID));
-			GEngine->AddOnScreenDebugMessage(-1, 3000.f, FColor::Green, FString::Printf(TEXT("%s"), *params));
-		}
-		//GEngine->AddOnScreenDebugMessage(-1, 3000.f, FColor::Green, TEXT("C:\\Work\\InteractiveMediaArt\\Content\\Scripts\\Cat_HelloWorld.py"));
 		
 	}
 	else
@@ -117,13 +113,14 @@ void ASG_ServerManager::CreateClient(FString IPString, int32 Port)
 
 void ASG_ServerManager::ReceiveData()
 {
+	uint32 JSON_SIZE = 1024;
 	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
 	{
-		uint32 size;
-		while(ClientSocket->HasPendingData(size))
+		// 더 이상 수신할 데이터가 없으면 루프 종료
+		while(ClientSocket->HasPendingData(JSON_SIZE))
 		{
 			TArray<uint8> ReceivedData;
-			ReceivedData.SetNumUninitialized(FMath::Min(size, 1024u));
+			ReceivedData.SetNumUninitialized(FMath::Min(JSON_SIZE, 1024u));
 
 			// 데이터 수신
 			int32 BytesRead = 0;
@@ -131,11 +128,14 @@ void ASG_ServerManager::ReceiveData()
 			{
 				if (BytesRead > 0)
 				{
-					FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
-					if (ReceivedString.Contains(TEXT("1")))
-					{
-						SendDataToPlayer(1);
-					}
+					FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())), BytesRead);
+					GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ReceivedString: %s"), *ReceivedString));
+					
+					USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedString, Me->Landmarks, Me->TargetJointLocations);
+					Me->SetJointPosition();
+					
+					/*for(int i = 0; i < Me->TargetJointLocations.Num(); i++)
+						GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%f %f"), Me->TargetJointLocations[i].Key, Me->TargetJointLocations[i].Value));*/
 				}
 				else
 				{
@@ -166,4 +166,30 @@ void ASG_ServerManager::Disconnect()
 void ASG_ServerManager::SendDataToPlayer(int32 data)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SendDataToPlayer")));
+}
+
+void ASG_ServerManager::testJsonParse()
+{
+	/*
+	FString testJson = TEXT("{\"NOSE\": {\"x\": 0.5, \"y\": 0.1}, \"LEFT_SHOULDER\": {\"x\": 1.2, \"y\": 3.0}}");
+	USG_JsonUtilityLibrary::MediaPipeJsonParse(testJson, Me->Landmarks, Me->TargetJointLocations);
+	GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Green, FString::Printf(TEXT("%d"), Me->TargetJointLocations.Num()));
+	for (int i = 0; i < Me->TargetJointLocations.Num(); i++)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Black, FString::Printf(TEXT("LandMark: %s, %f, %f"), *Me->Landmarks[i], Me->TargetJointLocations[i].Key, TargetJointLocations[i].Value));
+	}*/
+}
+
+void ASG_ServerManager::testMakeCoordinates()
+{
+	int8 BonesSize = 23;
+	for (int8 i = 0; i < BonesSize; i++)
+	{
+		float bound = 3;
+		float x = FMath::RandRange(-bound, bound);
+		float y = FMath::RandRange(-bound, bound);
+		Me->TargetJointLocations.Add({x, y});
+	}
+
+	Me->SetJointPosition();
 }

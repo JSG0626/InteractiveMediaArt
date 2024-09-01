@@ -26,8 +26,20 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class ASG_ServerManager> ServerManagerFactory;
-	UPROPERTY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UPoseableMeshComponent* PoseableMeshComp;
+
+	UPROPERTY(BlueprintReadOnly)
 	class ASG_ServerManager* ServerManager;
+
+	TArray<FString> Landmarks;
+	TArray<FName> Bones;
+
+	void InitLandmarkField();
+	void InitBones();
+
+	TArray<TPair<float, float>> TargetJointLocations;
+
+	void SetJointPosition();
 };

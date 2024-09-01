@@ -65,4 +65,9 @@ public:
 
 	uint32 ServerPID;
 	FProcHandle ServerProcHandle;
+
+	void testJsonParse();
+
+	UFUNCTION(BlueprintCallable)
+	void testMakeCoordinates();
 };

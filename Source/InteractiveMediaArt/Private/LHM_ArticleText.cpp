@@ -52,7 +52,7 @@ void ALHM_ArticleText::CreateStaticMesh()
         if (MeshComponent)
         {
             // 메시 이름 설정
-            FString MeshName;
+            FString MeshName = FString::Printf(TEXT("%s%03d"), *BaseMeshName, i);
 
             // 이름 중복 확인
             while (FindObject<UStaticMeshComponent>(ANY_PACKAGE, *MeshName))

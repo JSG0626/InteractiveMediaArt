@@ -49,7 +49,10 @@ void ALHM_ArticleText::CreateStaticMesh()
     {
         // Static Mesh 컴포넌트 생성
         UStaticMeshComponent* MeshComponent = NewObject<UStaticMeshComponent>(this);
-        if (MeshComponent)
+
+        if( nullptr == MeshComponent ) return;
+
+        if (MeshComponent != nullptr)
         {
             // 메시 이름 설정
             FString MeshName = FString::Printf(TEXT("%s%03d"), *BaseMeshName, i);
@@ -71,9 +74,18 @@ void ALHM_ArticleText::CreateStaticMesh()
                 MeshComponent->SetStaticMesh(LoadedMesh);
             }
 
-            // 컴포넌트 초기화
-            MeshComponent->RegisterComponent();
-            MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+            if (MeshComponent)
+            {
+                MeshComponent->RegisterComponent(); // 컴포넌트 초기화
+                MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+                MeshComponent->SetRelativeScale3D(FVector(0.5, 0.3, 0.5));
+                MeshComponent->SetVisibility(true);
+                MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+                MeshComponent->SetCollisionProfileName(TEXT("Text"),true);
+                MeshComponent->SetSimulatePhysics(true);
+                MeshComponent->SetEnableGravity(false);
+                MeshComponent->SetMassOverrideInKg(NAME_None, 10.f);
+            }
         }
     }
 }

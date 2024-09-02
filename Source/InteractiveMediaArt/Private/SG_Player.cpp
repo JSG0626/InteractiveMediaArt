@@ -115,7 +115,7 @@ void ASG_Player::SetJointPosition()
 {
 	check(PoseableMeshComp); if (nullptr == PoseableMeshComp) return;
 
-	for (int32 i = 0; i < Landmarks.Num(); i++)
+	for (int32 i = 0; i < TargetJointLocations.Num(); i++)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
 		// 관절의 본을 가져옵니다.
@@ -129,11 +129,13 @@ void ASG_Player::SetJointPosition()
 		// 본의 변환을 설정합니다.
 		PoseableMeshComp->SetBoneTransformByName(Bones[i], JointTransform, EBoneSpaces::WorldSpace);
 	}
-	FTransform pelvisTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(TEXT("pelvis")));
-	FVector pelvisLocation = pelvisTransform.GetLocation();
-	pelvisLocation.X = TargetJointLocations[0].Key;
-	pelvisTransform.SetLocation(pelvisLocation);
-	PoseableMeshComp->SetBoneTransformByName(TEXT("pelvis"), pelvisTransform, EBoneSpaces::WorldSpace);
+
+
+	//FTransform pelvisTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(TEXT("pelvis")));
+	//FVector pelvisLocation = pelvisTransform.GetLocation();
+	//pelvisLocation.X = TargetJointLocations[0].Key;
+	//pelvisTransform.SetLocation(pelvisLocation);
+	//PoseableMeshComp->SetBoneTransformByName(TEXT("pelvis"), pelvisTransform, EBoneSpaces::WorldSpace);
 
 	TargetJointLocations.Empty();
 }

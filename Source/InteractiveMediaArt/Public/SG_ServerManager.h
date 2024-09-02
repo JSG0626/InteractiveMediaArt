@@ -29,16 +29,16 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString ServerIP = TEXT("127.0.0.1");
-
+	FString ServerIP = TEXT("18.177.76.42");
+	//FString ServerIP = TEXT("127.0.0.l");
 	UPROPERTY(EditDefaultsOnly)
-	int32 ServerPort = 23456;
+	int32 ServerPort = 17942;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	FString PyDeafultPath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
-	FString PyConnectServer = TEXT("ConnectServer.py");
+	FString PyConnectServer = TEXT("TCP_response.py");
 
 	class FSocket* ClientSocket;
 
@@ -53,10 +53,13 @@ public:
 	void RunPythonScript(const FString& Path);
 
 	UFUNCTION(BlueprintCallable)
-	void CreateClient(FString IP, int32 Port);
+	void CreateClient();
 
+	void  RecvAll(TArray<uint8>& OutData, uint32 Length);
 	UFUNCTION(BlueprintCallable)
 	void ReceiveData();
+	void TestReceiveData();
+
 
 	UFUNCTION(BlueprintCallable)
 	void Disconnect();

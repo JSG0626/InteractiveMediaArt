@@ -25,8 +25,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
-	void CreateStaticMesh();
+public:
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 MeshCount = 1014;
@@ -34,4 +33,8 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	FString BaseMeshName = TEXT("Article_Text_");
 
+	// Static Mesh Components Array
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<UStaticMeshComponent*> TextComponents;
+	
 };

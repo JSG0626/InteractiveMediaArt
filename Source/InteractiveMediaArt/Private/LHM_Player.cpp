@@ -99,7 +99,8 @@ void ALHM_Player::Tick(float DeltaTime)
 	FRotator FixedCameraRotation = FRotator(0, 180, 0);
 	FollowCamera->SetWorldRotation(FixedCameraRotation);*/
 
-	if(isMouseButtonDown) SpawnNiagaraEffect();
+	// 왼쪽 마우스 클릭 시 나이아가라 스폰
+	//if(isMouseButtonDown) SpawnNiagaraEffect();
 
 }
 

@@ -3,10 +3,10 @@
 
 #include "SG_JsonUtilityLibrary.h"
 
-void USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<TPair<float, float>> & OutCoordinates)
+bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<TPair<float, float>> & OutCoordinates)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Json: %s"), *Json));
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *Json);
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Json: %s"), *Json));
+	UE_LOG(LogTemp, Warning, TEXT("Json: %s"), *Json);
 	TSharedRef<TJsonReader<TCHAR>> jsonReader = TJsonReaderFactory<TCHAR>::Create(Json);
 	TSharedPtr<FJsonObject> jsonObject = MakeShareable(new FJsonObject());
 
@@ -24,9 +24,12 @@ void USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArra
 				OutCoordinates.Add({x, y});
 			}
 		}
+		return true;
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Desrialize failed")));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Desrialize failed")));
+		UE_LOG(LogTemp, Warning, TEXT("Desrialize failed"));
 	}
+	return false;
 }

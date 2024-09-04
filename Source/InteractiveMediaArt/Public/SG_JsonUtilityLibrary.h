@@ -15,5 +15,5 @@ class INTERACTIVEMEDIAART_API USG_JsonUtilityLibrary : public UBlueprintFunction
 	GENERATED_BODY()
 	
 public:
-	static void MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<TPair<float, float>>& OutCoordinates);
+	static bool MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<TPair<float, float>>& OutCoordinates);
 };

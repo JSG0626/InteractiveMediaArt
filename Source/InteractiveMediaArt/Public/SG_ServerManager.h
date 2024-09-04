@@ -32,13 +32,14 @@ public:
 	FString ServerIP = TEXT("18.177.76.42");
 	//FString ServerIP = TEXT("127.0.0.l");
 	UPROPERTY(EditDefaultsOnly)
-	int32 ServerPort = 17942;
+	int32 ServerPort = 19666;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	FString PyDeafultPath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
-	FString PyConnectServer = TEXT("TCP_response.py");
+	//FString PyConnectServer = TEXT("TCP_response.py");
+	FString PyConnectServer = TEXT("response_test.py");
 
 	class FSocket* ClientSocket;
 
@@ -55,7 +56,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CreateClient();
 
-	void  RecvAll(TArray<uint8>& OutData, uint32 Length);
+	bool  RecvAll(TArray<uint8>& OutData, uint32 Length);
 	UFUNCTION(BlueprintCallable)
 	void ReceiveData();
 	void TestReceiveData();

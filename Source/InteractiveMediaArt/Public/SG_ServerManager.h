@@ -32,7 +32,7 @@ public:
 	FString ServerIP = TEXT("18.177.76.42");
 	//FString ServerIP = TEXT("127.0.0.l");
 	UPROPERTY(EditDefaultsOnly)
-	int32 ServerPort = 19666;
+	int32 ServerPort = 11221;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	FString PyDeafultPath;
@@ -56,9 +56,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CreateClient();
 
-	bool  RecvAll(TArray<uint8>& OutData, uint32 Length);
+	bool  RecvAll(TArray<uint8>& OutData, uint32 Length, int32& BytesReceived);
 	UFUNCTION(BlueprintCallable)
 	void ReceiveData();
+	void ReceiveRestData(uint32 bodyPendingData = 0);
 	void TestReceiveData();
 
 
@@ -69,9 +70,15 @@ public:
 
 	uint32 ServerPID;
 	FProcHandle ServerProcHandle;
+	FString ReceivedJson;
 
 	void testJsonParse();
 
 	UFUNCTION(BlueprintCallable)
 	void testMakeCoordinates();
+
+	bool bReceiveSuccess = true;
+	uint32 CurDataLength;
+	uint32 TargetDataLength = 0;
+	uint32 DataLength;
 };

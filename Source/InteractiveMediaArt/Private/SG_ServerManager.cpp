@@ -14,9 +14,11 @@
 #include "SG_JsonUtilityLibrary.h"
 #include "SG_Player.h"
 // Sets default values
+const uint32 MIN_JSON_SIZE = 1500;
+const uint32 MAX_JSON_SIZE = 3000;
 ASG_ServerManager::ASG_ServerManager()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	PyDeafultPath = FPaths::ProjectContentDir() + TEXT("Scripts/");
@@ -35,7 +37,7 @@ void ASG_ServerManager::BeginPlay()
 			CreateClient();
 		}, 3.0f, false);
 
-	
+
 }
 
 void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -60,11 +62,12 @@ void ASG_ServerManager::Tick(float DeltaTime)
 	//TestReceiveData();
 	if (ServerProcHandle.IsValid() && ClientSocket)
 	{
-		ReceiveData();
+		if (bReceiveSuccess) ReceiveData();
+		else ReceiveRestData();
 
-		//uint32 pendingData = 0; 
-		//ClientSocket->HasPendingData(pendingData);
-		//GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("%u"), pendingData));
+		uint32 pendingData = 0;
+		ClientSocket->HasPendingData(pendingData);
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("%u"), pendingData));
 
 	}
 }
@@ -74,19 +77,19 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 	FString scriptPath = PyDeafultPath + Path;
 	FString pythonExePath = TEXT("C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\\python.exe");
 	bool bPythonExe = FPaths::FileExists(pythonExePath);
-	bool bScript =  FPaths::FileExists(scriptPath);
+	bool bScript = FPaths::FileExists(scriptPath);
 	if (bPythonExe && bScript)
 	{
 		FString params = FString::Printf(TEXT("\"%s\""), *scriptPath);
 		ServerProcHandle = FPlatformProcess::CreateProc(*pythonExePath,
-		*params,
-		false,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
-		false,
-		false,
-		&ServerPID,
-		0,
-		nullptr,
-		nullptr
+			*params,
+			false,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
+			false,
+			false,
+			&ServerPID,
+			0,
+			nullptr,
+			nullptr
 		);
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ServerProcHandle is valid = %d"), ServerProcHandle.IsValid()));
 	}
@@ -106,7 +109,7 @@ void ASG_ServerManager::CreateClient()
 
 	// 서버 IP와 포트 설정
 	FIPv4Address ip;
-	
+
 	// 서버의 IP 주소 (예: LocalHost)
 	FIPv4Address::Parse(ServerIP, ip);
 	// IP 주소 설정
@@ -120,19 +123,18 @@ void ASG_ServerManager::CreateClient()
 }
 
 
-bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length)
+bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& BytesReceived)
 {
 	bool bSuccess = true;
 	if (Length >= 3000)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("!!Length Over!!"));
-		Length = 3000;
+		Length = 10000;
 		bSuccess = false;
 	}
 	OutData.Empty();
 	OutData.SetNumUninitialized(Length);
 
-	int32 BytesReceived = 0;
 	if (bSuccess)
 		ClientSocket->Recv(OutData.GetData(), OutData.Num(), BytesReceived, ESocketReceiveFlags::WaitAll);
 	else
@@ -144,57 +146,124 @@ bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length)
 
 void ASG_ServerManager::ReceiveData()
 {
-	uint32 DataLength = 0;
 	uint32 PackedLength = 0;
-	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
+	if (ClientSocket && ClientSocket->GetConnectionState() != SCS_Connected)
 	{
-		uint32 headerPendingData = 4;
-		if (ClientSocket->HasPendingData(headerPendingData))
+		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("Socket is not Connected or does not exist.")));
+		return;
+	}
+
+	uint32 headerPendingData = 0;
+	if (ClientSocket->HasPendingData(headerPendingData) && headerPendingData < 4)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("message")));
+		return;
+	}
+
+	// 데이터 수신
+	int32 BytesRead = 0;
+	if (!ClientSocket->Recv(reinterpret_cast<uint8*>(&PackedLength), sizeof(uint32), BytesRead, ESocketReceiveFlags::WaitAll))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Received Fail")));
+		return;
+	}
+
+	DataLength = FGenericPlatformProperties::IsLittleEndian() ? BYTESWAP_ORDER32(PackedLength) : PackedLength;
+
+	UE_LOG(LogTemp, Warning, TEXT("[ReceiveData] DataLength : %u"), DataLength);
+	uint32 bodyPendingData;
+
+	// 4바이트의 길이 데이터를 읽고, 펜딩 데이터가 있다면
+	if (ClientSocket->HasPendingData(bodyPendingData))
+	{
+		// 전체 Json이 버퍼에 존재한다면
+		int32 bodyByteReceived = 0;
+		if (bodyPendingData >= DataLength)
 		{
 			TArray<uint8> ReceivedData;
-			// 데이터 수신
-			int32 BytesRead = 0;
-			if (ClientSocket->Recv(reinterpret_cast<uint8*>(&PackedLength) , sizeof(uint32), BytesRead, ESocketReceiveFlags::WaitAll))
+			if (RecvAll(ReceivedData, DataLength, bodyByteReceived))
 			{
-				DataLength = FGenericPlatformProperties::IsLittleEndian() ? BYTESWAP_ORDER32(PackedLength) : PackedLength;
-				uint32 bodyPendingData = DataLength;
-				if (BytesRead == 4 && ClientSocket->HasPendingData(bodyPendingData))
-				{
-					if (RecvAll(ReceivedData, DataLength))
-					{
-						UE_LOG(LogTemp, Warning, TEXT("RecvAll Success"));
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Buffer Clear"));
-					}
-					FString ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
-					ReceivedJson = ReceivedJson.Mid(0, DataLength);
-					UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
-					if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
-					{
-						Me->SetJointPosition();
-					}
-				}
-				else
-				{
-					GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("No Data Received")));
-				}
+				UE_LOG(LogTemp, Warning, TEXT("RecvAll Success"));
 			}
+			else
 			{
-				GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("Failed to Reveive Data")));
+				UE_LOG(LogTemp, Warning, TEXT("Buffer Clear"));
 			}
+			bReceiveSuccess = true;
+			ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
+			ReceivedJson = ReceivedJson.Mid(0, DataLength);
+			UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
+			if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
+			{
+				Me->SetJointPosition();
+			}
+		}
+		// 아직 Json이 도착하기 전이라면
+		else if (bodyPendingData < DataLength)
+		{
+			bReceiveSuccess = false;
+			TargetDataLength = DataLength;
+			CurDataLength = 0;
+			ReceiveRestData(bodyPendingData);
 		}
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("Socket is not Connected or does not exist.")));
+		bReceiveSuccess = false;
+		TargetDataLength = DataLength;
+		CurDataLength = 0;
+		ReceiveRestData(bodyPendingData);
+	}
+
+}
+
+void ASG_ServerManager::ReceiveRestData(uint32 bodyPendingData)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ReceiveRestData"));
+	if (bodyPendingData == 0)
+	{
+		if (!ClientSocket->HasPendingData(bodyPendingData)) return;
+	}
+
+	if (!(TargetDataLength >= MIN_JSON_SIZE && TargetDataLength <= MAX_JSON_SIZE))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TargetDataLength %u not valid"), TargetDataLength);
+		/*TArray<uint8> ReceivedData;
+		int32 datas;
+		RecvAll(ReceivedData, TargetDataLength, datas);*/
+		return;
+	}
+	uint32 ReadDataLength = FMath::Min(bodyPendingData, TargetDataLength - CurDataLength);
+	TArray<uint8> ReceivedData;
+	ReceivedData.Empty();
+	ReceivedData.SetNumUninitialized(ReadDataLength);
+	int32 bodyByteReceived = 0;
+	ClientSocket->Recv(ReceivedData.GetData(), ReceivedData.Num(), bodyByteReceived);
+	CurDataLength += bodyByteReceived;
+	ReceivedJson += FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
+	ReceivedJson = ReceivedJson.Mid(0, CurDataLength);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *ReceivedJson);
+
+	if (CurDataLength == TargetDataLength)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CurDataLength: %u"), CurDataLength);
+		USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations);
+
+		Me->SetJointPosition();
+		ReceivedJson = "";
+		CurDataLength = 0;
+		bReceiveSuccess = true;
+		TargetDataLength = 0;
+
+	}
+	else
+	{
+
 	}
 }
 
 void ASG_ServerManager::TestReceiveData()
 {
-	uint32 DataLength = 0;
 	const uint32 DATA_SIZE = 2048;
 	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
 	{
@@ -212,7 +281,7 @@ void ASG_ServerManager::TestReceiveData()
 				if (BytesRead > DATA_SIZE)
 				{
 					//UE_LOG(LogTemp, Warning, TEXT(""))
-					FString ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
+					ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
 					//UE_LOG(LogTemp, Warning, TEXT("ReceivedJson : %s"), *ReceivedJson);
 
 					if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
@@ -270,7 +339,7 @@ void ASG_ServerManager::testMakeCoordinates()
 		float bound = 3;
 		float x = FMath::RandRange(-bound, bound);
 		float y = FMath::RandRange(-bound, bound);
-		Me->TargetJointLocations.Add({x, y});
+		Me->TargetJointLocations.Add({ x, y });
 	}
 
 	Me->SetJointPosition();

@@ -24,11 +24,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/*UFUNCTION()
-	virtual void ReceiveParticleData(const struct TArray<>& Data) override;*/
+	UFUNCTION()
+	virtual void ReceiveParticleData(const TArray<FBasicParticleData>& Data);
 
 private:
 	UPROPERTY(EditAnywhere)
 	UNiagaraComponent* NiagaraCompnent;
+
+private:
+	void PerformSphereTrace(const FVector& Start, const FVector& End, float Radius);
+	void SetHitComp();
 
 };

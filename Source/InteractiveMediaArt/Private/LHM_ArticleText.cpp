@@ -30,7 +30,7 @@ ALHM_ArticleText::ALHM_ArticleText()
             }
 
             MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-            MeshComponent->SetRelativeScale3D(FVector(0.5, 0.3, 0.5));
+            MeshComponent->SetRelativeScale3D(FVector(0.1, 0.1, 0.1));
             MeshComponent->SetVisibility(true);
 
             MeshComponent->SetGenerateOverlapEvents(true);

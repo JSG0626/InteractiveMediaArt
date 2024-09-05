@@ -65,8 +65,8 @@ ALHM_Player::ALHM_Player()
 
 	SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
 	SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraComp->SetRelativeLocation(FVector(0, 0, 20));
-	SmokeNiagaraComp->SetRelativeScale3D(FVector(0.5, 0.5, 0.7));
+	//SmokeNiagaraComp->SetRelativeLocation(FVector(0, 0, 20));
+	//SmokeNiagaraComp->SetRelativeScale3D(FVector(0.5, 0.5, 0.7));
 
 	/*ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraSystemAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/HRC/Effects/NS_Smoke.NS_Smoke'"));
 	
@@ -165,13 +165,13 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ALHM_Player::ShowMouseCursor()
 {
-	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
+	/*if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
 	{
 		pc->bShowMouseCursor = true;
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		pc->SetInputMode(InputMode);
-	}
+	}*/
 }
 
 void ALHM_Player::SpawnNiagaraEffect()

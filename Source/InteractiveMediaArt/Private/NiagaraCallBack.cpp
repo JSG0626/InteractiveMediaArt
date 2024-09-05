@@ -2,13 +2,7 @@
 
 
 #include "NiagaraCallBack.h"
-#include "NiagaraTypes.h"
-#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
-#include "NiagaraDataSet.h"
-#include "NiagaraDataInterface.h"
-#include "NiagaraComponent.h"
-#include "NiagaraDataInterfaceArrayFunctionLibrary.h"
-#include "NiagaraSystem.h"
+#include "NiagaraDataInterfaceExport.h"
 
 // Sets default values
 ANiagaraCallBack::ANiagaraCallBack()
@@ -37,16 +31,67 @@ void ANiagaraCallBack::Tick(float DeltaTime)
 
 }
 
-//void ANiagaraCallBack::ReceiveParticleData(const struct TArray<FNiagaraParticleData>& ParticleData)
-//{
-//	for (int32 i = 0; i < ParticleData.GetNumParticles(); ++i)
-//	{
-//		FVector Position = ParticleData.GetPosition(i);
-//		FVector Velocity = ParticleData.GetVelocity(i);
-//
-//		// 콘솔에 출력
-//		UE_LOG(LogTemp, Log, TEXT("Position: %s, Velocity: %s"), *Position.ToString(), *Velocity.ToString());
-//	}
-//}
+void ANiagaraCallBack::ReceiveParticleData(const TArray<FBasicParticleData>& ParticleData)
+{
+	for (int32 i = 0; i < ParticleData.Num(); ++i)
+	{
+		// 각 입자에 대한 데이터 가져오기
+		const FBasicParticleData& Particle = ParticleData[i];
+		
+		// 위치와 속도
+		FVector Position = Particle.Position;
+		FVector Velocity = Particle.Velocity;
 
+		// 콘솔에 출력
+        //UE_LOG(LogTemp, Log, TEXT("Particle Index: %d, Position: %s, Velocity: %s"), i, *Position.ToString(), *Velocity.ToString());
+		
+		// 시작과 끝 위치 설정
+		FVector Start = Position;
+		FVector End = Velocity; // 속도를 반영한 끝 위치
+
+		// 구형 트레이스 수행
+		PerformSphereTrace(Start, End, 10.0f); // 반지름 10.0f
+	}
+}
+
+void ANiagaraCallBack::PerformSphereTrace(const FVector& Start, const FVector& End, float Radius)
+{
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+
+	// 트레이스 수행
+	bool bHit = GetWorld()->SweepSingleByChannel(HitResult, Start, End, FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(Radius), Params);
+
+	// 디버그용 출력
+	if ( bHit ) DrawDebugSphere(GetWorld(), HitResult.Location, Radius, 12, FColor::Red, false, 2.0f);
+
+	if (bHit)
+	{
+		auto hitcomp = HitResult.GetComponent();
+		if (hitcomp && hitcomp->IsSimulatingPhysics())
+		{
+			float mass = hitcomp->GetMass();
+			FVector force = HitResult.ImpactPoint - HitResult.TraceEnd;
+			force.Normalize();
+			force *= 1.f * mass;
+			hitcomp->AddImpulse(force);
+
+			// TimerHandle
+			FTimerHandle TimerHandle;
+			GetWorldTimerManager().SetTimer(TimerHandle, this, &ANiagaraCallBack::SetHitComp, 1.0f, false);
+		}
+	}
+}
+
+void ANiagaraCallBack::SetHitComp()
+{
+	FHitResult HitResult;
+	auto hitcomp = HitResult.GetComponent();
+	if (hitcomp && hitcomp->IsSimulatingPhysics())
+	{
+		hitcomp->SetSimulatePhysics(false);
+		hitcomp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		hitcomp->SetVisibility(false);
+	}
+}
 

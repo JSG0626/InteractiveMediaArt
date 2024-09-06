@@ -12,7 +12,7 @@ ALHM_ArticleText::ALHM_ArticleText()
 	PrimaryActorTick.bCanEverTick = true;
 
     // Static Mesh 컴포넌트 생성
-    for (int32 i = 2; i <= MeshCount; i++)
+    for (int32 i = 1; i <= MeshCount; i++)
     {
         FString MeshName = FString::Printf(TEXT("%s%03d"), *BaseMeshName, i);
         UStaticMeshComponent* MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(*MeshName);
@@ -20,7 +20,8 @@ ALHM_ArticleText::ALHM_ArticleText()
         if (MeshComponent)
         {
             // 메시 경로 생성
-            FString MeshPath = FString::Printf(TEXT("/Game/ArtProject/HRC/Article/%s.%s"), *MeshName, *MeshName);
+            FString MeshPath = FString::Printf(TEXT("/Game/ArtProject/HRC/Article/Article_2/%s.%s"), *MeshName, *MeshName);
+            UE_LOG(LogTemp,Warning,TEXT("%s"),*MeshPath);
 
             // 메시 에셋 로드
             UStaticMesh* LoadedMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, *MeshPath));

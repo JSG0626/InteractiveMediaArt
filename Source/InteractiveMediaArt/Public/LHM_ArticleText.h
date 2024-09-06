@@ -28,10 +28,10 @@ public:
 public:
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 MeshCount = 1014;
+	int32 MeshCount = 716;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString BaseMeshName = TEXT("Article_Text_");
+	FString BaseMeshName = TEXT("text2_News_");
 
 	// Static Mesh Components Array
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

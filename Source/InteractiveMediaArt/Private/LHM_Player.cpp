@@ -85,7 +85,7 @@ void ALHM_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ShowMouseCursor();
+	//ShowMouseCursor();
 }
 
 // Called every frame
@@ -165,13 +165,13 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ALHM_Player::ShowMouseCursor()
 {
-	/*if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
+	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
 	{
 		pc->bShowMouseCursor = true;
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		pc->SetInputMode(InputMode);
-	}*/
+	}
 }
 
 void ALHM_Player::SpawnNiagaraEffect()

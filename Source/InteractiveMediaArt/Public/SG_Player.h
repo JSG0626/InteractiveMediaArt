@@ -40,6 +40,6 @@ public:
 	void InitBones();
 
 	TArray<TPair<float, float>> TargetJointLocations;
-
+	//TArray<TTuple<float, float, float>> TargetJointLocations;
 	void SetJointPosition();
 };

@@ -41,7 +41,7 @@ LANDMARK_NAMES = {
 EXCLUDED_LANDMARKS = set(range(1, 11))
 
 # 소켓 설정
-server_ip = "127.0.0.1"
+server_ip = "192.168.0.8"
 server_port = 7777
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -78,8 +78,8 @@ while cap.isOpened():
         for idx, landmark in enumerate(pose_results.pose_landmarks.landmark):
             if idx == 0 or idx not in EXCLUDED_LANDMARKS:  # 0번 포함, 1~10번 제외
                 landmark_name = LANDMARK_NAMES.get(idx, f"landmark_{idx}")
-                x, y = landmark.x, landmark.y
-                pose_landmarks[landmark_name] = {'x': x, 'y': y}
+                x, y, z = landmark.x, landmark.y, landmark.z
+                pose_landmarks[landmark_name] = {'x': x, 'y': y, 'z': z}
         
         # ------------------------------------------------------------------------------------
         # JSON으로 좌표 데이터 변환

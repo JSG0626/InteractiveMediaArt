@@ -95,8 +95,8 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 	}
 	else
 	{
-		if (!bPythonExe) UE_LOG(LogTemp, Warning, TEXT("%s is not exist"), *pythonExePath);
-		if (!bScript) UE_LOG(LogTemp, Warning, TEXT("%s is not exist"), *scriptPath);
+		if (!bPythonExe) UE_LOG(LogTemp, Warning, TEXT("error: %s is not exist"), *pythonExePath);
+		if (!bScript) UE_LOG(LogTemp, Warning, TEXT("error: %s is not exist"), *scriptPath);
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Python executable or script not found")));
 	}
 }
@@ -128,7 +128,7 @@ bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& By
 	bool bSuccess = true;
 	if (Length >= 3000)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("!!Length Over!!"));
+		UE_LOG(LogTemp, Warning, TEXT("error: !!Length Over!!"));
 		Length = 10000;
 		bSuccess = false;
 	}
@@ -146,17 +146,18 @@ bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& By
 
 void ASG_ServerManager::ReceiveData()
 {
+	UE_LOG(LogTemp, Warning, TEXT("[ReceiveData]"));
 	uint32 PackedLength = 0;
 	if (ClientSocket && ClientSocket->GetConnectionState() != SCS_Connected)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("Socket is not Connected or does not exist.")));
+		UE_LOG(LogTemp, Warning, TEXT("error: Socket is not Connected or does not exist."));
 		return;
 	}
 
 	uint32 headerPendingData = 0;
 	if (ClientSocket->HasPendingData(headerPendingData) && headerPendingData < 4)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("message")));
+		UE_LOG(LogTemp, Warning, TEXT("error: headetPendingData < 4"));
 		return;
 	}
 
@@ -164,16 +165,16 @@ void ASG_ServerManager::ReceiveData()
 	int32 BytesRead = 0;
 	if (!ClientSocket->Recv(reinterpret_cast<uint8*>(&PackedLength), sizeof(uint32), BytesRead, ESocketReceiveFlags::WaitAll))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Received Fail")));
+		UE_LOG(LogTemp, Warning, TEXT("error: Recv Length Information Fail"));
 		return;
 	}
 
 	DataLength = FGenericPlatformProperties::IsLittleEndian() ? BYTESWAP_ORDER32(PackedLength) : PackedLength;
 
-	UE_LOG(LogTemp, Warning, TEXT("[ReceiveData] DataLength : %u"), DataLength);
+	//UE_LOG(LogTemp, Warning, TEXT("[ReceiveData] DataLength : %u"), DataLength);
 	uint32 bodyPendingData;
 
-	// 4바이트의 길이 데이터를 읽고, 펜딩 데이터가 있다면
+	// 버퍼에 body 데이터가 있다면
 	if (ClientSocket->HasPendingData(bodyPendingData))
 	{
 		// 전체 Json이 버퍼에 존재한다면
@@ -181,58 +182,40 @@ void ASG_ServerManager::ReceiveData()
 		if (bodyPendingData >= DataLength)
 		{
 			TArray<uint8> ReceivedData;
-			if (RecvAll(ReceivedData, DataLength, bodyByteReceived))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("RecvAll Success"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Buffer Clear"));
-			}
+			RecvAll(ReceivedData, DataLength, bodyByteReceived);
 			bReceiveSuccess = true;
 			ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
 			ReceivedJson = ReceivedJson.Mid(0, DataLength);
-			UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
-			if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
-			{
-				Me->SetJointPosition();
-			}
+			//UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
+			USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations);
+		
+			Me->SetJointPosition();
+			return;
 		}
-		// 아직 Json이 도착하기 전이라면
-		else if (bodyPendingData < DataLength)
-		{
-			bReceiveSuccess = false;
-			TargetDataLength = DataLength;
-			CurDataLength = 0;
-			ReceiveRestData(bodyPendingData);
-		}
+		//UE_LOG(LogTemp, Warning, TEXT("bodyPendingData < DataLength"));
 	}
-	else
-	{
-		bReceiveSuccess = false;
-		TargetDataLength = DataLength;
-		CurDataLength = 0;
-		ReceiveRestData(bodyPendingData);
-	}
-
+	//UE_LOG(LogTemp, Warning, TEXT("Buffer no Have pending data"));
+	bReceiveSuccess = false;
+	TargetDataLength = DataLength;
+	CurDataLength = 0;
+	ReceivedJson = "";
+	ReceiveRestData();
 }
 
-void ASG_ServerManager::ReceiveRestData(uint32 bodyPendingData)
+void ASG_ServerManager::ReceiveRestData()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ReceiveRestData"));
-	if (bodyPendingData == 0)
-	{
-		if (!ClientSocket->HasPendingData(bodyPendingData)) return;
-	}
+	uint32 bodyPendingData;
+	if (!ClientSocket->HasPendingData(bodyPendingData)) return;
 
 	if (!(TargetDataLength >= MIN_JSON_SIZE && TargetDataLength <= MAX_JSON_SIZE))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TargetDataLength %u not valid"), TargetDataLength);
+		UE_LOG(LogTemp, Warning, TEXT("error: TargetDataLength %u not valid"), TargetDataLength);
 		/*TArray<uint8> ReceivedData;
 		int32 datas;
 		RecvAll(ReceivedData, TargetDataLength, datas);*/
 		return;
 	}
+	//UE_LOG(LogTemp, Warning, TEXT("CurDataLength: %u"), CurDataLength);
 	uint32 ReadDataLength = FMath::Min(bodyPendingData, TargetDataLength - CurDataLength);
 	TArray<uint8> ReceivedData;
 	ReceivedData.Empty();
@@ -240,70 +223,25 @@ void ASG_ServerManager::ReceiveRestData(uint32 bodyPendingData)
 	int32 bodyByteReceived = 0;
 	ClientSocket->Recv(ReceivedData.GetData(), ReceivedData.Num(), bodyByteReceived);
 	CurDataLength += bodyByteReceived;
-	ReceivedJson += FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
-	ReceivedJson = ReceivedJson.Mid(0, CurDataLength);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *ReceivedJson);
+	ReceivedJson += FString(UTF8_TO_TCHAR(ReceivedData.GetData())).Mid(0, bodyByteReceived);
+	//UE_LOG(LogTemp, Warning, TEXT("[ReceiveRestData] : CurDataLength: %u, TargetDataLength: %u, bodyPendingData: %u, Json: %s"), CurDataLength, TargetDataLength, bodyPendingData, *ReceivedJson);
+	//ReceivedJson = ReceivedJson.Mid(0, CurDataLength);
+	//UE_LOG(LogTemp, Warning, TEXT("%s"), *ReceivedJson);
 
 	if (CurDataLength == TargetDataLength)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CurDataLength: %u"), CurDataLength);
-		USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations);
-
-		Me->SetJointPosition();
+		//UE_LOG(LogTemp, Warning, TEXT("CurDataLength == TargetDataLength"));
+		if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
+		{
+			Me->SetJointPosition();
+		}
 		ReceivedJson = "";
 		CurDataLength = 0;
-		bReceiveSuccess = true;
 		TargetDataLength = 0;
-
-	}
-	else
-	{
-
+		bReceiveSuccess = true;
 	}
 }
 
-void ASG_ServerManager::TestReceiveData()
-{
-	const uint32 DATA_SIZE = 2048;
-	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
-	{
-		// 더 이상 수신할 데이터가 없으면 루프 종료
-		//while(ClientSocket->HasPendingData(JSON_SIZE))
-		uint32 pendingData = DATA_SIZE;
-		if (ClientSocket->HasPendingData(pendingData))
-		{
-			TArray<uint8> ReceivedData;
-			ReceivedData.SetNumUninitialized(pendingData);
-			// 데이터 수신
-			int32 BytesRead = 0;
-			if (ClientSocket->Recv(ReceivedData.GetData(), pendingData, BytesRead))
-			{
-				if (BytesRead > DATA_SIZE)
-				{
-					//UE_LOG(LogTemp, Warning, TEXT(""))
-					ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
-					//UE_LOG(LogTemp, Warning, TEXT("ReceivedJson : %s"), *ReceivedJson);
-
-					if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
-					{
-						Me->SetJointPosition();
-					}
-				}
-				else
-				{
-					GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("%d is not exist"), BytesRead));
-				}
-			}
-			{
-				GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("Failed to Reveive Data")));
-			}
-		}
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("Socket is not Connected or does not exist.")));
-	}
-}
 
 void ASG_ServerManager::Disconnect()
 {
@@ -313,34 +251,4 @@ void ASG_ServerManager::Disconnect()
 		ClientSocket = nullptr;
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Disconnect Server.")));
 	}
-}
-
-void ASG_ServerManager::SendDataToPlayer(int32 data)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("SendDataToPlayer")));
-}
-
-void ASG_ServerManager::testJsonParse()
-{
-	FString testJson = TEXT("{\"NOSE\": {\"x\": 0.5, \"y\": 0.1}, \"LEFT_SHOULDER\": {\"x\": 1.2, \"y\": 3.0}}");
-	USG_JsonUtilityLibrary::MediaPipeJsonParse(testJson, Me->Landmarks, Me->TargetJointLocations);
-	GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Green, FString::Printf(TEXT("%d"), Me->TargetJointLocations.Num()));
-	for (int i = 0; i < Me->TargetJointLocations.Num(); i++)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Black, FString::Printf(TEXT("LandMark: %s, %f, %f"), *Me->Landmarks[i], Me->TargetJointLocations[i].Key, Me->TargetJointLocations[i].Value));
-	}
-}
-
-void ASG_ServerManager::testMakeCoordinates()
-{
-	int8 BonesSize = 23;
-	for (int8 i = 0; i < BonesSize; i++)
-	{
-		float bound = 3;
-		float x = FMath::RandRange(-bound, bound);
-		float y = FMath::RandRange(-bound, bound);
-		Me->TargetJointLocations.Add({ x, y });
-	}
-
-	Me->SetJointPosition();
 }

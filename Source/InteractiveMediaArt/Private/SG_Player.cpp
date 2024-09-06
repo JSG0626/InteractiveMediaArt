@@ -120,9 +120,14 @@ void ASG_Player::SetJointPosition()
 	for (int32 i = 0; i < TargetJointLocations.Num(); i++)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
+		
 		float x = -(TargetJointLocations[i].Key - 0.5f);
 		float z = 0.5f - TargetJointLocations[i].Value;
-		
+		/*
+		float x = -(TargetJointLocations[i].Get<0>() - 0.5f);
+		float y = 0.5f - TargetJointLocations[i].Get<1>();
+		float z = 0.5f - TargetJointLocations[i].Get<2>();
+		*/
 		x *= WORLD_SCALE_X;
 		z *= WORLD_SCALE_Y;
 		// 관절의 본을 가져옵니다.

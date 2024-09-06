@@ -3,6 +3,7 @@ import mediapipe as mp
 import socket
 import json
 import struct
+import time
 
 # MediaPipe Pose 설정
 mp_pose = mp.solutions.pose
@@ -40,7 +41,7 @@ LANDMARK_NAMES = {
 EXCLUDED_LANDMARKS = set(range(1, 11))
 
 # 소켓 설정
-server_ip = "127.0.0.1"
+server_ip = "192.168.0.8"
 server_port = 7777
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -80,21 +81,26 @@ while cap.isOpened():
                 x, y = landmark.x, landmark.y
                 pose_landmarks[landmark_name] = {'x': x, 'y': y}
         
-# ------------------------------------------------------------------------------------ 좌표 데이터를 json으로 변환해서 데이터 길이 전송하고 그 다음에 좌표값 보내는거
+        # ------------------------------------------------------------------------------------
         # JSON으로 좌표 데이터 변환
         data = json.dumps(pose_landmarks)
         
-        # 데이터 길이를 계산하고 전송
+        # 데이터 길이를 계산하고 4바이트 빅 엔디안 형식으로 패킹하여 전송
         data_length = len(data)
-        print(f"데이터 길이: {data_length}")
-        conn.sendall(struct.pack('!I', data_length))  # 4바이트 길이 전송
+        packed_length = struct.pack('!I', data_length)  # 4바이트 빅 엔디안으로 데이터 길이 전송
         
-        # JSON 데이터 전송
-        conn.sendall(data.encode('utf-8'))
-# ------------------------------------------------------------------------------------
-        # 전송된 데이터 출력
-        print(f'Sent data: {data}')
-
+        try:
+            # 데이터 길이 전송
+            conn.sendall(packed_length)
+            
+            # JSON 데이터 전송
+            conn.sendall(data.encode('utf-8'))
+            print(f'Sent data length: {data_length}, Sent JSON data: {data}')
+        
+        except socket.error as e:
+            print(f"Failed to send data: {e}")
+        # ------------------------------------------------------------------------------------
+        
         # 스켈레톤 그리기 (전체 랜드마크를 그립니다)
         mp_drawing.draw_landmarks(
             frame, 
@@ -107,7 +113,9 @@ while cap.isOpened():
 
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break
+    #time.sleep(0.1)
 
+# 리소스 정리
 cap.release()
 cv2.destroyAllWindows()
 conn.close()

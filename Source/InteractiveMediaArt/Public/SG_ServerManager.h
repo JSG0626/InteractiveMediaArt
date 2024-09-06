@@ -29,17 +29,19 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly)
-	FString ServerIP = TEXT("18.177.76.42");
+	//FString ServerIP = TEXT("18.177.76.42");
 	//FString ServerIP = TEXT("127.0.0.l");
+	FString ServerIP = TEXT("192.168.0.8");
+	
 	UPROPERTY(EditDefaultsOnly)
-	int32 ServerPort = 11221;
+	int32 ServerPort = 7777;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	FString PyDeafultPath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	//FString PyConnectServer = TEXT("TCP_response.py");
-	FString PyConnectServer = TEXT("response_test.py");
+	FString PyConnectServer = TEXT("TCP_response_copy.py");
 
 	class FSocket* ClientSocket;
 
@@ -59,23 +61,15 @@ public:
 	bool  RecvAll(TArray<uint8>& OutData, uint32 Length, int32& BytesReceived);
 	UFUNCTION(BlueprintCallable)
 	void ReceiveData();
-	void ReceiveRestData(uint32 bodyPendingData = 0);
-	void TestReceiveData();
+	void ReceiveRestData();
 
 
 	UFUNCTION(BlueprintCallable)
 	void Disconnect();
 
-	void SendDataToPlayer(int32 data);
-
 	uint32 ServerPID;
 	FProcHandle ServerProcHandle;
 	FString ReceivedJson;
-
-	void testJsonParse();
-
-	UFUNCTION(BlueprintCallable)
-	void testMakeCoordinates();
 
 	bool bReceiveSuccess = true;
 	uint32 CurDataLength;

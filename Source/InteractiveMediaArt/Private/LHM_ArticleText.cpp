@@ -11,6 +11,9 @@ ALHM_ArticleText::ALHM_ArticleText()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    RootComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootComp"));
+    RootComp->SetupAttachment(RootComponent);
+
     // Static Mesh 컴포넌트 생성
     for (int32 i = 1; i <= MeshCount; i++)
     {
@@ -21,7 +24,7 @@ ALHM_ArticleText::ALHM_ArticleText()
         {
             // 메시 경로 생성
             FString MeshPath = FString::Printf(TEXT("/Game/ArtProject/HRC/Article/Article_2/%s.%s"), *MeshName, *MeshName);
-            UE_LOG(LogTemp,Warning,TEXT("%s"),*MeshPath);
+            //UE_LOG(LogTemp,Warning,TEXT("%s"),*MeshPath);
 
             // 메시 에셋 로드
             UStaticMesh* LoadedMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, *MeshPath));
@@ -30,8 +33,8 @@ ALHM_ArticleText::ALHM_ArticleText()
                 MeshComponent->SetStaticMesh(LoadedMesh);
             }
 
-            MeshComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-            MeshComponent->SetRelativeScale3D(FVector(0.1, 0.1, 0.1));
+            MeshComponent->SetupAttachment(RootComp);
+            MeshComponent->SetRelativeScale3D(FVector(1, 10, 1));
             MeshComponent->SetVisibility(true);
 
             MeshComponent->SetGenerateOverlapEvents(true);

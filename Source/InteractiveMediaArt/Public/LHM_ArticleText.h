@@ -27,6 +27,9 @@ public:
 
 public:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UStaticMeshComponent* RootComp;
+
 	UPROPERTY(EditDefaultsOnly)
 	int32 MeshCount = 716;
 

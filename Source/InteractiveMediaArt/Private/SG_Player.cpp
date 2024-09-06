@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/PoseableMeshComponent.h"
 #include "SG_TupleUtilityLibrary.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 // Sets default values
 ASG_Player::ASG_Player()
 {
@@ -21,12 +22,18 @@ ASG_Player::ASG_Player()
 		PoseableMeshComp->SetSkeletalMesh(tempMesh.Object);
 		PoseableMeshComp->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	}
+
+	SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
+	SmokeNiagaraComp->SetupAttachment(RootComponent);
+
+
 }
 
 // Called when the game starts or when spawned
 void ASG_Player::BeginPlay()
 {
 	Super::BeginPlay();
+	PoseableMeshComp->SetRelativeScale3D(FVector(MeshScale));
 
 	InitLandmarkField();
 	InitBones();
@@ -102,8 +109,8 @@ void ASG_Player::InitBones()
 	Bones.Add(TEXT("thumb_01_r"));
 	Bones.Add(TEXT("thigh_l"));
 	Bones.Add(TEXT("thigh_r"));
-	Bones.Add(TEXT("calf_knee_l"));
-	Bones.Add(TEXT("calf_knee_r"));
+	Bones.Add(TEXT("calf_l"));
+	Bones.Add(TEXT("calf_r"));
 	Bones.Add(TEXT("foot_l"));
 	Bones.Add(TEXT("foot_r"));
 	Bones.Add(TEXT("ball_l"));
@@ -116,30 +123,33 @@ void ASG_Player::SetJointPosition()
 {
 	check(PoseableMeshComp); if (nullptr == PoseableMeshComp) return;
 
+	FVector CurLocation = GetActorLocation();
 	for (int32 i = 0; i < TargetJointLocations.Num(); i++)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
 		
-		float x = TargetJointLocations[i].X;
-		float y = TargetJointLocations[i].Y;
-		float z = TargetJointLocations[i].Z;
+		float x = TargetJointLocations[i].X * MeshScale;
+		float y = TargetJointLocations[i].Y * MeshScale;
+		float z = TargetJointLocations[i].Z * MeshScale;
 
 		// 관절의 본을 가져옵니다.
 		FTransform JointTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(Bones[i]));
 		FVector JointLocation = JointTransform.GetLocation();
 		// 새로운 위치를 설정합니다.
 		//FVector newLocation = FVector(TargetJointLocations[i].Key, JointTransform.GetLocation().Y, TargetJointLocations[i].Value);
-		FVector newLocation = FVector(x, y, z);
-
+		FVector newLocation = CurLocation + FVector(x, y, z);
+		newLocation.Y = CurLocation.Y;
 		// 본의 변환을 설정합니다.
 		PoseableMeshComp->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
 	}
 	
-	FVector spine_04_loc = (TargetJointLocations[ELandmark::LEFT_SHOULDER] + TargetJointLocations[ELandmark::RIGHT_SHOULDER] +
-		TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 4;
+	FVector spine_04_loc = CurLocation + (TargetJointLocations[ELandmark::LEFT_SHOULDER] + TargetJointLocations[ELandmark::RIGHT_SHOULDER] +
+		TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 4 * MeshScale;
+	spine_04_loc.Y = CurLocation.Y;
 	PoseableMeshComp->SetBoneLocationByName(TEXT("spine_04"), spine_04_loc, EBoneSpaces::WorldSpace);
 	
-	FVector pelvis_loc = (TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 2;
+	FVector pelvis_loc = CurLocation + (TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 2  * MeshScale;
+	pelvis_loc.Y = CurLocation.Y;
 	PoseableMeshComp->SetBoneLocationByName(TEXT("pelvis"), pelvis_loc, EBoneSpaces::WorldSpace);
 
 	TargetJointLocations.Empty();

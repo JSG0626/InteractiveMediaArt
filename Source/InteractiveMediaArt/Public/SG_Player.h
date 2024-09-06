@@ -71,4 +71,10 @@ public:
 	UPROPERTY()
 	TArray<FVector> TargetJointLocations;
 	void SetJointPosition();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UNiagaraComponent* SmokeNiagaraComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float MeshScale = 5.0f;
 };

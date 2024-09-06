@@ -41,7 +41,7 @@ LANDMARK_NAMES = {
 EXCLUDED_LANDMARKS = set(range(1, 11))
 
 # 소켓 설정
-server_ip = "192.168.0.8"
+server_ip = "192.168.0.77"
 server_port = 7777
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

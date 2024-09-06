@@ -91,12 +91,14 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 			nullptr,
 			nullptr
 		);
+
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ServerProcHandle is valid = %d"), ServerProcHandle.IsValid()));
 	}
 	else
 	{
 		if (!bPythonExe) UE_LOG(LogTemp, Warning, TEXT("error: %s is not exist"), *pythonExePath);
 		if (!bScript) UE_LOG(LogTemp, Warning, TEXT("error: %s is not exist"), *scriptPath);
+
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Python executable or script not found")));
 	}
 }

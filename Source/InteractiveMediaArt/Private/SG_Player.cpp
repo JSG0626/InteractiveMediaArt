@@ -5,6 +5,7 @@
 #include "SG_ServerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/PoseableMeshComponent.h"
+#include "SG_TupleUtilityLibrary.h"
 // Sets default values
 ASG_Player::ASG_Player()
 {
@@ -114,33 +115,32 @@ void ASG_Player::InitBones()
 void ASG_Player::SetJointPosition()
 {
 	check(PoseableMeshComp); if (nullptr == PoseableMeshComp) return;
-	const float WORLD_SCALE_X = 180;
-	const float WORLD_SCALE_Y = 150;
 
 	for (int32 i = 0; i < TargetJointLocations.Num(); i++)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
 		
-		float x = -(TargetJointLocations[i].Key - 0.5f);
-		float z = 0.5f - TargetJointLocations[i].Value;
-		/*
-		float x = -(TargetJointLocations[i].Get<0>() - 0.5f);
-		float y = 0.5f - TargetJointLocations[i].Get<1>();
-		float z = 0.5f - TargetJointLocations[i].Get<2>();
-		*/
-		x *= WORLD_SCALE_X;
-		z *= WORLD_SCALE_Y;
+		float x = TargetJointLocations[i].X;
+		float y = TargetJointLocations[i].Y;
+		float z = TargetJointLocations[i].Z;
+
 		// 관절의 본을 가져옵니다.
 		FTransform JointTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(Bones[i]));
 		FVector JointLocation = JointTransform.GetLocation();
 		// 새로운 위치를 설정합니다.
 		//FVector newLocation = FVector(TargetJointLocations[i].Key, JointTransform.GetLocation().Y, TargetJointLocations[i].Value);
-		FVector newLocation = FVector(x, JointLocation.Y, z);
-		JointTransform.SetLocation(newLocation);
+		FVector newLocation = FVector(x, y, z);
 
 		// 본의 변환을 설정합니다.
-		PoseableMeshComp->SetBoneTransformByName(Bones[i], JointTransform, EBoneSpaces::WorldSpace);
+		PoseableMeshComp->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
 	}
+	
+	FVector spine_04_loc = (TargetJointLocations[ELandmark::LEFT_SHOULDER] + TargetJointLocations[ELandmark::RIGHT_SHOULDER] +
+		TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 4;
+	PoseableMeshComp->SetBoneLocationByName(TEXT("spine_04"), spine_04_loc, EBoneSpaces::WorldSpace);
+	
+	FVector pelvis_loc = (TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 2;
+	PoseableMeshComp->SetBoneLocationByName(TEXT("pelvis"), pelvis_loc, EBoneSpaces::WorldSpace);
 
 	TargetJointLocations.Empty();
 }

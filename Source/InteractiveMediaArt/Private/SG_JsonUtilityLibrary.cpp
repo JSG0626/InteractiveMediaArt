@@ -3,7 +3,11 @@
 
 #include "SG_JsonUtilityLibrary.h"
 
-bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<TPair<float, float>> & OutCoordinates/*, TArray<TTuple<float, float, float>> OutCoordinates*/ )
+const float WORLD_SCALE_X = 180;
+const float WORLD_SCALE_Y = 50;
+const float WORLD_SCALE_Z = 150;
+
+bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<FVector>& OutCoordinates )
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Json: %s"), *Json));
 	//UE_LOG(LogTemp, Warning, TEXT("Json: %s"), *Json);
@@ -20,11 +24,18 @@ bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArra
 			if (ValueObject)
 			{
 				float x = ValueObject->GetNumberField(TEXT("x"));
-				float y = ValueObject->GetNumberField(TEXT("y"));
-				float z = ValueObject->GetNumberField(TEXT("z"));
+				float z = ValueObject->GetNumberField(TEXT("y"));
+				float y = ValueObject->GetNumberField(TEXT("z"));
 
-				OutCoordinates.Add({x, y});
-				//OutCoordinates.Add(MakeTuple(x, y, z));
+				x = -(x - 0.5f);
+				y = 0.5f - y;
+				z = 0.5f - z;
+
+				x *= WORLD_SCALE_X;
+				y *= WORLD_SCALE_Y;
+				z *= WORLD_SCALE_Z;
+
+				OutCoordinates.Add(FVector(x, y, z));
 			}
 		}
 		return true;

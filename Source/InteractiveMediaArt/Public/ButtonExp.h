@@ -52,7 +52,7 @@ public:
 	TSubclassOf <class UUserWidget> WBP_aimpoint;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UAimPoint* AimpoiontUI;
+	class UAimPoint* AimpointUI;
 
 
 	UPROPERTY(EditDefaultsOnly)

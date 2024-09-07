@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "LHM_SphereCollision.h"
+#include "Camera/CameraActor.h"
 #include "LHM_Player.generated.h"
 
 
@@ -56,24 +57,21 @@ protected:
 	void Look(const struct FInputActionValue& Value);
 
 public:
-	void ShowMouseCursor();
-
-	bool isMouseButtonDown;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	class UNiagaraComponent* SmokeNiagaraComp;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<ALHM_SphereCollision> collision;
-
-	UPROPERTY(EditAnywhere, Category = "Effects")
-	class UNiagaraSystem* NiagaraEffect;
-
-	void SpawnNiagaraEffect();
-
 	void OnMouseClick(const struct FInputActionInstance& Instance);
 	void OnMouseRelease(const struct FInputActionInstance& Instance);
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_EscapeUI;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UEscapeUI* EscapeUI;
+
+
+	void ShowEscapeUI();
+
+	void ShowMouseCursor();
+
+	bool isMouseButtonDown;
 
 
 protected:

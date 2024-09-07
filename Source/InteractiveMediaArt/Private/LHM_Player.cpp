@@ -20,6 +20,7 @@
 #include "SG_ArtPlayer.h"
 #include "GameFramework/Actor.h"
 #include "Camera/CameraActor.h"
+#include "EscapeUI.h"
 
 
 
@@ -64,7 +65,7 @@ ALHM_Player::ALHM_Player()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -82,13 +83,7 @@ void ALHM_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*FVector FixedCameraLocation = FVector(-190, 0, 100.f);
-	FollowCamera->SetWorldLocation(FixedCameraLocation);
 
-	FRotator FixedCameraRotation = FRotator(0, 180, 0);
-	FollowCamera->SetWorldRotation(FixedCameraRotation);*/
-
-	//if(isMouseButtonDown) SpawnNiagaraEffect();
 
 }
 
@@ -159,41 +154,7 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	}
 }
 
-void ALHM_Player::ShowMouseCursor()
-{
-	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
-	{
-		pc->bShowMouseCursor = true;
-		FInputModeGameAndUI InputMode;
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		pc->SetInputMode(InputMode);
-	}
-}
 
-void ALHM_Player::SpawnNiagaraEffect()
-{
-	if (NiagaraEffect)
-	{
-		FHitResult HitResult;
-		APlayerController* pc = CastChecked<APlayerController>(GetController());
-
-		if (pc && pc->GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
-		{
-			//UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NiagaraEffect, HitResult.Location, FRotator::ZeroRotator, FVector(1.0f), true, true, ENCPoolMethod::None, true);
-
-			if (collision)
-			{
-				GetWorld()->SpawnActor<ALHM_SphereCollision> (collision, HitResult.Location, FRotator::ZeroRotator);
-				UE_LOG(LogTemp, Warning, TEXT(" Spawn collision "));
-			}
-			else if (!collision)
-			{
-				UE_LOG(LogTemp, Warning, TEXT(" NOT Spawn collision "));
-			}
-		}
-	}
-
-}
 
 void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 {
@@ -211,14 +172,37 @@ void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 			GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
 			GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
 
+			//buttonexp->AimpointUI->RemoveFromViewport();
 
+			ShowMouseCursor();
+			ShowEscapeUI();
 		}
 	}
-
 }
 
 void ALHM_Player::OnMouseRelease(const struct FInputActionInstance& Instance)
 {
 	//isMouseButtonDown = false;
+}
+
+void ALHM_Player::ShowEscapeUI()
+{	
+	EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
+	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
+	{
+		EscapeUI->AddToViewport(true);
+	}
+}
+
+void ALHM_Player::ShowMouseCursor()
+{
+	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
+	{
+		pc->bShowMouseCursor = true;
+		pc->bEnableMouseOverEvents = true;
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		pc->SetInputMode(InputMode);
+	}
 }
 

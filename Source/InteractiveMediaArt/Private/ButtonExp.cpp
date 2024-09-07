@@ -69,7 +69,7 @@ AButtonExp::AButtonExp()
 	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AButtonExp::OnOverlapBegin);
 	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &AButtonExp::OnOverlapEnd);
 
-	AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+	AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
 }
 
 // Called when the game starts or when spawned
@@ -101,9 +101,9 @@ void AButtonExp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 			ButtonDescription->SetVisibility(true);
 			ButtonChatBot->SetVisibility(true);
 			
-			if (AimpoiontUI != nullptr)
+			if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 			{
-				AimpoiontUI->AddToViewport(true);
+				AimpointUI->AddToViewport(true);
 			}
 			
 		}
@@ -122,9 +122,9 @@ void AButtonExp::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* 
 			ButtonDescription->SetVisibility(false);
 			ButtonChatBot->SetVisibility(false);
 
-			if (AimpoiontUI != nullptr)
+			if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 			{
-				AimpoiontUI->RemoveFromViewport();
+				AimpointUI->RemoveFromViewport();
 			}
 		}
 	}

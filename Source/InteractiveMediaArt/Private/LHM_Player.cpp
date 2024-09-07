@@ -108,7 +108,7 @@ void ALHM_Player::Tick(float DeltaTime)
 	FRotator FixedCameraRotation = FRotator(0, 180, 0);
 	FollowCamera->SetWorldRotation(FixedCameraRotation);
 
-	// ¿ÞÂÊ ¸¶¿ì½º Å¬¸¯ ½Ã ³ªÀÌ¾Æ°¡¶ó ½ºÆù
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ì½º Å¬ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¾Æ°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	//if(isMouseButtonDown) SpawnNiagaraEffect();
 
 }

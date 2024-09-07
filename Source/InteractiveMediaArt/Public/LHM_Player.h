@@ -14,13 +14,13 @@ class INTERACTIVEMEDIAART_API ALHM_Player : public ACharacter
 {
 	GENERATED_BODY()
 
-	///** Camera boom positioning the camera behind the character */
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	//class USpringArmComponent* CameraBoom;
+	/** Camera boom positioning the camera behind the character */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
 
-	///** Follow camera */
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	//class UCameraComponent* FollowCamera;
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FollowCamera;
 	
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -41,6 +41,7 @@ class INTERACTIVEMEDIAART_API ALHM_Player : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LeftMouseButtonAction;
+
 
 public:
 	// Sets default values for this character's properties
@@ -73,6 +74,8 @@ public:
 	void OnMouseClick(const struct FInputActionInstance& Instance);
 	void OnMouseRelease(const struct FInputActionInstance& Instance);
 
+
+
 protected:
 
 	// Called when the game starts or when spawned
@@ -89,10 +92,14 @@ public:
 
 public:
 	/** Returns CameraBoom subobject **/
-	//FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
-	//FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_aimpoint;
 
+	UPROPERTY(EditDefaultsOnly)
+	class UAimPoint* AimpoiontUI;
 
 };

@@ -36,6 +36,7 @@ ALHM_ArticleText::ALHM_ArticleText()
             MeshComponent->SetupAttachment(RootComp);
             MeshComponent->SetRelativeScale3D(FVector(1, 10, 1));
             MeshComponent->SetVisibility(true);
+            MeshComponent->SetCastShadow(false);
 
             MeshComponent->SetGenerateOverlapEvents(true);
             MeshComponent->SetCollisionProfileName(TEXT("Text"));

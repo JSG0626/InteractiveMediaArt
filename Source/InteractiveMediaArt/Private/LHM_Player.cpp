@@ -16,6 +16,8 @@
 #include "LHM_SphereCollision.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
+#include "AimPoint.h"
+#include "ButtonExp.h"
 
 
 // Sets default values
@@ -45,26 +47,26 @@ ALHM_Player::ALHM_Player()
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
-	//// Create a camera boom (pulls in towards the player if there is a collision)
-	//CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	//CameraBoom->SetupAttachment(RootComponent);
-	//CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
-	//CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	// Create a camera boom (pulls in towards the player if there is a collision)
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 
 	// Create a follow camera
-	//FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	//FollowCamera->SetupAttachment(RootComponent); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	//FollowCamera->bUsePawnControlRotation = true; // Camera does not rotate relative to arm
-	//FollowCamera->ProjectionMode = ECameraProjectionMode::Orthographic;
-	//FollowCamera->OrthoWidth = 2000.f;
-	//FollowCamera->SetRelativeLocation(FVector(-190, 0, 100.f));
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(RootComponent); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->bUsePawnControlRotation = true; // Camera does not rotate relative to arm
+	FollowCamera->ProjectionMode = ECameraProjectionMode::Orthographic;
+	FollowCamera->OrthoWidth = 2000.f;
+	FollowCamera->SetRelativeLocation(FVector(-190, 0, 100.f));
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
-	SmokeNiagaraComp->SetupAttachment(RootComponent);
+	//SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
+	//SmokeNiagaraComp->SetupAttachment(RootComponent);
 	//SmokeNiagaraComp->SetRelativeLocation(FVector(0, 0, 20));
 	//SmokeNiagaraComp->SetRelativeScale3D(FVector(0.5, 0.5, 0.7));
 
@@ -76,7 +78,7 @@ ALHM_Player::ALHM_Player()
 	}*/
 	
 
-	isMouseButtonDown = false;
+	//isMouseButtonDown = false;
 
 }
 
@@ -85,7 +87,14 @@ void ALHM_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//ShowMouseCursor();
+	ShowMouseCursor();
+
+	AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+	if (AimpoiontUI)
+	{
+		AimpoiontUI->AddToViewport();
+	}
+
 }
 
 // Called every frame
@@ -93,11 +102,11 @@ void ALHM_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*FVector FixedCameraLocation = FVector(-190, 0, 100.f);
+	FVector FixedCameraLocation = FVector(-190, 0, 100.f);
 	FollowCamera->SetWorldLocation(FixedCameraLocation);
 
 	FRotator FixedCameraRotation = FRotator(0, 180, 0);
-	FollowCamera->SetWorldRotation(FixedCameraRotation);*/
+	FollowCamera->SetWorldRotation(FixedCameraRotation);
 
 	// 왼쪽 마우스 클릭 시 나이아가라 스폰
 	//if(isMouseButtonDown) SpawnNiagaraEffect();
@@ -160,6 +169,8 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Started, this, &ALHM_Player::OnMouseClick);
 		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Completed, this, &ALHM_Player::OnMouseRelease);
+
+
 	}
 }
 
@@ -201,11 +212,29 @@ void ALHM_Player::SpawnNiagaraEffect()
 
 void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 {
-	isMouseButtonDown = true;
+	//isMouseButtonDown = true;
+
+	FVector start = FollowCamera->GetComponentLocation();
+	FVector end = start + FollowCamera->GetForwardVector() * 1000.f;
+	FHitResult outhit;
+	if (GetWorld()->LineTraceSingleByChannel(outhit, start, end, ECollisionChannel::ECC_Visibility))
+	{
+		auto* hitActor = outhit.GetActor();
+		AButtonExp* buttonexp = CastChecked<AButtonExp>(hitActor);
+		if (buttonexp != nullptr)
+		{
+			//GetWorld()->SpawnActor<>()
+			
+		}
+	}
+
+
+	
+
 }
 
 void ALHM_Player::OnMouseRelease(const struct FInputActionInstance& Instance)
 {
-	isMouseButtonDown = false;
+	//isMouseButtonDown = false;
 }
 

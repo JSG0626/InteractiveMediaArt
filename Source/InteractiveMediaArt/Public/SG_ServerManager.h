@@ -50,7 +50,7 @@ public:
 	TArray<TPair<int32, int32>> GetDatas;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Object");
-	class ASG_Player* Me;
+	class ASG_ArtPlayer* Me;
 
 	UFUNCTION()
 	void RunPythonScript(const FString& Path);

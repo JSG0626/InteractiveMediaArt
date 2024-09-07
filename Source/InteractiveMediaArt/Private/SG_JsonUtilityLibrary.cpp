@@ -3,9 +3,9 @@
 
 #include "SG_JsonUtilityLibrary.h"
 
-const float WORLD_SCALE_X = 180;
-const float WORLD_SCALE_Y = 50;
-const float WORLD_SCALE_Z = 150;
+const float WORLD_SCALE_X = 300;
+const float WORLD_SCALE_Y = 100;
+const float WORLD_SCALE_Z = 200;
 
 bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArray<FString>& Landmarks, TArray<FVector>& OutCoordinates )
 {
@@ -42,7 +42,7 @@ bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, const TArra
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Desrialize failed"));
+		UE_LOG(LogTemp, Warning, TEXT("error: Desrialize failed"));
 //		UE_LOG(LogTemp, Warning, TEXT("Json: %s"), *Json);
 	}
 	return false;

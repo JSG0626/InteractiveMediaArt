@@ -12,7 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "SG_JsonUtilityLibrary.h"
-#include "SG_Player.h"
+#include "SG_ArtPlayer.h"
 // Sets default values
 const uint32 MIN_JSON_SIZE = 1500;
 const uint32 MAX_JSON_SIZE = 3000;
@@ -83,9 +83,9 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 		FString params = FString::Printf(TEXT("\"%s\""), *scriptPath);
 		ServerProcHandle = FPlatformProcess::CreateProc(*pythonExePath,
 			*params,
-			false,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
-			false,
-			false,
+			true,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
+			true,
+			true,
 			&ServerPID,
 			0,
 			nullptr,
@@ -122,6 +122,7 @@ void ASG_ServerManager::CreateClient()
 	FString connectionStr = ClientSocket->Connect(*ServerAddr) ? TEXT("서버 연결 완료") : TEXT("서버 연결 실패");
 	GEngine->AddOnScreenDebugMessage(-1, 20, FColor::Green, FString::Printf(TEXT("%s"), *connectionStr));
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *connectionStr);
+	Me->ActivateSmoke();
 }
 
 

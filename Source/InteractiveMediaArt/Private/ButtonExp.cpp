@@ -6,6 +6,8 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraActor.h"
+#include "AimPoint.h"
 
 // Sets default values
 AButtonExp::AButtonExp()
@@ -41,6 +43,9 @@ AButtonExp::AButtonExp()
 void AButtonExp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
+	TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2130,-2150,840),FRotator(0,-90,0));
 	
 }
 
@@ -60,7 +65,14 @@ void AButtonExp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 		{
 			ButtonComp->SetVisibility(true);
 		}
+		
+		AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+		if (AimpoiontUI)
+		{
+			AimpoiontUI->AddToViewport(true);
+		}
 	}
+
 }
 
 void AButtonExp::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -71,6 +83,12 @@ void AButtonExp::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* 
 		if (pc)
 		{
 			ButtonComp->SetVisibility(false);
+		}
+
+		AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+		if (AimpoiontUI)
+		{
+			AimpoiontUI->AddToViewport(false);
 		}
 	}
 }

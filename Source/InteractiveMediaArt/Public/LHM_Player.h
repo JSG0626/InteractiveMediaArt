@@ -96,10 +96,6 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf <class UUserWidget> WBP_aimpoint;
 
-	UPROPERTY(EditDefaultsOnly)
-	class UAimPoint* AimpoiontUI;
 
 };

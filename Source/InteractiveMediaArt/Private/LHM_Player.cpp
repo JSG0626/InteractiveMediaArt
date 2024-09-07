@@ -16,8 +16,11 @@
 #include "LHM_SphereCollision.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraSystem.h"
-#include "AimPoint.h"
 #include "ButtonExp.h"
+#include "SG_ArtPlayer.h"
+#include "GameFramework/Actor.h"
+#include "Camera/CameraActor.h"
+
 
 
 // Sets default values
@@ -53,32 +56,14 @@ ALHM_Player::ALHM_Player()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
-
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(RootComponent); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = true; // Camera does not rotate relative to arm
-	FollowCamera->ProjectionMode = ECameraProjectionMode::Orthographic;
-	FollowCamera->OrthoWidth = 2000.f;
-	FollowCamera->SetRelativeLocation(FVector(-190, 0, 100.f));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	//SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
-	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	//SmokeNiagaraComp->SetRelativeLocation(FVector(0, 0, 20));
-	//SmokeNiagaraComp->SetRelativeScale3D(FVector(0.5, 0.5, 0.7));
-
-	/*ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraSystemAsset(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/HRC/Effects/NS_Smoke.NS_Smoke'"));
-	
-	if (NiagaraSystemAsset.Succeeded())
-	{
-		SmokeNiagaraComp->SetAsset(NiagaraSystemAsset.Object);
-	}*/
-	
-
-	//isMouseButtonDown = false;
 
 }
 
@@ -87,13 +72,8 @@ void ALHM_Player::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ShowMouseCursor();
+	//ShowMouseCursor();
 
-	AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
-	if (AimpoiontUI)
-	{
-		AimpoiontUI->AddToViewport();
-	}
 
 }
 
@@ -102,13 +82,12 @@ void ALHM_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector FixedCameraLocation = FVector(-190, 0, 100.f);
+	/*FVector FixedCameraLocation = FVector(-190, 0, 100.f);
 	FollowCamera->SetWorldLocation(FixedCameraLocation);
 
 	FRotator FixedCameraRotation = FRotator(0, 180, 0);
-	FollowCamera->SetWorldRotation(FixedCameraRotation);
+	FollowCamera->SetWorldRotation(FixedCameraRotation);*/
 
-	// ���� ���콺 Ŭ�� �� ���̾ư��� ����
 	//if(isMouseButtonDown) SpawnNiagaraEffect();
 
 }
@@ -118,26 +97,29 @@ void ALHM_Player::Move(const struct FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	// find out which way is forward
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	// get forward vector
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	// get right vector 
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
-		this->AddMovementInput(ForwardDirection, MovementVector.Y);
-		this->AddMovementInput(RightDirection, MovementVector.X);
+	// add movement 
+	this->AddMovementInput(ForwardDirection, MovementVector.Y);
+	this->AddMovementInput(RightDirection, MovementVector.X);
 }
 
 void ALHM_Player::Look(const struct FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-		this->AddControllerYawInput(LookAxisVector.X);
-		this->AddControllerPitchInput(LookAxisVector.Y);
+
+	// add yaw and pitch input to controller
+	this->AddControllerYawInput(LookAxisVector.X);
+	this->AddControllerPitchInput(LookAxisVector.Y);
 }
 
 // Called to bind functionality to input
@@ -223,8 +205,8 @@ void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 		AButtonExp* buttonexp = CastChecked<AButtonExp>(hitActor);
 		if (buttonexp != nullptr)
 		{
-			//GetWorld()->SpawnActor<>()
-			
+			GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
+			GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
 		}
 	}
 

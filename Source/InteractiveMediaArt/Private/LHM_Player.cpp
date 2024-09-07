@@ -150,6 +150,9 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ALHM_Player::Look);
 
 		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Started, this, &ALHM_Player::OnMouseClick);
+
+
+
 		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Completed, this, &ALHM_Player::OnMouseRelease);
 
 
@@ -207,11 +210,10 @@ void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 		{
 			GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
 			GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+
+
 		}
 	}
-
-
-	
 
 }
 

@@ -38,7 +38,7 @@ class INTERACTIVEMEDIAART_API ALHM_Player : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 	
-	/** Look Input Action */
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LeftMouseButtonAction;
 

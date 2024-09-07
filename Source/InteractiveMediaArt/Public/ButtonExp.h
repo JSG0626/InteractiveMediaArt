@@ -23,9 +23,18 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UStaticMeshComponent* RootBoxComp;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* ButtonComp;
+	class UStaticMeshComponent* ButtonExperience;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UStaticMeshComponent* ButtonDescription;
+	
+	UPROPERTY(EditDefaultsOnly)
+	class UStaticMeshComponent* ButtonChatBot;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* VisibleBoxComp;
@@ -45,6 +54,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UAimPoint* AimpoiontUI;
 
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class ASG_ArtPlayer> ArtPlayerFactory;
 
@@ -59,6 +69,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class ACameraActor> cameraFactory;
 
+	
 	
 
 };

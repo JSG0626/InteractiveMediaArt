@@ -178,6 +178,7 @@ void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 			ShowEscapeUI();
 		}
 	}
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1);
 }
 
 void ALHM_Player::OnMouseRelease(const struct FInputActionInstance& Instance)

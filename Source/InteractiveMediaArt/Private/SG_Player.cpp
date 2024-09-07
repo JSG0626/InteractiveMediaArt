@@ -5,8 +5,8 @@
 #include "SG_ServerManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/PoseableMeshComponent.h"
-#include "SG_TupleUtilityLibrary.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "SG_ArtPlayer.h"
 // Sets default values
 ASG_Player::ASG_Player()
 {
@@ -24,7 +24,7 @@ ASG_Player::ASG_Player()
 	}
 
 	SmokeNiagaraComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraComp"));
-	SmokeNiagaraComp->SetupAttachment(RootComponent);
+	SmokeNiagaraComp->SetupAttachment(PoseableMeshComp, TEXT("head"));
 
 
 }
@@ -33,7 +33,7 @@ ASG_Player::ASG_Player()
 void ASG_Player::BeginPlay()
 {
 	Super::BeginPlay();
-	PoseableMeshComp->SetRelativeScale3D(FVector(MeshScale));
+	PoseableMeshComp->SetRelativeScale3D(MeshScale);
 
 	InitLandmarkField();
 	InitBones();
@@ -48,7 +48,7 @@ void ASG_Player::BeginPlay()
 	}
 
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ServerManager Spawn")));
-	ServerManager->Me = this;
+	//ServerManager->Me = this;
 }
 
 // Called every frame
@@ -128,9 +128,9 @@ void ASG_Player::SetJointPosition()
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
 		
-		float x = TargetJointLocations[i].X * MeshScale;
-		float y = TargetJointLocations[i].Y * MeshScale;
-		float z = TargetJointLocations[i].Z * MeshScale;
+		float x = TargetJointLocations[i].X * MeshScale.X;
+		float y = TargetJointLocations[i].Y * MeshScale.Y;
+		float z = TargetJointLocations[i].Z * MeshScale.Z;
 
 		// 관절의 본을 가져옵니다.
 		FTransform JointTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(Bones[i]));
@@ -142,7 +142,8 @@ void ASG_Player::SetJointPosition()
 		// 본의 변환을 설정합니다.
 		PoseableMeshComp->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
 	}
-	
+	//auto* artPlayer = GetWorld()->SpawnActor(ASG_ArtPlayer::StaticClass());
+	//GetWorld()->GetFirstPlayerController()->SetViewTargetWithBlend()
 	FVector spine_04_loc = CurLocation + (TargetJointLocations[ELandmark::LEFT_SHOULDER] + TargetJointLocations[ELandmark::RIGHT_SHOULDER] +
 		TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 4 * MeshScale;
 	spine_04_loc.Y = CurLocation.Y;

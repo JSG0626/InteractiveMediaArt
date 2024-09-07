@@ -7,32 +7,6 @@
 #include "SG_Player.generated.h"
 
 
-enum ELandmark
-{
-	NOSE = 0, 
-	LEFT_SHOULDER,
-	RIGHT_SHOULDER,
-	LEFT_ELBOW,
-	RIGHT_ELBOW,
-	LEFT_WRIST,
-	RIGHT_WRIST,
-	LEFT_PINKY,
-	RIGHT_PINKY,
-	LEFT_INDEX,
-	RIGHT_INDEX,
-	LEFT_THUMB,
-	RIGHT_THUMB,
-	LEFT_HIP,
-	RIGHT_HIP,
-	LEFT_KNEE,
-	RIGHT_KNEE,
-	LEFT_ANKLE,
-	RIGHT_ANKLE,
-	LEFT_HEEL,
-	RIGHT_HEEL,
-	LEFT_FOOT_INDEX,
-	RIGHT_FOOT_INDEX
-};
 
 UCLASS()
 class INTERACTIVEMEDIAART_API ASG_Player : public ACharacter
@@ -76,5 +50,5 @@ public:
 	class UNiagaraComponent* SmokeNiagaraComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float MeshScale = 5.0f;
+	FVector MeshScale = FVector(5, 5, 5);
 };

@@ -14,7 +14,7 @@ ALHM_ArticleText::ALHM_ArticleText()
     RootComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootComp"));
     RootComp->SetupAttachment(RootComponent);
 
-    // Static Mesh ÄÄÆ÷³ÍÆ® »ý¼º
+    // Static Mesh ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
     for (int32 i = 1; i <= MeshCount; i++)
     {
         FString MeshName = FString::Printf(TEXT("%s%03d"), *BaseMeshName, i);
@@ -22,11 +22,11 @@ ALHM_ArticleText::ALHM_ArticleText()
 
         if (MeshComponent)
         {
-            // ¸Þ½Ã °æ·Î »ý¼º
+            // ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             FString MeshPath = FString::Printf(TEXT("/Game/ArtProject/HRC/Article/Article_2/%s.%s"), *MeshName, *MeshName);
             //UE_LOG(LogTemp,Warning,TEXT("%s"),*MeshPath);
 
-            // ¸Þ½Ã ¿¡¼Â ·Îµå
+            // ï¿½Þ½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½
             UStaticMesh* LoadedMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, *MeshPath));
             if (LoadedMesh)
             {
@@ -45,7 +45,7 @@ ALHM_ArticleText::ALHM_ArticleText()
             MeshComponent->SetMassOverrideInKg(NAME_None, 10.f);
             //MeshComponent->
 
-            // ¹è¿­¿¡ Ãß°¡
+            // ï¿½è¿­ï¿½ï¿½ ï¿½ß°ï¿½
             TextComponents.Add(MeshComponent);
         }
     }

@@ -29,19 +29,23 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 
 	SmokeNiagaraOnHeadComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnHeadComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraOnHeadComp->SetupAttachment(PoseableMeshComp, TEXT("head"));
-	SmokeNiagaraOnHeadComp->SetRelativeRotation(FRotator(0, 90, 0));
+	SmokeNiagaraOnHeadComp->SetupAttachment(PoseableMeshComp, FName("headSmokeSocket"));
 
 	SmokeNiagaraOnLHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnLHandComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraOnLHandComp->SetupAttachment(PoseableMeshComp, TEXT("hand_l"));
-	SmokeNiagaraOnLHandComp->SetRelativeRotation(FRotator(0, 90, 0));
+	SmokeNiagaraOnLHandComp->SetupAttachment(PoseableMeshComp, FName("hand_l_SmokeSocket"));
 
 	SmokeNiagaraOnRHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnRHandComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraOnRHandComp->SetupAttachment(PoseableMeshComp, TEXT("hand_r"));
-	SmokeNiagaraOnRHandComp->SetRelativeRotation(FRotator(0, 90, 0));
+	SmokeNiagaraOnRHandComp->SetupAttachment(PoseableMeshComp, FName("hand_r_SmokeSocket"));
 
+	ConstructorHelpers::FObjectFinder<UNiagaraSystem> tempSmokeNiagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/LHM/Effects/P_Smoke_01.P_Smoke_01'"));
+	if (tempSmokeNiagara.Succeeded())
+	{
+		SmokeNiagaraOnHeadComp->SetAsset(tempSmokeNiagara.Object);
+		SmokeNiagaraOnLHandComp->SetAsset(tempSmokeNiagara.Object);
+		SmokeNiagaraOnRHandComp->SetAsset(tempSmokeNiagara.Object);
+	}
 	SmokeNiagaraOnHeadComp->bAutoActivate = false;
 	SmokeNiagaraOnLHandComp->bAutoActivate = false;
 	SmokeNiagaraOnRHandComp->bAutoActivate = false;

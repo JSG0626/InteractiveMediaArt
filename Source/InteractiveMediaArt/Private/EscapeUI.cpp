@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Camera/CameraActor.h"
 #include "LHM_Player.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 void UEscapeUI::NativeConstruct()
 {
@@ -16,30 +17,31 @@ void UEscapeUI::NativeConstruct()
         Button_Escape->OnClicked.AddDynamic(this, &UEscapeUI::OnExitButtonClicked);
     }
 
-    ALHM_Player* PlayerCharacter = Cast<ALHM_Player>(UGameplayStatics::GetPlayerCharacter(this, 0));
-    if (PlayerCharacter)
-    {
-        OriginalCameraActor = Cast<ACameraActor>(GetWorld()->GetFirstPlayerController()->GetViewTarget());
-    }
+    //ACJS_LobbyPlayer* PlayerCharacter = Cast<ACJS_LobbyPlayer>(UGameplayStatics::GetPlayerCharacter(this, 0));
+    //if (PlayerCharacter)
+    //{
+    //    OriginalCameraActor = Cast<ACameraActor>(GetWorld()->GetFirstPlayerController()->GetViewTarget());
+    //}
 }
 
 void UEscapeUI::OnExitButtonClicked()
 {
-    // ¿ø·¡ Ä«¸Þ¶ó·Î µ¹¾Æ°¡±â
-    if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
-    {
-        pc->SetViewTarget(OriginalCameraActor);
-    }
+    Me->ExitArt();
+    //// ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½
+    //if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
+    //{
+    //    pc->SetViewTarget(OriginalCameraActor);
+    //}
 
-    // ÀÎÇ² ¸ðµå¸¦ °ÔÀÓ ¸ðµå·Î º¯°æ
-    if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
-    {
-        FInputModeGameOnly InputMode;
-        pc->SetInputMode(InputMode);
-        pc->bShowMouseCursor = false;
-    }
+    //// ï¿½ï¿½Ç² ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    //if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
+    //{
+    //    FInputModeGameOnly InputMode;
+    //    pc->SetInputMode(InputMode);
+    //    pc->bShowMouseCursor = false;
+    //}
 
-    // UI Á¦°Å
+    //// UI ï¿½ï¿½ï¿½ï¿½
     this->RemoveFromParent();
 }
 

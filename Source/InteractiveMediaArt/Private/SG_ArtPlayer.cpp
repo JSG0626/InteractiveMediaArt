@@ -25,19 +25,23 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 	{
 		PoseableMeshComp->SetSkeletalMesh(tempMesh.Object);
 		PoseableMeshComp->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+		PoseableMeshComp->SetVisibility(false);
 	}
 
 	SmokeNiagaraOnHeadComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnHeadComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
 	SmokeNiagaraOnHeadComp->SetupAttachment(PoseableMeshComp, FName("headSmokeSocket"));
+	SmokeNiagaraOnHeadComp->SetRelativeLocation(FVector(0));
 
 	SmokeNiagaraOnLHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnLHandComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
 	SmokeNiagaraOnLHandComp->SetupAttachment(PoseableMeshComp, FName("hand_l_SmokeSocket"));
+	SmokeNiagaraOnLHandComp->SetRelativeLocation(FVector(0));
 
 	SmokeNiagaraOnRHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnRHandComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
 	SmokeNiagaraOnRHandComp->SetupAttachment(PoseableMeshComp, FName("hand_r_SmokeSocket"));
+	SmokeNiagaraOnRHandComp->SetRelativeLocation(FVector(0));
 
 	ConstructorHelpers::FObjectFinder<UNiagaraSystem> tempSmokeNiagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/LHM/Effects/P_Smoke_01.P_Smoke_01'"));
 	if (tempSmokeNiagara.Succeeded())
@@ -154,7 +158,7 @@ void ASG_ArtPlayer::SetJointPosition()
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
 
 		float x = TargetJointLocations[i].X * MeshScale.X;
-		float y = TargetJointLocations[i].Y * MeshScale.Y;
+		//float y = TargetJointLocations[i].Y * MeshScale.Y;
 		float z = TargetJointLocations[i].Z * MeshScale.Z;
 
 		// 관절의 본을 가져옵니다.
@@ -162,7 +166,7 @@ void ASG_ArtPlayer::SetJointPosition()
 		FVector JointLocation = JointTransform.GetLocation();
 		// 새로운 위치를 설정합니다.
 		//FVector newLocation = FVector(TargetJointLocations[i].Key, JointTransform.GetLocation().Y, TargetJointLocations[i].Value);
-		FVector newLocation = CurLocation + FVector(x, y, z);
+		FVector newLocation = CurLocation + FVector(x, 0, z);
 		newLocation.Y = CurLocation.Y;
 		// 본의 변환을 설정합니다.
 		PoseableMeshComp->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
@@ -183,6 +187,7 @@ void ASG_ArtPlayer::SetJointPosition()
 
 void ASG_ArtPlayer::ActivateSmoke()
 {
+	PoseableMeshComp->SetVisibility(true);
 	SmokeNiagaraOnHeadComp->Activate(true);
 	SmokeNiagaraOnLHandComp->Activate(true);
 	SmokeNiagaraOnRHandComp->Activate(true);

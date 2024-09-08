@@ -16,9 +16,13 @@ class INTERACTIVEMEDIAART_API UEnvSettingWidget : public UUserWidget
 	
 public:
 	
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	class UEditableText* IP_Input;
-
+	virtual void NativeConstruct() override;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UEditableText* Path_Input;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UButton* Path_Button;
+
+	UFUNCTION()
+	void SetPath();
 };

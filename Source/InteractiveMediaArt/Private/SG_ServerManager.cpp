@@ -29,13 +29,13 @@ void ASG_ServerManager::BeginPlay()
 {
 	Super::BeginPlay();
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString::Printf(TEXT("IPString: %s, Port: %d"), *ServerIP, ServerPort));
-
+	
 	RunPythonScript(PyConnectServer);
 	FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 		{
 			CreateClient();
-		}, 3.0f, false);
+		}, 1.0f, false);
 
 
 }
@@ -112,10 +112,16 @@ void ASG_ServerManager::CreateClient()
 	// 서버 IP와 포트 설정
 	FIPv4Address ip;
 
+	bool bCanBindAll;
+	TSharedPtr<FInternetAddr> LocalIP = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
+	uint32 myLocalAddress;
+
+	LocalIP->GetIp(myLocalAddress);
+
 	// 서버의 IP 주소 (예: LocalHost)
-	FIPv4Address::Parse(ServerIP, ip);
+	//FIPv4Address::Parse(ServerIP, ip);
 	// IP 주소 설정
-	ServerAddr->SetIp(ip.Value);
+	ServerAddr->SetIp(myLocalAddress);
 	// 서버 포트
 	ServerAddr->SetPort(ServerPort);
 

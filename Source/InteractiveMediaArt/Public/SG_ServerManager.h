@@ -40,8 +40,8 @@ public:
 	FString PyDeafultPath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
-	//FString PyConnectServer = TEXT("TCP_response.py");
-	FString PyConnectServer = TEXT("TCP_response_copy.py");
+	FString PyConnectServer = TEXT("TCP_response.py");
+	//FString PyConnectServer = TEXT("TCP_response_copy.py");
 
 	class FSocket* ClientSocket;
 

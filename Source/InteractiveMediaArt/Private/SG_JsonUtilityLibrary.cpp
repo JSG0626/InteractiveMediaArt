@@ -26,19 +26,20 @@ bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, class ASG_A
 			{
 				float x = ValueObject->GetNumberField(TEXT("x"));
 				float z = ValueObject->GetNumberField(TEXT("y"));
-				float y = ValueObject->GetNumberField(TEXT("z"));
+				//float y = ValueObject->GetNumberField(TEXT("z"));
 
 				x = -(x - 0.5f);
-				y = 0.5f - y;
+				//y = 0.5f - y;
 				z = 0.5f - z;
 
 				x *= WORLD_SCALE_X;
-				y *= WORLD_SCALE_Y;
+				//y *= WORLD_SCALE_Y;
 				z *= WORLD_SCALE_Z;
 
 				if (nullptr == ArtPlayer) return false;
 
-				OutCoordinates.Add(FVector(x, y, z));
+				OutCoordinates.Add(FVector(x, 0, z));
+				//OutCoordinates.Add(FVector)
 			}
 		}
 		return true;

@@ -190,7 +190,7 @@ void ASG_ServerManager::ReceiveData()
 			ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
 			ReceivedJson = ReceivedJson.Mid(0, DataLength);
 			//UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
-			USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations);
+			USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me, Me->Landmarks, Me->TargetJointLocations);
 		
 			Me->SetJointPosition();
 			return;
@@ -234,7 +234,7 @@ void ASG_ServerManager::ReceiveRestData()
 	if (CurDataLength == TargetDataLength)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("CurDataLength == TargetDataLength"));
-		if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
+		if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me, Me->Landmarks, Me->TargetJointLocations))
 		{
 			Me->SetJointPosition();
 		}

@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputActionValue.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
 #include "CJS_LobbyPlayer.generated.h"
 
 UCLASS()
@@ -30,22 +32,48 @@ public:
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* SpringArmComp;
+	class USpringArmComponent* CameraBoom;
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* CameraComp;
+	class UCameraComponent* FollowCamera;
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* IMC_LobbyPlayer;
+	
 	/** InputActions */
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Move;
 	FVector Direction;
-	void OnMyActionMove(const struct FInputActionValue& Value);
+	void OnMyActionMove(const FInputActionValue& Value);
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Look;
-	void OnMyActionLook(const struct FInputActionValue& Value);
+	void OnMyActionLook(const FInputActionValue& Value);
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Jump;
-	void OnMyActionJump(const FInputActionValue& Value);
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	class UInputAction* IA_ClickBnt;
+	void OnMouseClick(const FInputActionInstance& Value);
+	void OnMouseClickRelease(const FInputActionInstance& Value);
+
+
+	/** Widgets */
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> PopUpUIClass;
+	UPROPERTY()
+	class UUserWidget* PopUpUI;
+	bool bPopUpUIShowing;
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void AIChatbot(ACJS_AIChatbotBnt* buttonexp);
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void VoiceRecord(ACJS_AIChatbotBnt* buttonexp);
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_aimpoint;
+	UPROPERTY(EditDefaultsOnly)
+	class UAimPoint* AimpoiontUI;
+
+
+
 };

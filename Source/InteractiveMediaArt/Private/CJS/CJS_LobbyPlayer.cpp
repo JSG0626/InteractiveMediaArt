@@ -2,14 +2,25 @@
 
 
 #include "CJS/CJS_LobbyPlayer.h"
+#include "CJS/CJS_PopUpBnt.h"
+#include "CJS/CJS_AIChatbotBnt.h"
 
+#include "ButtonExp.h"
+#include "SG_ArtPlayer.h"
+
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/Actor.h"
+#include "Camera/CameraActor.h"
+#include "Components/WidgetComponent.h"
+#include "CJS/CJS_MovePosBnt.h"
+#include "AimPoint.h"
+
 
 // Sets default values
 ACJS_LobbyPlayer::ACJS_LobbyPlayer()
@@ -17,15 +28,39 @@ ACJS_LobbyPlayer::ACJS_LobbyPlayer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Set size for collision capsule
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+
+	// Don't rotate when the controller rotates. Let that just affect the camera.
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
+
+	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
+	// instead of recompiling to adjust them
+	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+
 	// 스프링암을 생성해서 루트에 붙이고싶다.
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
-	SpringArmComp->SetupAttachment(RootComponent);
-	SpringArmComp->SetRelativeLocation(FVector(0, 40, 80));
-	SpringArmComp->TargetArmLength = 200;
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->SocketOffset = FVector(0, 50, 100);
 
 	// 카메라를 생성해서 스프링암에 붙이고싶다.
-	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
-	CameraComp->SetupAttachment(SpringArmComp);
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
 }
 
 // Called when the game starts or when spawned
@@ -46,23 +81,33 @@ void ACJS_LobbyPlayer::BeginPlay()
 			subSys->AddMappingContext(IMC_LobbyPlayer, 0);
 		}
 	}
+
+	// AimPointUI 위젯 생성
+	//if (WBP_aimpoint)  // WBP_aimpoint가 올바르게 할당되어 있는지 확인
+	//{
+	//	AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+	//	if (AimpoiontUI)
+	//	{
+	//		AimpoiontUI->AddToViewport(true);
+	//		AimpoiontUI->SetVisibility(ESlateVisibility::Visible);
+	//		UE_LOG(LogTemp, Warning, TEXT("AimpoiontUI successfully created and added to viewport"));
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Error, TEXT("Failed to create AimpoiontUI widget"));
+	//	}
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
+	//}
+
 }
 
 // Called every frame
 void ACJS_LobbyPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// 회전 방향으로 이동하고싶다.
-	// 1. ControlRotation 을 이용해서 Transform을 만들고
-	FTransform ttt = FTransform(GetControlRotation());
-	Direction = ttt.TransformVector(Direction);
-	Direction.Z = 0;
-	Direction.Normalize();
-	// 2. TransformDirection기능 이용해서 방향을 만들어서
-	// 3. 그 방향으로 이동
-	AddMovementInput(Direction);
-	Direction = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -75,28 +120,195 @@ void ACJS_LobbyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ACJS_LobbyPlayer::OnMyActionMove);
 		input->BindAction(IA_Look, ETriggerEvent::Triggered, this, &ACJS_LobbyPlayer::OnMyActionLook);
-		input->BindAction(IA_Jump, ETriggerEvent::Started, this, &ACJS_LobbyPlayer::OnMyActionJump);
+		input->BindAction(IA_Jump, ETriggerEvent::Started, this, &ACharacter::Jump);
+		input->BindAction(IA_Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		input->BindAction(IA_ClickBnt, ETriggerEvent::Started, this, &ACJS_LobbyPlayer::OnMouseClick);
+		input->BindAction(IA_ClickBnt, ETriggerEvent::Completed, this, &ACJS_LobbyPlayer::OnMouseClickRelease);
+
+		UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
 	}
 }
 
 void ACJS_LobbyPlayer::OnMyActionMove(const struct FInputActionValue& Value)
 {
-	FVector2D v = Value.Get<FVector2D>();
-	Direction.X = v.X;
-	Direction.Y = v.Y;
-	Direction.Normalize();
-}
+	// input is a Vector2D
+	FVector2D MovementVector = Value.Get<FVector2D>();
 
+	if (Controller != nullptr)
+	{
+		// find out which way is forward
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		// get forward vector
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		// get right vector 
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		// add movement 
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
+}
 void ACJS_LobbyPlayer::OnMyActionLook(const struct FInputActionValue& Value)
 {
-	FVector2D v = Value.Get<FVector2D>();
+	// input is a Vector2D
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	AddControllerPitchInput(-v.Y);
-	AddControllerYawInput(v.X);
+	if (Controller != nullptr)
+	{
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
 }
 
-void ACJS_LobbyPlayer::OnMyActionJump(const FInputActionValue& Value)
+
+void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 {
-	Jump();
+	FVector Start = FollowCamera->GetComponentLocation();
+	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
+	FHitResult Outhit;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_Visibility);
+	if (bHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+		AActor* HitActor = Outhit.GetActor();
+		if (HitActor)
+		{
+			FString HitActorName = HitActor->GetName();
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
+			
+			if (HitActorName.Contains("BNT1_1"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
+				AButtonExp* buttonexp = Cast<AButtonExp>(HitActor);
+				if (buttonexp != nullptr)
+				{
+					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+				}
+			}
+			else if (HitActorName.Contains("BNT2_1"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BNT2_1 Clicked"));
+				ACJS_MovePosBnt* buttonexp = Cast<ACJS_MovePosBnt>(HitActor);
+				if (buttonexp != nullptr)
+				{
+					//GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+				}
+			}
+			else if (HitActorName.Contains("BNT1_2"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BNT1_2 Clicked"));
+				ACJS_PopUpBnt* buttonexp = Cast<ACJS_PopUpBnt>(HitActor);
+				if (buttonexp != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Show PopUpUI"));
+					if (!bPopUpUIShowing)
+					{
+						buttonexp->WidgetComp->SetVisibility(true);
+						bPopUpUIShowing = true;
+						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
+					}
+					else
+					{
+						buttonexp->WidgetComp->SetVisibility(false);
+						bPopUpUIShowing = false;
+						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
+					}
+					
+				}
+			}
+			else if (HitActorName.Contains("BNT1_3"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BNT1_3 Clicked"));
+				ACJS_AIChatbotBnt* buttonexp = Cast<ACJS_AIChatbotBnt>(HitActor);
+				if (buttonexp != nullptr)
+				{
+					AIChatbot(buttonexp);			
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+	}
+}
+
+void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
+{
+	FVector Start = FollowCamera->GetComponentLocation();
+	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
+	FHitResult Outhit;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_Visibility);
+	if (bHit)
+	{
+		AActor* HitActor = Outhit.GetActor();
+		if (HitActor)
+		{
+			FString HitActorName = HitActor->GetName();
+
+			if (HitActorName.Contains("BNT1_3"))
+			{
+				// BNT1_3을 뗀 상태: 녹음 종료 및 저장
+				ACJS_AIChatbotBnt* buttonexp = Cast<ACJS_AIChatbotBnt>(HitActor);
+				if (buttonexp != nullptr)
+				{
+					VoiceRecord(buttonexp);
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+	}
+}
+
+
+void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
+{
+	// AI 챗봇 동작
+	// 블루프린트의 ActivateAIChatbot 함수 호출
+	UFunction* AIChatbotFunction = buttonexp->FindFunction(FName("ActivateAIChatbot"));
+	if (AIChatbotFunction)
+	{
+		buttonexp->ProcessEvent(AIChatbotFunction, nullptr);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateAIChatbot function"));
+	}
+}
+void ACJS_LobbyPlayer::VoiceRecord(ACJS_AIChatbotBnt* buttonexp)
+{
+	// 블루프린트의 ActivateVoiceRecord 함수 호출 (음성 저장)
+	UFunction* StopRecordingFunction = buttonexp->FindFunction(FName("ActivateVoiceRecord"));
+	if (StopRecordingFunction)
+	{
+		buttonexp->ProcessEvent(StopRecordingFunction, nullptr);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateVoiceRecord function"));
+	}
 }
 

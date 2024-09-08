@@ -371,7 +371,6 @@ void ACJS_LobbyPlayer::OnExitBnt()
 		{
 			// 1. 원래 카메라로 복원
 			pc->SetViewTarget(this);
-			
 
 			// 2. 입력 모드를 게임 전용으로 설정
 			FInputModeGameOnly inputMode;
@@ -417,18 +416,14 @@ void ACJS_LobbyPlayer::ExitArt()
 	pc->SetViewTarget(this);
 	ShowAimPoint();
 }
-
 void ACJS_LobbyPlayer::ShowAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Visible);
 }
-
 void ACJS_LobbyPlayer::HideAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 }
-
-
 
 //void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
 //{

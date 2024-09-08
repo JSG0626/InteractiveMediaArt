@@ -21,6 +21,7 @@
 #include "CJS/CJS_MovePosBnt.h"
 #include "AimPoint.h"
 #include "EscapeUI.h"
+#include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
 
 
 // Sets default values
@@ -62,6 +63,25 @@ ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	// BP_VoiceMeterClass = LoadObject<UClass>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/ArtProject/CJS/Blueprints/BP_CJS_VoiceMeter.BP_CJS_VoiceMeter'"));
+	/*if (BP_VoiceMeterClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BP_CJS_VoiceMeter Class successfully loaded"));
+		BP_VoiceMeter = UGameplayStatics::GetActorOfClass(GetWorld(), BP_VoiceMeterClass);
+		if (BP_VoiceMeter)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("BP_CJS_VoiceMeter instance found"));
+			DisableAudioCapture();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to find BP_CJS_VoiceMeter instance"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load BP_CJS_VoiceMeter Class"));
+	}*/
 }
 
 // Called when the game starts or when spawned
@@ -91,18 +111,17 @@ void ACJS_LobbyPlayer::BeginPlay()
 		{
 			AimpointUI->AddToViewport(true);
 			AimpointUI->SetVisibility(ESlateVisibility::Hidden);
-			UE_LOG(LogTemp, Warning, TEXT("AimpointUI successfully created and added to viewport"));
+			//UE_LOG(LogTemp, Warning, TEXT("AimpointUI successfully created and added to viewport"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create AimpointUI widget"));
+			//UE_LOG(LogTemp, Error, TEXT("Failed to create AimpointUI widget"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
+		//UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
 	}
-
 
 	if (WBP_EscapeUI)
 	{
@@ -111,7 +130,15 @@ void ACJS_LobbyPlayer::BeginPlay()
 		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-
+	FTransform VoiceMeterTransform1 = FTransform(FRotator(0, 0, 0), FVector(-5705, -1980, 670), FVector(3, 3, 3));
+	FTransform VoiceMeterTransform2 = FTransform(FRotator(0, 0, 0), FVector(-5710, -1970, 670), FVector(3, 3, 3));
+	VoiceMeter1 = GetWorld()->SpawnActor<AActor>(BP_VoiceMeterClass, VoiceMeterTransform1);
+	VoiceMeter2 = GetWorld()->SpawnActor<AActor>(BP_VoiceMeterClass, VoiceMeterTransform2);
+	if (VoiceMeter1 && VoiceMeter2)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("VoiceMeter Spawn"));
+		DisableAudioCapture();
+	}
 }
 
 // Called every frame
@@ -135,7 +162,7 @@ void ACJS_LobbyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		input->BindAction(IA_ClickBnt, ETriggerEvent::Started, this, &ACJS_LobbyPlayer::OnMouseClick);
 		input->BindAction(IA_ClickBnt, ETriggerEvent::Completed, this, &ACJS_LobbyPlayer::OnMouseClickRelease);
 
-		UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
+		//UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
 	}
 }
 
@@ -186,7 +213,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_GameTraceChannel4);
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
 		AActor* HitActor = Outhit.GetActor();
 		auto* hitComp = Outhit.GetComponent();
 		if (hitComp)
@@ -194,11 +221,11 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
-			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
+			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
 			if (HitActorName.Contains("BNT1_1"))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
 				AButtonExp* button1 = Cast<AButtonExp>(HitActor);
 				if (button1 != nullptr)
 				{
@@ -218,7 +245,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			else if (HitActorName.Contains("BNT2_1"))
 			{
 				bExitBnt2_1 = true;
-				UE_LOG(LogTemp, Warning, TEXT("BNT2_1 Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BNT2_1 Clicked"));
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
 				{
@@ -229,35 +256,37 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					HideAimPoint();
 					ShowMouseCursor();
 					ShowEscapeUI();
+
+					EnableAudioCapture();
 				}
 			}
 			else if (HitActorName.Contains("BNT1_2"))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BNT1_2 Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BNT1_2 Clicked"));
 				ACJS_PopUpBnt* button2 = Cast<ACJS_PopUpBnt>(HitActor);
 				if (button2 != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Show PopUpUI"));
+					//UE_LOG(LogTemp, Warning, TEXT("Show PopUpUI"));
 					if (!bPopUpUIShowing)
 					{
 						if (nullptr == button2->WidgetComp) return;
 						button2->WidgetComp->SetVisibility(true);
 						bPopUpUIShowing = true;
-						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
+						//UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
 					}
 					else
 					{
 						if (nullptr == button2->WidgetComp) return;
 						button2->WidgetComp->SetVisibility(false);
 						bPopUpUIShowing = false;
-						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
+						//UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
 					}
 
 				}
 			}
 			else if (HitActorName.Contains("BNT1_3"))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BNT1_3 Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BNT1_3 Clicked"));
 				ACJS_AIChatbotBnt* button3 = Cast<ACJS_AIChatbotBnt>(HitActor);
 				if (button3 != nullptr)
 				{
@@ -267,12 +296,12 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
 	}
 }
 
@@ -305,15 +334,13 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
 	}
-
-	//HideMouseCursor();
 }
 
 void ACJS_LobbyPlayer::RemoveAimPoint()
@@ -364,38 +391,33 @@ void ACJS_LobbyPlayer::HideEscapeUI()
 
 void ACJS_LobbyPlayer::OnExitBnt()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnExitBnt()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnExitBnt()"));
 	if (bExitBnt2_1)
 	{
+		DisableAudioCapture();
+
 		if (pc)
 		{
 			// 1. 원래 카메라로 복원
 			pc->SetViewTarget(this);
-
+			
 			// 2. 입력 모드를 게임 전용으로 설정
 			FInputModeGameOnly inputMode;
 			pc->bShowMouseCursor = false;
 			pc->bEnableMouseOverEvents = false;
 			pc->SetInputMode(inputMode);
 
-			// 3. ArtPlayer 제거 (BNT1_1에서 생성된 경우)
-			//if (ArtPlayer)
-			//{
-			//	ArtPlayer->Destroy();
-			//	ArtPlayer = nullptr; // 메모리 정리
-			//}
-
-			// 4. Escape UI 제거
+			// 3. Escape UI 제거
 			if (EscapeUI)
 			{
 				HideEscapeUI();
 			}
-			ShowAimPoint();
-			// 5. AimPoint 다시 표시 (필요하다면)
-			//ShowAimPoint();
-			UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
 
-			bExitBnt2_1 = false;
+			// 4. AimPoint 다시 표시 (필요하다면)
+			ShowAimPoint();
+			//UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
+
+			bExitBnt2_1 = false;	
 		}
 	}
 }
@@ -416,14 +438,101 @@ void ACJS_LobbyPlayer::ExitArt()
 	pc->SetViewTarget(this);
 	ShowAimPoint();
 }
+
+void ACJS_LobbyPlayer::EnableAudioCapture()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EnableAudioCapture()"));
+	if (BP_VoiceMeterClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeterClass is valid"));
+
+		if (VoiceMeter1 && VoiceMeter2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeter instance is valid"));
+
+			UAudioCaptureComponent* AudioCapture1 = VoiceMeter1->FindComponentByClass<UAudioCaptureComponent>();
+			UAudioCaptureComponent* AudioCapture2 = VoiceMeter2->FindComponentByClass<UAudioCaptureComponent>();
+			if (AudioCapture1 && AudioCapture2)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AudioCapture component found"));
+
+				// AutoActivate 활성화
+				AudioCapture1->bAutoActivate = true;
+				AudioCapture2->bAutoActivate = true;
+
+				// 즉시 활성화
+				AudioCapture1->Activate();
+				AudioCapture2->Activate();
+				UE_LOG(LogTemp, Warning, TEXT("AudioCapture has been activated"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("AudioCapture component not found"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeter instance is null"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
+	}
+}
+void ACJS_LobbyPlayer::DisableAudioCapture()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::DisableAudioCapture()"));
+	if (BP_VoiceMeterClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeterClass is valid"));
+
+		if (VoiceMeter1 && VoiceMeter2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeter instance is valid"));
+
+			UAudioCaptureComponent* AudioCapture1 = VoiceMeter1->FindComponentByClass<UAudioCaptureComponent>();
+			UAudioCaptureComponent* AudioCapture2 = VoiceMeter2->FindComponentByClass<UAudioCaptureComponent>();
+			if (AudioCapture1 && AudioCapture2)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AudioCapture component found"));
+
+				// AutoActivate 비활성화
+				AudioCapture1->bAutoActivate = false;
+				AudioCapture2->bAutoActivate = false;
+
+				// 즉시 비활성화
+				AudioCapture1->Deactivate();
+				AudioCapture2->Deactivate();
+				UE_LOG(LogTemp, Warning, TEXT("AudioCapture has been deactivated"));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("AudioCapture component not found"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeter instance is null"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
+	}
+}
+
 void ACJS_LobbyPlayer::ShowAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Visible);
 }
+
 void ACJS_LobbyPlayer::HideAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 }
+
+
 
 //void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
 //{

@@ -51,7 +51,7 @@ public:
 	TSubclassOf <class ASG_ArtPlayer> ArtPlayerFactory;
 
 
-	FVector TargetLocation = FVector(1260, -3580, 180);
+	FVector TargetLocation = FVector(1260, -3580, 300);
 	FRotator TargetRotation = FRotator(0, -90, 0);
 	FTransform TargetTransform = FTransform(TargetRotation, TargetLocation);
 

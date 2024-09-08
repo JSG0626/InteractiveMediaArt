@@ -69,6 +69,13 @@ void ASG_ArtPlayer::BeginPlay()
 	ServerManager->Me = this;
 }
 
+void ASG_ArtPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	ServerManager->Destroy();
+}
+
 // Called every frame
 void ASG_ArtPlayer::Tick(float DeltaTime)
 {

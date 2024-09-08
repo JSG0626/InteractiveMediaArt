@@ -9,7 +9,7 @@ const float WORLD_SCALE_Z = 200;
 
 bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, class ASG_ArtPlayer* ArtPlayer, const TArray<FString>& Landmarks, TArray<FVector>& OutCoordinates )
 {
-	if (nullptr == ArtPlayer) return;
+	if (nullptr == ArtPlayer) return false;
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Json: %s"), *Json));
 	//UE_LOG(LogTemp, Warning, TEXT("Json: %s"), *Json);
 	TSharedRef<TJsonReader<TCHAR>> jsonReader = TJsonReaderFactory<TCHAR>::Create(Json);
@@ -35,6 +35,8 @@ bool USG_JsonUtilityLibrary::MediaPipeJsonParse(const FString& Json, class ASG_A
 				x *= WORLD_SCALE_X;
 				y *= WORLD_SCALE_Y;
 				z *= WORLD_SCALE_Z;
+
+				if (nullptr == ArtPlayer) return false;
 
 				OutCoordinates.Add(FVector(x, y, z));
 			}

@@ -92,6 +92,8 @@ public:
 	void OnExitBnt();
 	bool bExitBnt2_1;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
 
 	UPROPERTY()
 	class ASG_ArtPlayer* ArtPlayer;

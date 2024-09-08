@@ -231,7 +231,9 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				{
 					if (nullptr == ArtPlayer)
 					{
-						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), button1->TargetTransform);
+						FActorSpawnParameters params;
+						params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button1->TargetTransform, params);
 						pc->SetViewTarget(Cast<AActor>(button1->TargetCamera));
 
 						FInputModeUIOnly UIOnlyMode;

@@ -99,5 +99,16 @@ public:
 	UPROPERTY()
 	class APlayerController* pc;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> BP_VoiceMeterClass;
+	UPROPERTY()
+	class AActor* VoiceMeter1;
+	UPROPERTY()
+	class AActor* VoiceMeter2;
+	//UPROPERTY(EditDefaultsOnly)
+	//class UAudioCaptureComponent* AudioCapture;
+	void EnableAudioCapture();   // AudioCapture 활성화
+	void DisableAudioCapture();  // AudioCapture 비활성화
+
 	
 };

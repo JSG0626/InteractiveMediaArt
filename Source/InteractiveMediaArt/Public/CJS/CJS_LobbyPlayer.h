@@ -77,7 +77,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class UUserWidget> WBP_EscapeUI;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
 	class UEscapeUI* EscapeUI;
 
 	void RemoveAimPoint();
@@ -90,4 +90,7 @@ public:
 	void ExitArt();
 	UPROPERTY()
 	class APlayerController* pc;
+
+	void ShowAimPoint();
+	void HideAimPoint();
 };

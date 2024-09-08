@@ -26,7 +26,7 @@
 // Sets default values
 ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Set size for collision capsule
@@ -68,7 +68,7 @@ ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 void ACJS_LobbyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// 컨트롤러를 가져와서 캐스팅
 	pc = Cast<APlayerController>(Controller);
 	//2. 캐스팅 성공했다면 
@@ -83,25 +83,25 @@ void ACJS_LobbyPlayer::BeginPlay()
 		}
 	}
 
-	// AimPointUI 위젯 생성
-	//if (WBP_aimpoint)  // WBP_aimpoint가 올바르게 할당되어 있는지 확인
-	//{
-	//	AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
-	//	if (AimpoiontUI)
-	//	{
-	//		AimpoiontUI->AddToViewport(true);
-	//		AimpoiontUI->SetVisibility(ESlateVisibility::Visible);
-	//		UE_LOG(LogTemp, Warning, TEXT("AimpoiontUI successfully created and added to viewport"));
-	//	}
-	//	else
-	//	{
-	//		UE_LOG(LogTemp, Error, TEXT("Failed to create AimpoiontUI widget"));
-	//	}
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
-	//}
+	//AimPointUI 위젯 생성
+	if (WBP_aimpoint)  // WBP_aimpoint가 올바르게 할당되어 있는지 확인
+	{
+		AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+		if (AimpointUI)
+		{
+			AimpointUI->AddToViewport(true);
+			AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+			UE_LOG(LogTemp, Warning, TEXT("AimpointUI successfully created and added to viewport"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create AimpointUI widget"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
+	}
 
 }
 
@@ -174,16 +174,19 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_Visibility);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_GameTraceChannel4);
 	if (bHit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
 		AActor* HitActor = Outhit.GetActor();
+		auto* hitComp = Outhit.GetComponent();
+		if (hitComp)
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s,  %s"), *HitActor->GetName(), *hitComp->GetName()));
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
 			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
-			
+
 			if (HitActorName.Contains("BNT1_1"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
@@ -196,7 +199,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					FInputModeUIOnly UIOnlyMode;
 					pc->SetInputMode(UIOnlyMode);
 
-					RemoveAimPoint();
+					HideAimPoint();
 					ShowMouseCursor();
 					ShowEscapeUI();
 				}
@@ -207,11 +210,13 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
 				{
-					ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonArt2->TargetTransform);
 					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->TargetCamera));
+					FInputModeUIOnly UIOnlyMode;
+					pc->SetInputMode(UIOnlyMode);
 
-					RemoveAimPoint();
+					HideAimPoint();
 					ShowMouseCursor();
+					ShowEscapeUI();
 				}
 			}
 			else if (HitActorName.Contains("BNT1_2"))
@@ -227,9 +232,6 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 						button2->WidgetComp->SetVisibility(true);
 						bPopUpUIShowing = true;
 						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
-
-						RemoveAimPoint();
-						ShowMouseCursor();
 					}
 					else
 					{
@@ -238,7 +240,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 						bPopUpUIShowing = false;
 						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
 					}
-					
+
 				}
 			}
 			else if (HitActorName.Contains("BNT1_3"))
@@ -274,6 +276,7 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 	if (bHit)
 	{
 		AActor* HitActor = Outhit.GetActor();
+
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
@@ -333,7 +336,7 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 void ACJS_LobbyPlayer::RemoveAimPoint()
 {
 	// AimPoint UI 끄기
-	if (AimpointUI != nullptr) AimpointUI->RemoveFromParent();
+	if (AimpointUI != nullptr) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ACJS_LobbyPlayer::ShowMouseCursor()
@@ -378,22 +381,39 @@ void ACJS_LobbyPlayer::ShowEscapeUI()
 		EscapeUI->AddToViewport();
 		EscapeUI->Me = this;
 	}
-	
-}
 
+}
 void ACJS_LobbyPlayer::ExitArt()
 {
 	pc = Cast<APlayerController>(Controller);
-
 	AActor* myFollowCamera = Cast<AActor>(FollowCamera);
 
 	FInputModeGameOnly inputMode;
 	pc->bShowMouseCursor = false;
 	pc->bEnableMouseOverEvents = false;
 	pc->SetInputMode(inputMode);
-	check(ArtPlayer); if (nullptr == ArtPlayer) return;
 
-	ArtPlayer->Destroy();
+	check(ArtPlayer);
+	if (ArtPlayer)
+	{
+		ArtPlayer->Destroy();
+	}
+	else
+	{
+		ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>();
+
+	}
+	
 	pc->SetViewTarget(myFollowCamera);
 
+}
+
+void ACJS_LobbyPlayer::ShowAimPoint()
+{
+	AimpointUI->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ACJS_LobbyPlayer::HideAimPoint()
+{
+	AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 }

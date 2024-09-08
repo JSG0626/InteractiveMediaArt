@@ -43,10 +43,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class ACameraActor> cameraFactory;
 
-	UPROPERTY(EditDefaultsOnly)
+	/*UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class UUserWidget> WBP_aimpoint;
-	UPROPERTY(EditDefaultsOnly)
-	class UAimPoint* AimpointUI;
+	UPROPERTY()
+	class UAimPoint* AimpointUI;*/
 
 
 };

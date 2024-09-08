@@ -22,10 +22,12 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class UButton* Button_Escape;
 
+	UPROPERTY()
+	class ACJS_LobbyPlayer* Me;
 
     UFUNCTION(BlueprintCallable)
     void OnExitButtonClicked();
 
 protected:
-	virtual void NativeConstruct() override; // UI°¡ »ý¼ºµÉ ¶§ È£ÃâµÇ´Â ÇÔ¼ö
+	virtual void NativeConstruct() override; // UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½Ç´ï¿½ ï¿½Ô¼ï¿½
 };

@@ -88,7 +88,7 @@ void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 
 		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 		{
-			AimpointUI->AddToViewport();
+			AimpointUI->RemoveFromParent();
 		}
 	}
 }

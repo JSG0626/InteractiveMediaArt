@@ -70,7 +70,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 	Super::BeginPlay();
 	
 	// 컨트롤러를 가져와서 캐스팅
-	auto* pc = Cast<APlayerController>(Controller);
+	pc = Cast<APlayerController>(Controller);
 	//2. 캐스팅 성공했다면 
 	if (pc)
 	{
@@ -190,8 +190,11 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				AButtonExp* button1 = Cast<AButtonExp>(HitActor);
 				if (button1 != nullptr)
 				{
-					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), button1->TargetTransform);
+					ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), button1->TargetTransform);
 					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(button1->TargetCamera));
+
+					FInputModeUIOnly UIOnlyMode;
+					pc->SetInputMode(UIOnlyMode);
 
 					RemoveAimPoint();
 					ShowMouseCursor();
@@ -204,7 +207,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
 				{
-					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonArt2->TargetTransform);
+					ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonArt2->TargetTransform);
 					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->TargetCamera));
 
 					RemoveAimPoint();
@@ -220,6 +223,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					UE_LOG(LogTemp, Warning, TEXT("Show PopUpUI"));
 					if (!bPopUpUIShowing)
 					{
+						if (nullptr == button2->WidgetComp) return;
 						button2->WidgetComp->SetVisibility(true);
 						bPopUpUIShowing = true;
 						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
@@ -229,6 +233,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					}
 					else
 					{
+						if (nullptr == button2->WidgetComp) return;
 						button2->WidgetComp->SetVisibility(false);
 						bPopUpUIShowing = false;
 						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
@@ -265,7 +270,7 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_Visibility);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_GameTraceChannel4);
 	if (bHit)
 	{
 		AActor* HitActor = Outhit.GetActor();
@@ -292,36 +297,38 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
 	}
+
+	//HideMouseCursor();
 }
 
 
-void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
-{
-	// AI 챗봇 동작
-	// 블루프린트의 ActivateAIChatbot 함수 호출
-	UFunction* AIChatbotFunction = buttonexp->FindFunction(FName("ActivateAIChatbot"));
-	if (AIChatbotFunction)
-	{
-		buttonexp->ProcessEvent(AIChatbotFunction, nullptr);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateAIChatbot function"));
-	}
-}
-void ACJS_LobbyPlayer::VoiceRecord(ACJS_AIChatbotBnt* buttonexp)
-{
-	// 블루프린트의 ActivateVoiceRecord 함수 호출 (음성 저장)
-	UFunction* StopRecordingFunction = buttonexp->FindFunction(FName("ActivateVoiceRecord"));
-	if (StopRecordingFunction)
-	{
-		buttonexp->ProcessEvent(StopRecordingFunction, nullptr);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateVoiceRecord function"));
-	}
-}
+//void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
+//{
+//	// AI 챗봇 동작
+//	// 블루프린트의 ActivateAIChatbot 함수 호출
+//	UFunction* AIChatbotFunction = buttonexp->FindFunction(FName("ActivateAIChatbot"));
+//	if (AIChatbotFunction)
+//	{
+//		buttonexp->ProcessEvent(AIChatbotFunction, nullptr);
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateAIChatbot function"));
+//	}
+//}
+//void ACJS_LobbyPlayer::VoiceRecord(ACJS_AIChatbotBnt* buttonexp)
+//{
+//	// 블루프린트의 ActivateVoiceRecord 함수 호출 (음성 저장)
+//	UFunction* StopRecordingFunction = buttonexp->FindFunction(FName("ActivateVoiceRecord"));
+//	if (StopRecordingFunction)
+//	{
+//		buttonexp->ProcessEvent(StopRecordingFunction, nullptr);
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateVoiceRecord function"));
+//	}
+//}
 
 void ACJS_LobbyPlayer::RemoveAimPoint()
 {
@@ -331,13 +338,34 @@ void ACJS_LobbyPlayer::RemoveAimPoint()
 
 void ACJS_LobbyPlayer::ShowMouseCursor()
 {
-	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
+	if (pc)
 	{
+		// 마우스 커서를 보이게 하고 카메라 회전을 비활성화
 		pc->bShowMouseCursor = true;
 		pc->bEnableMouseOverEvents = true;
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		pc->SetInputMode(InputMode);
+
+		// 카메라 회전 비활성화
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;  // 이동할 때 플레이어의 방향이 움직이는 방향을 향하게 함
+	}
+}
+
+void ACJS_LobbyPlayer::HideMouseCursor()
+{
+	if (pc)
+	{
+		// 마우스 커서를 숨기고 카메라 회전을 활성화
+		pc->bShowMouseCursor = false;
+		pc->bEnableMouseOverEvents = true;
+		FInputModeGameOnly InputMode;
+		pc->SetInputMode(InputMode);
+
+		// 카메라 회전 활성화
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement()->bOrientRotationToMovement = false;  // 이동할 때 플레이어의 방향을 카메라의 회전에 맞춤
 	}
 }
 
@@ -348,6 +376,24 @@ void ACJS_LobbyPlayer::ShowEscapeUI()
 	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
 	{
 		EscapeUI->AddToViewport();
+		EscapeUI->Me = this;
 	}
+	
 }
 
+void ACJS_LobbyPlayer::ExitArt()
+{
+	pc = Cast<APlayerController>(Controller);
+
+	AActor* myFollowCamera = Cast<AActor>(FollowCamera);
+
+	FInputModeGameOnly inputMode;
+	pc->bShowMouseCursor = false;
+	pc->bEnableMouseOverEvents = false;
+	pc->SetInputMode(inputMode);
+	check(ArtPlayer); if (nullptr == ArtPlayer) return;
+
+	ArtPlayer->Destroy();
+	pc->SetViewTarget(myFollowCamera);
+
+}

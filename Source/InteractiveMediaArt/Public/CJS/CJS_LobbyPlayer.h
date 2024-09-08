@@ -64,9 +64,9 @@ public:
 	class UUserWidget* PopUpUI;
 	bool bPopUpUIShowing;
 
-	UFUNCTION(BlueprintCallable, Category = "AI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "AI")  // BlueprintImplementableEvent : cpp에서 블루프린트 함수 호출할 때 / BlueprintCallable : 블루프린트에서 cpp 호출할 때
 	void AIChatbot(ACJS_AIChatbotBnt* buttonexp);
-	UFUNCTION(BlueprintCallable, Category = "AI")
+	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
 	void VoiceRecord(ACJS_AIChatbotBnt* buttonexp);
 
 	UPROPERTY(EditDefaultsOnly)
@@ -82,6 +82,12 @@ public:
 
 	void RemoveAimPoint();
 	void ShowMouseCursor();
+	void HideMouseCursor();
 	void ShowEscapeUI();
 
+	UPROPERTY()
+	class ASG_ArtPlayer* ArtPlayer;
+	void ExitArt();
+	UPROPERTY()
+	class APlayerController* pc;
 };

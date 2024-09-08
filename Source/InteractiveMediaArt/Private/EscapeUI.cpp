@@ -25,13 +25,13 @@ void UEscapeUI::NativeConstruct()
 
 void UEscapeUI::OnExitButtonClicked()
 {
-    // ¿ø·¡ Ä«¸Þ¶ó·Î µ¹¾Æ°¡±â
+    // ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ï¿½ ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½
     if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
     {
         pc->SetViewTarget(OriginalCameraActor);
     }
 
-    // ÀÎÇ² ¸ðµå¸¦ °ÔÀÓ ¸ðµå·Î º¯°æ
+    // ï¿½ï¿½Ç² ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
     {
         FInputModeGameOnly InputMode;
@@ -39,7 +39,7 @@ void UEscapeUI::OnExitButtonClicked()
         pc->bShowMouseCursor = false;
     }
 
-    // UI Á¦°Å
+    // UI ï¿½ï¿½ï¿½ï¿½
     this->RemoveFromParent();
 }
 

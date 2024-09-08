@@ -53,9 +53,9 @@ ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 	// 스프링암을 생성해서 루트에 붙이고싶다.
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 0; // The camera follows at this distance behind the character   
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-	CameraBoom->SocketOffset = FVector(0, 50, 100);
+	CameraBoom->SocketOffset = FVector(0, 0, 85);
 
 	// 카메라를 생성해서 스프링암에 붙이고싶다.
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -102,6 +102,15 @@ void ACJS_LobbyPlayer::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
 	}
+
+
+	if (WBP_EscapeUI)
+	{
+		EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
+		EscapeUI->AddToViewport();
+		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 
 }
 
@@ -193,19 +202,22 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				AButtonExp* button1 = Cast<AButtonExp>(HitActor);
 				if (button1 != nullptr)
 				{
-					ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), button1->TargetTransform);
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(button1->TargetCamera));
+					if (nullptr == ArtPlayer)
+					{
+						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), button1->TargetTransform);
+						pc->SetViewTarget(Cast<AActor>(button1->TargetCamera));
 
-					FInputModeUIOnly UIOnlyMode;
-					pc->SetInputMode(UIOnlyMode);
-
-					HideAimPoint();
-					ShowMouseCursor();
-					ShowEscapeUI();
+						FInputModeUIOnly UIOnlyMode;
+						pc->SetInputMode(UIOnlyMode);
+						HideAimPoint();
+						ShowMouseCursor();
+						ShowEscapeUI();
+					}
 				}
 			}
 			else if (HitActorName.Contains("BNT2_1"))
 			{
+				bExitBnt2_1 = true;
 				UE_LOG(LogTemp, Warning, TEXT("BNT2_1 Clicked"));
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
@@ -304,6 +316,119 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 	//HideMouseCursor();
 }
 
+void ACJS_LobbyPlayer::RemoveAimPoint()
+{
+	// AimPoint UI 끄기
+	if (AimpointUI != nullptr) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void ACJS_LobbyPlayer::ShowMouseCursor()
+{
+	if (pc)
+	{
+		// 마우스 커서를 보이게 하고 카메라 회전을 비활성화
+		pc->bShowMouseCursor = true;
+		pc->bEnableMouseOverEvents = true;
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		pc->SetInputMode(InputMode);
+
+		// 카메라 회전 비활성화
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;  // 이동할 때 플레이어의 방향이 움직이는 방향을 향하게 함
+	}
+}
+
+void ACJS_LobbyPlayer::ShowEscapeUI()
+{
+	if (nullptr == EscapeUI) 
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ShowEscapeUI is Null")));
+		return;
+	}
+	EscapeUI->SetVisibility(ESlateVisibility::Visible);
+
+	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
+	{
+		EscapeUI->AddToViewport();
+		EscapeUI->Me = this;
+	}
+}
+
+void ACJS_LobbyPlayer::HideEscapeUI()
+{
+	if (nullptr == EscapeUI) return;
+	EscapeUI->SetVisibility(ESlateVisibility::Hidden);
+
+}
+
+void ACJS_LobbyPlayer::OnExitBnt()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnExitBnt()"));
+	if (bExitBnt2_1)
+	{
+		if (pc)
+		{
+			// 1. 원래 카메라로 복원
+			pc->SetViewTarget(this);
+			
+
+			// 2. 입력 모드를 게임 전용으로 설정
+			FInputModeGameOnly inputMode;
+			pc->bShowMouseCursor = false;
+			pc->bEnableMouseOverEvents = false;
+			pc->SetInputMode(inputMode);
+
+			// 3. ArtPlayer 제거 (BNT1_1에서 생성된 경우)
+			//if (ArtPlayer)
+			//{
+			//	ArtPlayer->Destroy();
+			//	ArtPlayer = nullptr; // 메모리 정리
+			//}
+
+			// 4. Escape UI 제거
+			if (EscapeUI)
+			{
+				HideEscapeUI();
+			}
+			ShowAimPoint();
+			// 5. AimPoint 다시 표시 (필요하다면)
+			//ShowAimPoint();
+			UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
+
+			bExitBnt2_1 = false;
+		}
+	}
+}
+
+void ACJS_LobbyPlayer::ExitArt()
+{
+	FInputModeGameOnly inputMode;
+	pc->bShowMouseCursor = false;
+	pc->bEnableMouseOverEvents = false;
+	pc->SetInputMode(inputMode);
+
+	check(ArtPlayer);
+	if (ArtPlayer)
+	{
+		ArtPlayer->Destroy();
+	}
+	HideEscapeUI();
+	pc->SetViewTarget(this);
+	ShowAimPoint();
+}
+
+void ACJS_LobbyPlayer::ShowAimPoint()
+{
+	AimpointUI->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ACJS_LobbyPlayer::HideAimPoint()
+{
+	AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+
 
 //void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
 //{
@@ -332,88 +457,19 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 //		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateVoiceRecord function"));
 //	}
 //}
+//void ACJS_LobbyPlayer::HideMouseCursor()
+//{
+//	if (pc)
+//	{
+//		// 마우스 커서를 숨기고 카메라 회전을 활성화
+//		pc->bShowMouseCursor = false;
+//		pc->bEnableMouseOverEvents = true;
+//		FInputModeGameOnly InputMode;
+//		pc->SetInputMode(InputMode);
+//
+//		// 카메라 회전 활성화
+//		bUseControllerRotationYaw = true;
+//		GetCharacterMovement()->bOrientRotationToMovement = false;  // 이동할 때 플레이어의 방향을 카메라의 회전에 맞춤
+//	}
+//}
 
-void ACJS_LobbyPlayer::RemoveAimPoint()
-{
-	// AimPoint UI 끄기
-	if (AimpointUI != nullptr) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
-}
-
-void ACJS_LobbyPlayer::ShowMouseCursor()
-{
-	if (pc)
-	{
-		// 마우스 커서를 보이게 하고 카메라 회전을 비활성화
-		pc->bShowMouseCursor = true;
-		pc->bEnableMouseOverEvents = true;
-		FInputModeGameAndUI InputMode;
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		pc->SetInputMode(InputMode);
-
-		// 카메라 회전 비활성화
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;  // 이동할 때 플레이어의 방향이 움직이는 방향을 향하게 함
-	}
-}
-
-void ACJS_LobbyPlayer::HideMouseCursor()
-{
-	if (pc)
-	{
-		// 마우스 커서를 숨기고 카메라 회전을 활성화
-		pc->bShowMouseCursor = false;
-		pc->bEnableMouseOverEvents = true;
-		FInputModeGameOnly InputMode;
-		pc->SetInputMode(InputMode);
-
-		// 카메라 회전 활성화
-		bUseControllerRotationYaw = true;
-		GetCharacterMovement()->bOrientRotationToMovement = false;  // 이동할 때 플레이어의 방향을 카메라의 회전에 맞춤
-	}
-}
-
-void ACJS_LobbyPlayer::ShowEscapeUI()
-{
-	EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
-
-	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
-	{
-		EscapeUI->AddToViewport();
-		EscapeUI->Me = this;
-	}
-
-}
-void ACJS_LobbyPlayer::ExitArt()
-{
-	pc = Cast<APlayerController>(Controller);
-	AActor* myFollowCamera = Cast<AActor>(FollowCamera);
-
-	FInputModeGameOnly inputMode;
-	pc->bShowMouseCursor = false;
-	pc->bEnableMouseOverEvents = false;
-	pc->SetInputMode(inputMode);
-
-	check(ArtPlayer);
-	if (ArtPlayer)
-	{
-		ArtPlayer->Destroy();
-	}
-	else
-	{
-		ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>();
-
-	}
-	
-	pc->SetViewTarget(myFollowCamera);
-
-}
-
-void ACJS_LobbyPlayer::ShowAimPoint()
-{
-	AimpointUI->SetVisibility(ESlateVisibility::Visible);
-}
-
-void ACJS_LobbyPlayer::HideAimPoint()
-{
-	AimpointUI->SetVisibility(ESlateVisibility::Hidden);
-}

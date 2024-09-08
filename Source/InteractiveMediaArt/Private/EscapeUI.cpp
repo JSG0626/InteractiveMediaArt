@@ -26,22 +26,14 @@ void UEscapeUI::NativeConstruct()
 
 void UEscapeUI::OnExitButtonClicked()
 {
-    Me->ExitArt();
-    //// ���� ī�޶�� ���ư���
-    //if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
-    //{
-    //    pc->SetViewTarget(OriginalCameraActor);
-    //}
-
-    //// ��ǲ ��带 ���� ���� ����
-    //if (APlayerController* pc = UGameplayStatics::GetPlayerController(this, 0))
-    //{
-    //    FInputModeGameOnly InputMode;
-    //    pc->SetInputMode(InputMode);
-    //    pc->bShowMouseCursor = false;
-    //}
-
-    //// UI ����
-    this->RemoveFromParent();
+    if (Me->bExitBnt2_1)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UEscapeUI::OnExitButtonClicked()::Me->bExitBnt2_1 "));
+        Me->OnExitBnt();
+    }
+    else
+    {
+        Me->ExitArt();
+    }
 }
 

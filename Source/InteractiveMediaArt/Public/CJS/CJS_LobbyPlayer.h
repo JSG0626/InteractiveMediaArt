@@ -81,9 +81,17 @@ public:
 	class UEscapeUI* EscapeUI;
 
 	void RemoveAimPoint();
+	void ShowAimPoint();
+	void HideAimPoint();
+
 	void ShowMouseCursor();
-	void HideMouseCursor();
+	//void HideMouseCursor();
+
 	void ShowEscapeUI();
+	void HideEscapeUI();
+	void OnExitBnt();
+	bool bExitBnt2_1;
+
 
 	UPROPERTY()
 	class ASG_ArtPlayer* ArtPlayer;
@@ -91,6 +99,5 @@ public:
 	UPROPERTY()
 	class APlayerController* pc;
 
-	void ShowAimPoint();
-	void HideAimPoint();
+	
 };

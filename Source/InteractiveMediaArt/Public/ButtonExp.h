@@ -25,16 +25,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* RootBoxComp;
+	class UStaticMeshComponent* ButtonComp;
 
-	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* ButtonExperience;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* ButtonDescription;
-	
-	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* ButtonChatBot;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UBoxComponent* VisibleBoxComp;

@@ -20,6 +20,7 @@
 #include "Components/WidgetComponent.h"
 #include "CJS/CJS_MovePosBnt.h"
 #include "AimPoint.h"
+#include "EscapeUI.h"
 
 
 // Sets default values
@@ -186,39 +187,49 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			if (HitActorName.Contains("BNT1_1"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
-				AButtonExp* buttonexp = Cast<AButtonExp>(HitActor);
-				if (buttonexp != nullptr)
+				AButtonExp* button1 = Cast<AButtonExp>(HitActor);
+				if (button1 != nullptr)
 				{
-					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), button1->TargetTransform);
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(button1->TargetCamera));
+
+					RemoveAimPoint();
+					ShowMouseCursor();
+					ShowEscapeUI();
 				}
 			}
 			else if (HitActorName.Contains("BNT2_1"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("BNT2_1 Clicked"));
-				ACJS_MovePosBnt* buttonexp = Cast<ACJS_MovePosBnt>(HitActor);
-				if (buttonexp != nullptr)
+				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
+				if (buttonArt2 != nullptr)
 				{
-					//GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonArt2->TargetTransform);
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->TargetCamera));
+
+					RemoveAimPoint();
+					ShowMouseCursor();
 				}
 			}
 			else if (HitActorName.Contains("BNT1_2"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("BNT1_2 Clicked"));
-				ACJS_PopUpBnt* buttonexp = Cast<ACJS_PopUpBnt>(HitActor);
-				if (buttonexp != nullptr)
+				ACJS_PopUpBnt* button2 = Cast<ACJS_PopUpBnt>(HitActor);
+				if (button2 != nullptr)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Show PopUpUI"));
 					if (!bPopUpUIShowing)
 					{
-						buttonexp->WidgetComp->SetVisibility(true);
+						button2->WidgetComp->SetVisibility(true);
 						bPopUpUIShowing = true;
 						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
+
+						RemoveAimPoint();
+						ShowMouseCursor();
 					}
 					else
 					{
-						buttonexp->WidgetComp->SetVisibility(false);
+						button2->WidgetComp->SetVisibility(false);
 						bPopUpUIShowing = false;
 						UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
 					}
@@ -228,10 +239,10 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			else if (HitActorName.Contains("BNT1_3"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("BNT1_3 Clicked"));
-				ACJS_AIChatbotBnt* buttonexp = Cast<ACJS_AIChatbotBnt>(HitActor);
-				if (buttonexp != nullptr)
+				ACJS_AIChatbotBnt* button3 = Cast<ACJS_AIChatbotBnt>(HitActor);
+				if (button3 != nullptr)
 				{
-					AIChatbot(buttonexp);			
+					AIChatbot(button3);
 				}
 			}
 		}
@@ -309,6 +320,34 @@ void ACJS_LobbyPlayer::VoiceRecord(ACJS_AIChatbotBnt* buttonexp)
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateVoiceRecord function"));
+	}
+}
+
+void ACJS_LobbyPlayer::RemoveAimPoint()
+{
+	// AimPoint UI 끄기
+	if (AimpointUI != nullptr) AimpointUI->RemoveFromParent();
+}
+
+void ACJS_LobbyPlayer::ShowMouseCursor()
+{
+	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
+	{
+		pc->bShowMouseCursor = true;
+		pc->bEnableMouseOverEvents = true;
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		pc->SetInputMode(InputMode);
+	}
+}
+
+void ACJS_LobbyPlayer::ShowEscapeUI()
+{
+	EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
+
+	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
+	{
+		EscapeUI->AddToViewport();
 	}
 }
 

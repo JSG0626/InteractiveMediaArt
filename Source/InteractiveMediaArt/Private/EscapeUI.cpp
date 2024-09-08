@@ -21,8 +21,6 @@ void UEscapeUI::NativeConstruct()
     {
         OriginalCameraActor = Cast<ACameraActor>(GetWorld()->GetFirstPlayerController()->GetViewTarget());
     }
-
-    
 }
 
 void UEscapeUI::OnExitButtonClicked()

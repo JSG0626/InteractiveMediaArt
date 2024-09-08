@@ -36,6 +36,8 @@ ACJS_MovePosBnt::ACJS_MovePosBnt()
 
 	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapBegin);
 	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapEnd);
+
+	AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
 }
 
 // Called when the game starts or when spawned
@@ -43,7 +45,7 @@ void ACJS_MovePosBnt::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(-5710, -1470, 850), FRotator(0, -90, 0));  
+	TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(-5710, -1470, 850), FRotator(0, -90, 0));
 
 	TargetLocation = TargetCamera->GetActorLocation();
 	TargetRotation = TargetCamera->GetActorRotation();
@@ -67,10 +69,9 @@ void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 			ButtonComp->SetVisibility(true);
 		}
 
-		AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
-		if (AimpoiontUI)
+		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 		{
-			AimpoiontUI->AddToViewport(true);
+			AimpointUI->AddToViewport();
 		}
 	}
 }
@@ -85,10 +86,9 @@ void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 			ButtonComp->SetVisibility(false);
 		}
 
-		AimpoiontUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
-		if (AimpoiontUI)
+		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 		{
-			AimpoiontUI->AddToViewport(false);
+			AimpointUI->AddToViewport();
 		}
 	}
 }

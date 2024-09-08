@@ -72,8 +72,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class UUserWidget> WBP_aimpoint;
 	UPROPERTY(EditDefaultsOnly)
-	class UAimPoint* AimpoiontUI;
+	class UAimPoint* AimpointUI;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_EscapeUI;
 
+	UPROPERTY(EditDefaultsOnly)
+	class UEscapeUI* EscapeUI;
+
+	void RemoveAimPoint();
+	void ShowMouseCursor();
+	void ShowEscapeUI();
 
 };

@@ -172,7 +172,7 @@ void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 			AButtonExp* buttonexp = Cast<AButtonExp>(hitActor);
 			if (buttonexp != nullptr)
 			{
-				if (buttonexp->ButtonExperience)
+				if (buttonexp->ButtonComp)
 				{
 					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
 					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));

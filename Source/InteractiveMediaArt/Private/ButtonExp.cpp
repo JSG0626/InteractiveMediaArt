@@ -9,6 +9,7 @@
 #include "Camera/CameraActor.h"
 #include "AimPoint.h"
 #include "Blueprint/UserWidget.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 // Sets default values
 AButtonExp::AButtonExp()
@@ -39,7 +40,6 @@ AButtonExp::AButtonExp()
 	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AButtonExp::OnOverlapBegin);
 	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &AButtonExp::OnOverlapEnd);
 
-	AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
 }
 
 // Called when the game starts or when spawned
@@ -61,38 +61,53 @@ void AButtonExp::Tick(float DeltaTime)
 
 void AButtonExp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && (OtherActor != this) && OtherComp)
+	auto Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+	if (Player)
 	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
-		{
-			ButtonComp->SetVisibility(true);
-			//ButtonDescription->SetVisibility(true);
-			//ButtonChatBot->SetVisibility(true);
-			
-			if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
-			{
-				AimpointUI->AddToViewport();
-			}
-		}
+		Player->ShowAimPoint();
 	}
+
+	ButtonComp->SetVisibility(true);
+	//ButtonDescription->SetVisibility(true);
+	//ButtonChatBot->SetVisibility(true);
+	// 
+	//if (OtherActor && (OtherActor != this) && OtherComp)
+	//{
+	//	ACharacter* pc = Cast<ACharacter>(OtherActor);
+	//	if (pc)
+	//	{
+	//		
+	//		
+	//		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
+	//		{
+	//			AimpointUI->AddToViewport();
+	//		}
+	//	}
+	//}
 }
 
 void AButtonExp::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && (OtherActor != this) && OtherComp)
+	auto Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+	if (Player)
 	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
-		{
-			ButtonComp->SetVisibility(false);
-			//ButtonDescription->SetVisibility(false);
-			//ButtonChatBot->SetVisibility(false);
-
-			if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
-			{
-				AimpointUI->RemoveFromParent();
-			}
-		}
+		Player->HideAimPoint();
 	}
+	ButtonComp->SetVisibility(false);
+
+	//if (OtherActor && (OtherActor != this) && OtherComp)
+	//{
+	//	ACharacter* pc = Cast<ACharacter>(OtherActor);
+	//	if (pc)
+	//	{
+	//		ButtonComp->SetVisibility(false);
+	//		//ButtonDescription->SetVisibility(false);
+	//		//ButtonChatBot->SetVisibility(false);
+
+	//		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
+	//		{
+	//			AimpointUI->RemoveFromParent();
+	//		}
+	//	}
+	//}
 }

@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraActor.h"
 #include "AimPoint.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 // Sets default values
 ACJS_MovePosBnt::ACJS_MovePosBnt()
@@ -37,7 +38,7 @@ ACJS_MovePosBnt::ACJS_MovePosBnt()
 	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapBegin);
 	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapEnd);
 
-	AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
+	//AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
 }
 
 // Called when the game starts or when spawned
@@ -61,35 +62,47 @@ void ACJS_MovePosBnt::Tick(float DeltaTime)
 
 void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	ButtonComp->SetVisibility(true);
+	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+
+	if (Player)
+	{
+		Player->ShowAimPoint();
+	}
+	/*
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		ACharacter* pc = Cast<ACharacter>(OtherActor);
 		if (pc)
 		{
-			ButtonComp->SetVisibility(true);
 		}
 
 		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 		{
 			AimpointUI->AddToViewport();
 		}
-	}
+	}*/
 }
 
 void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && (OtherActor != this) && OtherComp)
+	ButtonComp->SetVisibility(false);
+	auto Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+	if (Player)
+	{
+		Player->HideAimPoint();
+	}
+	/*if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		ACharacter* pc = Cast<ACharacter>(OtherActor);
 		if (pc)
 		{
-			ButtonComp->SetVisibility(false);
 		}
 
 		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 		{
-			AimpointUI->AddToViewport();
+			AimpointUI->RemoveFromParent();
 		}
-	}
+	}*/
 }
 

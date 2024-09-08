@@ -10,6 +10,7 @@
 #include "AimPoint.h"
 #include "Blueprint/UserWidget.h"
 #include "CJS/CJS_LobbyPlayer.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AButtonExp::AButtonExp()
@@ -48,7 +49,10 @@ void AButtonExp::BeginPlay()
 	Super::BeginPlay();
 
 	
-	TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2130,-2150,840),FRotator(0,-90,0));
+	TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470,-2150,840),FRotator(0,-90,0));
+	auto* TargetCameraComp = TargetCamera->GetCameraComponent();
+	TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+	TargetCameraComp->OrthoWidth = 3200.f;
 	
 }
 

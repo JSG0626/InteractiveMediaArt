@@ -155,7 +155,7 @@ FString ACJS_HttpNetActor::GenerateSavePath()
 
 	// 최종 파일 경로를 생성합니다.
 	//FString ReceiveFileSavePath = FPaths::Combine(TEXT("C:/Users/Sunny/Desktop/sound/Response"), *FileName);
-	FString ReceiveFileSavePath = FPaths::Combine(TEXT("C:\\Users\\onlys\\Desktop\\sound\\Response"), *FileName);
+	FString ReceiveFileSavePath = FPaths::Combine(TEXT("C:\\Users\\Admin\\IMA_Sound\\Response"), *FileName);
 	//ReceiveFileSavePath = FPaths::Combine(TEXT("C:/Users/Sunny/Desktop/sound/Response/"), *FileName); 
 
 	// SavePath를 사용하는 로직

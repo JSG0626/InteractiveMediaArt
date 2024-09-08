@@ -22,6 +22,7 @@
 #include "AimPoint.h"
 #include "EscapeUI.h"
 #include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 
 
 // Sets default values
@@ -63,25 +64,6 @@ ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	// BP_VoiceMeterClass = LoadObject<UClass>(nullptr, TEXT("/Script/Engine.Blueprint'/Game/ArtProject/CJS/Blueprints/BP_CJS_VoiceMeter.BP_CJS_VoiceMeter'"));
-	/*if (BP_VoiceMeterClass)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("BP_CJS_VoiceMeter Class successfully loaded"));
-		BP_VoiceMeter = UGameplayStatics::GetActorOfClass(GetWorld(), BP_VoiceMeterClass);
-		if (BP_VoiceMeter)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("BP_CJS_VoiceMeter instance found"));
-			DisableAudioCapture();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to find BP_CJS_VoiceMeter instance"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load BP_CJS_VoiceMeter Class"));
-	}*/
 }
 
 // Called when the game starts or when spawned
@@ -130,13 +112,39 @@ void ACJS_LobbyPlayer::BeginPlay()
 		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	FTransform VoiceMeterTransform1 = FTransform(FRotator(0, 0, 0), FVector(-5705, -1980, 670), FVector(3, 3, 3));
-	FTransform VoiceMeterTransform2 = FTransform(FRotator(0, 0, 0), FVector(-5710, -1970, 670), FVector(3, 3, 3));
+	// AudioCapture 설정
+	FTransform VoiceMeterTransform1 = FTransform(FRotator(0, 0, 0), FVector(-5705, -1980, 670), FVector(1, 1, 1));
+	FTransform VoiceMeterTransform2 = FTransform(FRotator(0, 0, 0), FVector(-5710, -1970, 670), FVector(1, 1, 1));
 	VoiceMeter1 = GetWorld()->SpawnActor<AActor>(BP_VoiceMeterClass, VoiceMeterTransform1);
 	VoiceMeter2 = GetWorld()->SpawnActor<AActor>(BP_VoiceMeterClass, VoiceMeterTransform2);
 	if (VoiceMeter1 && VoiceMeter2)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("VoiceMeter Spawn"));
+
+		// VoiceMeter1의 Niagara 컴포넌트 크기 조정
+		UNiagaraComponent* NiagaraComponent1 = VoiceMeter1->FindComponentByClass<UNiagaraComponent>();
+		if (NiagaraComponent1)
+		{
+			NiagaraComponent1->SetWorldScale3D(FVector(3.0f));  // 스케일을 3으로 설정
+			UE_LOG(LogTemp, Warning, TEXT("VoiceMeter1 Niagara Scale Set to 3"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter1"));
+		}
+
+		// VoiceMeter2의 Niagara 컴포넌트 크기 조정
+		UNiagaraComponent* NiagaraComponent2 = VoiceMeter2->FindComponentByClass<UNiagaraComponent>();
+		if (NiagaraComponent2)
+		{
+			NiagaraComponent2->SetWorldScale3D(FVector(3.0f));  // 스케일을 3으로 설정
+			UE_LOG(LogTemp, Warning, TEXT("VoiceMeter2 Niagara Scale Set to 3"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter2"));
+		}
+
 		DisableAudioCapture();
 	}
 }

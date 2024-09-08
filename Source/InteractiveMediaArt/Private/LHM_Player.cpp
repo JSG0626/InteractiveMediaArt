@@ -21,6 +21,7 @@
 #include "GameFramework/Actor.h"
 #include "Camera/CameraActor.h"
 #include "EscapeUI.h"
+#include "AimPoint.h"
 
 
 
@@ -166,16 +167,26 @@ void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
 	if (GetWorld()->LineTraceSingleByChannel(outhit, start, end, ECollisionChannel::ECC_Visibility))
 	{
 		auto* hitActor = outhit.GetActor();
-		AButtonExp* buttonexp = CastChecked<AButtonExp>(hitActor);
-		if (buttonexp != nullptr)
+		if (hitActor)
 		{
-			GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
-			GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+			AButtonExp* buttonexp = Cast<AButtonExp>(hitActor);
+			if (buttonexp != nullptr)
+			{
+				if (buttonexp->ButtonExperience)
+				{
+					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
+					
+					if (buttonexp->AimpointUI != nullptr)
+					{
+						buttonexp->AimpointUI->RemoveFromParent();
+					}
+					
+					ShowMouseCursor();
+					ShowEscapeUI();
+				}
+			}
 
-			//buttonexp->AimpointUI->RemoveFromViewport();
-
-			ShowMouseCursor();
-			ShowEscapeUI();
 		}
 	}
 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1);
@@ -189,9 +200,10 @@ void ALHM_Player::OnMouseRelease(const struct FInputActionInstance& Instance)
 void ALHM_Player::ShowEscapeUI()
 {	
 	EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
+
 	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
 	{
-		EscapeUI->AddToViewport(true);
+		EscapeUI->AddToViewport();
 	}
 }
 

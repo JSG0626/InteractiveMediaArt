@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraActor.h"
 #include "AimPoint.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AButtonExp::AButtonExp()
@@ -91,7 +92,6 @@ void AButtonExp::Tick(float DeltaTime)
 
 void AButtonExp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
 	if (OtherActor && (OtherActor != this) && OtherComp)
 	{
 		ACharacter* pc = Cast<ACharacter>(OtherActor);
@@ -103,12 +103,10 @@ void AButtonExp::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 			
 			if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 			{
-				AimpointUI->AddToViewport(true);
+				AimpointUI->AddToViewport();
 			}
-			
 		}
 	}
-
 }
 
 void AButtonExp::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -124,7 +122,7 @@ void AButtonExp::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* 
 
 			if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
 			{
-				AimpointUI->RemoveFromViewport();
+				AimpointUI->RemoveFromParent();
 			}
 		}
 	}

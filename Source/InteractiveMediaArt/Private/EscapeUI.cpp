@@ -16,7 +16,8 @@ void UEscapeUI::NativeConstruct()
         Button_Escape->OnClicked.AddDynamic(this, &UEscapeUI::OnExitButtonClicked);
     }
 
-    if (ALHM_Player* pc = Cast<ALHM_Player>(UGameplayStatics::GetPlayerCharacter(this, 0)))
+    ALHM_Player* PlayerCharacter = Cast<ALHM_Player>(UGameplayStatics::GetPlayerCharacter(this, 0));
+    if (PlayerCharacter)
     {
         OriginalCameraActor = Cast<ACameraActor>(GetWorld()->GetFirstPlayerController()->GetViewTarget());
     }
@@ -41,6 +42,6 @@ void UEscapeUI::OnExitButtonClicked()
     }
 
     // UI Á¦°Å
-    RemoveFromViewport();
+    this->RemoveFromParent();
 }
 

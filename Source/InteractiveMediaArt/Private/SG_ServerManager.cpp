@@ -119,10 +119,20 @@ void ASG_ServerManager::CreateClient()
 	// 서버 포트
 	ServerAddr->SetPort(ServerPort);
 
-	FString connectionStr = ClientSocket->Connect(*ServerAddr) ? TEXT("서버 연결 완료") : TEXT("서버 연결 실패");
+	bool bIsConnect = ClientSocket->Connect(*ServerAddr);
+	FString connectionStr = bIsConnect ? TEXT("서버 연결 완료") : TEXT("서버 연결 실패");
 	GEngine->AddOnScreenDebugMessage(-1, 20, FColor::Green, FString::Printf(TEXT("%s"), *connectionStr));
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *connectionStr);
-	Me->ActivateSmoke();
+
+	if (bIsConnect)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *connectionStr);
+		Me->ActivateSmoke();
+
+	}
+	else
+	{
+		Destroy();
+	}
 }
 
 
@@ -190,9 +200,11 @@ void ASG_ServerManager::ReceiveData()
 			ReceivedJson = FString(UTF8_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
 			ReceivedJson = ReceivedJson.Mid(0, DataLength);
 			//UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
-			USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations);
-		
-			Me->SetJointPosition();
+			if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me, Me->Landmarks, Me->TargetJointLocations))
+			{
+				Me->SetJointPosition();
+
+			}
 			return;
 		}
 		//UE_LOG(LogTemp, Warning, TEXT("bodyPendingData < DataLength"));
@@ -234,7 +246,7 @@ void ASG_ServerManager::ReceiveRestData()
 	if (CurDataLength == TargetDataLength)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("CurDataLength == TargetDataLength"));
-		if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me->Landmarks, Me->TargetJointLocations))
+		if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me, Me->Landmarks, Me->TargetJointLocations))
 		{
 			Me->SetJointPosition();
 		}

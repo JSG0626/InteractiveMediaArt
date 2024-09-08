@@ -76,7 +76,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class UUserWidget> WBP_EscapeUI;
-
 	UPROPERTY()
 	class UEscapeUI* EscapeUI;
 
@@ -94,7 +93,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
-
 	UPROPERTY()
 	class ASG_ArtPlayer* ArtPlayer;
 	void ExitArt();

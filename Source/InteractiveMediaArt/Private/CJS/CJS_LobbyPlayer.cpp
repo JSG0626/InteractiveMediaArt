@@ -130,7 +130,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter1"));
+			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent1 in VoiceMeter1"));
 		}
 
 		// VoiceMeter2의 Niagara 컴포넌트 크기 조정
@@ -146,6 +146,11 @@ void ACJS_LobbyPlayer::BeginPlay()
 		}
 
 		DisableAudioCapture();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
+		return;
 	}
 }
 
@@ -351,6 +356,16 @@ void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
 	}
+}
+
+FString ACJS_LobbyPlayer::GetProjectSavedDir()
+{
+	FString SavedDir = FPaths::ProjectSavedDir();
+
+	// 로그 출력
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::GetProjectSavedDir()::Project Saved Directory: %s"), *SavedDir);
+
+	return SavedDir;
 }
 
 void ACJS_LobbyPlayer::RemoveAimPoint()

@@ -19,7 +19,6 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 
 	PoseableMeshComp = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("PoseableMeshComp"));
 	PoseableMeshComp->SetupAttachment(RootComponent);
-
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
 	if (tempMesh.Succeeded())
 	{
@@ -27,6 +26,7 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 		PoseableMeshComp->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		PoseableMeshComp->SetVisibility(false);
 	}
+
 
 	SmokeNiagaraOnHeadComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnHeadComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);

@@ -68,6 +68,9 @@ public:
 	void AIChatbot(ACJS_AIChatbotBnt* buttonexp);
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
 	void VoiceRecord(ACJS_AIChatbotBnt* buttonexp);
+	// 블루프린트에서 호출 가능한 함수 선언
+    UFUNCTION(BlueprintCallable, Category = "File Path")
+    static FString GetProjectSavedDir();
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class UUserWidget> WBP_aimpoint;
@@ -100,7 +103,7 @@ public:
 	class APlayerController* pc;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> BP_VoiceMeterClass;
+	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()
 	class AActor* VoiceMeter1;
 	UPROPERTY()

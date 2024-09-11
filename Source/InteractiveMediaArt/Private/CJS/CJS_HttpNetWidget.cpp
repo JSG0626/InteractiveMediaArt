@@ -13,7 +13,6 @@ void UCJS_HttpNetWidget::NativeConstruct()
 void UCJS_HttpNetWidget::OnMyClickSendPost()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_HttpNetWidget::OnMyClickSendPost()"));
-
 	HttpNetActor->ReqPostWaveFile(ServerURL, WavFilePath);
 }
 

@@ -23,7 +23,6 @@ void ACJS_HttpNetActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-
 void ACJS_HttpNetActor::ReqPostWaveFile(FString url, FString wavFilePath)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::ReqPostWaveFile()"));
@@ -127,7 +126,6 @@ void ACJS_HttpNetActor::PlaySoundFromFile(const FString& FilePath)
 			SoundWave->NumChannels = 2; // 채널 수 설정, 실제 WAV 파일 정보에 따라 변경 필요
 
 			// 재생
-			//UGameplayStatics::PlaySoundAtLocation(this, SoundWave, GetActorLocation());
 			UGameplayStatics::PlaySound2D(this, SoundWave);
 			UE_LOG(LogTemp, Warning, TEXT("Playing sound from file: %s"), *FilePath);
 		}
@@ -153,14 +151,13 @@ FString ACJS_HttpNetActor::GenerateSavePath()
 	// 파일 이름을 생성합니다.
 	FString FileName = FString::Printf(TEXT("DownloadedWave_%s.wav"), *DateTimeString);
 
-	// 최종 파일 경로를 생성합니다.
-	//FString ReceiveFileSavePath = FPaths::Combine(TEXT("C:/Users/Sunny/Desktop/sound/Response"), *FileName);
-	FString ReceiveFileSavePath = FPaths::Combine(TEXT("C:\\Users\\Admin\\IMA_Sound\\Response"), *FileName);
-	//ReceiveFileSavePath = FPaths::Combine(TEXT("C:/Users/Sunny/Desktop/sound/Response/"), *FileName); 
+	// 저장할 경로를 설정합니다.
+	FString SaveDirectory = FPaths::FPaths::ProjectSavedDir();
+	FString FullSavePath = FPaths::Combine(SaveDirectory, FileName);
 
-	// SavePath를 사용하는 로직
-	UE_LOG(LogTemp, Log, TEXT("Generated file path: %s"), *ReceiveFileSavePath);
+	// 로그로 경로 출력
+	UE_LOG(LogTemp, Log, TEXT("Generated file path: %s"), *FullSavePath);
 
-	return ReceiveFileSavePath;
+	return FullSavePath;
 }
 

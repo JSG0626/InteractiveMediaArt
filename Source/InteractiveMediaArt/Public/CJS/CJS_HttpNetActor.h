@@ -25,18 +25,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//UPROPERTY()
-	//ACJS_HttpNetActor* HttpNetActorInstance;
-
-
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> HttpNetUIFactory;
 	UPROPERTY()
 	class UCJS_HttpNetWidget* HttpNetUI;
-
-	//UPROPERTY(EditAnywhere)
-	//FString ReceiveFileSavePath;
-
 
 	void ReqPostWaveFile(FString url, FString wavFilePath);
 	void OnResPostWaveFile(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);

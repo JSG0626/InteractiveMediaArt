@@ -20,10 +20,6 @@ public:
 	UPROPERTY()
 	class ACJS_HttpNetActor* HttpNetActor;
 
-	//UPROPERTY(meta=(BindWidget))
-	//class UButton* ButtonWaveFileSend;
-
-
 	UFUNCTION(BlueprintCallable)
 	void OnMyClickSendPost();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -31,7 +27,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetHttpNetActor(class ACJS_HttpNetActor* actor);
 
-
 	FString ServerURL = "https://adapted-charmed-panda.ngrok-free.app/voice_stts";
-	
 };

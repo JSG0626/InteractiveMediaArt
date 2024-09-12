@@ -75,7 +75,6 @@ void ASG_ServerManager::Tick(float DeltaTime)
 void ASG_ServerManager::RunPythonScript(const FString& Path)
 {
 	FString scriptPath = PyDeafultPath + Path;
-	FString pythonExePath = TEXT("C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\\python.exe");
 	bool bPythonExe = FPaths::FileExists(pythonExePath);
 	bool bScript = FPaths::FileExists(scriptPath);
 	if (bPythonExe && bScript)
@@ -165,7 +164,7 @@ bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& By
 
 void ASG_ServerManager::ReceiveData()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ReceiveData]"));
+	//UE_LOG(LogTemp, Warning, TEXT("[ReceiveData]"));
 	uint32 PackedLength = 0;
 	if (ClientSocket && ClientSocket->GetConnectionState() != SCS_Connected)
 	{

@@ -40,6 +40,9 @@ public:
 	FString PyDeafultPath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
+	FString pythonExePath = TEXT("C:\\Users\\Admin\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\\python.exe");
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	FString PyConnectServer = TEXT("TCP_response.py");
 	//FString PyConnectServer = TEXT("TCP_response_copy.py");
 

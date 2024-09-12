@@ -14,7 +14,6 @@ ATextDestroyZone::ATextDestroyZone()
 	DestroyZone->SetupAttachment(RootComponent);
 	DestroyZone->SetCollisionProfileName(TEXT("DestroyZone"));
 
-	DestroyZone->OnComponentHit.AddDynamic(this, &ATextDestroyZone::DestroyText);
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +26,7 @@ void ATextDestroyZone::BeginPlay()
 		SetReplicateMovement(true);
 		SetReplicates(true);
 	}
+	DestroyZone->OnComponentBeginOverlap.AddDynamic(this, &ATextDestroyZone::DestroyText);
 
 }
 
@@ -37,11 +37,14 @@ void ATextDestroyZone::Tick(float DeltaTime)
 
 }
 
-void ATextDestroyZone::DestroyText(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ATextDestroyZone::DestroyText(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("DestroyText"));
 	if (HasAuthority())
 	{
-		if (HitComp != nullptr) HitComp->DestroyComponent(true);
+		check(OtherComp); if (nullptr == OtherComp) return;
+
+		OtherComp->DestroyComponent(true);
 		UE_LOG(LogTemp, Warning, TEXT("Destroy Article Text"));
 	}
 }

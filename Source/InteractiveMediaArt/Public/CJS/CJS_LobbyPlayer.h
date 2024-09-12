@@ -94,6 +94,20 @@ public:
 	void OnExitBnt();
 	bool bExitBnt2_1;
 
+
+	// 작품 1의 체험 인원 표시 UI
+	/*UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_CountPlayerUI;
+	UPROPERTY()
+	class UCJS_CountPlayerUI* CountPlayerUI;*/
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ACJS_CountPlayerUIActor> CountPlayerUIActorClass;
+	UPROPERTY()
+	class ACJS_CountPlayerUIActor* CountPlayerUIActor;
+	
+
+	// 작품 1의 플레이어
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
 	UPROPERTY()
@@ -102,6 +116,9 @@ public:
 	UPROPERTY()
 	class APlayerController* pc;
 
+	//void MoveFirstArtPos(AButtonExp* button1);
+
+	// 작품 2의 요소
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()

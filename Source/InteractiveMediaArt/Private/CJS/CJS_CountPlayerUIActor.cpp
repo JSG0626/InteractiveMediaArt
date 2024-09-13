@@ -25,44 +25,42 @@ void ACJS_CountPlayerUIActor::BeginPlay()
 	Super::BeginPlay();
 
 	// 서버 권한이 있는지 확인
-	auto MyOwner = GetOwner<ACJS_LobbyPlayer>();
-	if (  MyOwner && MyOwner->IsLocallyControlled())
+	//auto MyOwner = GetOwner<ACJS_LobbyPlayer>();
+	//if (MyOwner && MyOwner->IsLocallyControlled())
+	// UI 위젯 초기화
+	if (WBP_CountPlayerUI) // WBP_CountPlayerUI가 유효한지 먼저 확인
 	{
-		// UI 위젯 초기화
-		if (WBP_CountPlayerUI) // WBP_CountPlayerUI가 유효한지 먼저 확인
-		{
-			CountPlayerUI = CreateWidget<UCJS_CountPlayerUI>(GetWorld(), WBP_CountPlayerUI);
-			UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::BeginPlay()::WBP_CountPlayerUI created"))
+		CountPlayerUI = CreateWidget<UCJS_CountPlayerUI>(GetWorld(), WBP_CountPlayerUI);
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::BeginPlay()::WBP_CountPlayerUI created"))
 
-				if (CountPlayerUI) // CreateWidget으로 올바르게 생성되었는지 확인
-				{
-					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::BeginPlay()::CountPlayerUI created"))
-						CountPlayerUI->AddToViewport();
-					CountPlayerUI->SetVisibility(ESlateVisibility::Hidden);
-					InitCountPlayerUiActor(CurPlayer);
-				}
-				else
-				{
-					UE_LOG(LogTemp, Error, TEXT("CountPlayerUI could not be created!"));
-				}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("WBP_CountPlayerUI is not set!"));
-		}
-
-		// 첫 번째 플레이어의 Pawn을 Owner로 설정
-		//APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-		//if (MyOwner)
-		//{
-		//	SetOwner(PlayerPawn);  // Owner 설정
-		//	UE_LOG(LogTemp, Warning, TEXT("Owner has been set to the PlayerPawn."));
-		//}
-		//else
-		//{
-		//	UE_LOG(LogTemp, Error, TEXT("Failed to set Owner. PlayerPawn is null."));
-		//}
+			if (CountPlayerUI) // CreateWidget으로 올바르게 생성되었는지 확인
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::BeginPlay()::CountPlayerUI created"))
+				CountPlayerUI->AddToViewport();
+				CountPlayerUI->SetVisibility(ESlateVisibility::Hidden);
+				InitCountPlayerUiActor(CurPlayer);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("CountPlayerUI could not be created!"));
+			}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("WBP_CountPlayerUI is not set!"));
+	}
+
+	// 첫 번째 플레이어의 Pawn을 Owner로 설정
+	//APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+	//if (MyOwner)
+	//{
+	//	SetOwner(PlayerPawn);  // Owner 설정
+	//	UE_LOG(LogTemp, Warning, TEXT("Owner has been set to the PlayerPawn."));
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("Failed to set Owner. PlayerPawn is null."));
+	//}
 
 	
 }
@@ -88,23 +86,25 @@ void ACJS_CountPlayerUIActor::InitCountPlayerUiActor(int32 curPlayer)
 void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(int32 AddNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation()"));
-	if (HasAuthority())
+	//SetOwner(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+	 // 클라이언트에게 동기화
+	// Update the player count on the server
+	CurPlayer += AddNum;
+	if (CurPlayer > MaxPlayer)
 	{
-		//SetOwner(GetWorld()->GetFirstPlayerController()->GetPawn());
-
-		// Update the player count on the server
-		CurPlayer += AddNum;
-		if (CurPlayer > MaxPlayer)
-		{
-			CurPlayer = MaxPlayer;
-		}
-
-		// Sync the value with clients
-		//OnRep_CurPlayer();
-
-		 // 클라이언트에게 동기화
-		MulticastRPC_UpdatePlayerNum(CurPlayer);
+		CurPlayer = MaxPlayer;
 	}
+	OnRep_CurPlayer();
+	// Sync the value with clients
+	//OnRep_CurPlayer();
+
+	
+	//MulticastRPC_UpdatePlayerNum(CurPlayer);
+	/*if (HasAuthority())
+	{
+
+	}*/
 }
 bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(int32 AddNum)
 {

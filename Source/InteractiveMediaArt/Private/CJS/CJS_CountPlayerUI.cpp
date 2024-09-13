@@ -26,10 +26,11 @@ void UCJS_CountPlayerUI::InitPlayerNum(int32 curNum, int32 maxNum)
 	ShowPlayerNum(curNum, maxNum);
 }
 
-
 void UCJS_CountPlayerUI::ShowPlayerNum(int32 curNum, int32 maxNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::ShowPlayerNum()"));
+
+	curNum > 0 ? SetVisibility(ESlateVisibility::Visible) : SetVisibility(ESlateVisibility::Hidden);
 
 	if (Txt_CurNum)
 	{

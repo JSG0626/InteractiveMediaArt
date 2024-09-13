@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class INTERACTIVEMEDIAART_API AIMA_GameModeBase : public AGameModeBase
 {
@@ -19,4 +20,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	ACameraActor* SharedCamera;
+
+	UPROPERTY()
+	class ACJS_CountPlayerUIActor* CountPlayerUIActor;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ACJS_CountPlayerUIActor> CountPlayerUIActorClass;
 };

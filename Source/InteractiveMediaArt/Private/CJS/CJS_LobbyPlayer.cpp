@@ -23,9 +23,10 @@
 #include "GameFramework/Actor.h"
 #include "Camera/CameraActor.h"
 #include "Components/WidgetComponent.h"
-
+#include "Net/UnrealNetwork.h"
 #include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "../IMA_GameModeBase.h"
 
 
 
@@ -117,30 +118,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 
-	if (HasAuthority())
-	{
-		// CountPlayerUIActorClass가 유효한지 확인하고 스폰
-		if (CountPlayerUIActorClass)
-		{
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = this;
-
-			// CountPlayerUIActorClass를 기반으로 스폰
-			CountPlayerUIActor = GetWorld()->SpawnActor<ACJS_CountPlayerUIActor>(CountPlayerUIActorClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-			if (CountPlayerUIActor)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("CountPlayerUIActor successfully spawned"));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("Failed to spawn CountPlayerUIActor"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("CountPlayerUIActorClass is not set!"));
-		}
-	}	
+	
 
 	// 작품1 체험 인원 확인 UI
 	//if (WBP_CountPlayerUI) // WBP_CountPlayerUI가 유효한지 먼저 확인
@@ -296,37 +274,36 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				if (button1 != nullptr)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button1 is OK"));
-					if (CountPlayerUIActor)
-					{
+	
 						UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is OK"));
-						CountPlayerUIActor->CountPlayerUI->SetVisibility(ESlateVisibility::Visible);
+						
 						//CountPlayerUIActor->AddPlayerNum();
 
-						// 클라이언트는 서버에 RPC를 요청
-						if (!HasAuthority())
-						{
-							UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::!HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
-							// 클라이언트에서 서버로 RPC 요청
-							CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
-						}
-						else
-						{
-							UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
-							// 서버는 직접 플레이어 수를 증가
-							CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
-						}
+						ServerRPC_StartInteraction();
 
-
-						if (CountPlayerUIActor->CurPlayer == 2)
+						//if (!HasAuthority())
+						//{
+						//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::!HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
+						//	// 클라이언트에서 서버로 RPC 요청
+						//}
+						//else
+						//{
+						//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
+						//	// 서버는 직접 플레이어 수를 증가
+						//	ServerRPC_StartInteraction();
+						//}
+						/*if (CountPlayerUIActor->CurPlayer == 2)
 						{
 							//MoveFirstArtPos(button1);
 							UE_LOG(LogTemp, Warning, TEXT("CountPlayerUI->CurPlayer == 2"));
 						}
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is not OK"));
-					}
+							if (CountPlayerUIActor)
+							{
+							}
+						else
+						{
+							UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is not OK"));
+						}*/
 
 					/*if (ArtPlayer == nullptr)
 					{
@@ -669,9 +646,14 @@ void ACJS_LobbyPlayer::DisableAudioCapture()
 	}
 }
 
-
-
-
+void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
+{
+	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
+	{
+		if(GM->CountPlayerUIActor) 
+			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
+	}
+}
 
 void ACJS_LobbyPlayer::ShowAimPoint()
 {

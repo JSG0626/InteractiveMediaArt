@@ -21,7 +21,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -100,13 +99,7 @@ public:
 	TSubclassOf <class UUserWidget> WBP_CountPlayerUI;
 	UPROPERTY()
 	class UCJS_CountPlayerUI* CountPlayerUI;*/
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class ACJS_CountPlayerUIActor> CountPlayerUIActorClass;
-	UPROPERTY()
-	class ACJS_CountPlayerUIActor* CountPlayerUIActor;
 	
-
 	// 작품 1의 플레이어
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
@@ -130,5 +123,6 @@ public:
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
-
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartInteraction();
 };

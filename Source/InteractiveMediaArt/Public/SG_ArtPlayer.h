@@ -69,20 +69,38 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	class ASG_ServerManager* ServerManager;
 
+	UPROPERTY(EditDefaultsOnly)
+	class ACJS_LobbyPlayer* Me;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class ASG_ServerManager> ServerManagerFactory;
 	TArray<FString> Landmarks;
 	TArray<FName> Bones;
 
 	void InitLandmarkField();
 	void InitBones();
-
+	void SpawnServerManager();
 	//TArray<TPair<float, float>> TargetJointLocations;
 	UPROPERTY()
 	TArray<FVector> TargetJointLocations;
-	void SetJointPosition();
+	void SetJointPosition(const TArray<FVector>& JointPosition);
 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FVector MeshScale = FVector(5, 5, 5);
 
-	void ActivateSmoke();
+	void ActiveComponents();
+	// --------------------------------------------RPC--------------------------------------------
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetJointPosition(const TArray<FVector>& JointPosition);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SetJointPosition(const TArray<FVector>& JointPosition);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ActiveComponents();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ActiveComponents();
+
 };

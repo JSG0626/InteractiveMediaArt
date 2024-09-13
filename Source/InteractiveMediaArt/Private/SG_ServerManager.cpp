@@ -13,6 +13,8 @@
 
 #include "SG_JsonUtilityLibrary.h"
 #include "SG_ArtPlayer.h"
+#include "../InteractiveMediaArt.h"
+#include "CJS/CJS_LobbyPlayer.h"
 // Sets default values
 const uint32 MIN_JSON_SIZE = 1500;
 const uint32 MAX_JSON_SIZE = 3000;
@@ -22,6 +24,8 @@ ASG_ServerManager::ASG_ServerManager()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PyDeafultPath = FPaths::ProjectContentDir() + TEXT("Scripts/");
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -29,15 +33,8 @@ void ASG_ServerManager::BeginPlay()
 {
 	Super::BeginPlay();
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString::Printf(TEXT("IPString: %s, Port: %d"), *ServerIP, ServerPort));
+
 	
-	RunPythonScript(PyConnectServer);
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, [&]()
-		{
-			CreateClient();
-		}, 1.0f, false);
-
-
 }
 
 void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -52,7 +49,6 @@ void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		FPlatformProcess::TerminateProc(ServerProcHandle);
 		FPlatformProcess::CloseProc(ServerProcHandle);
 	}
-
 }
 
 // Called every frame
@@ -60,15 +56,37 @@ void ASG_ServerManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//TestReceiveData();
-	if (ServerProcHandle.IsValid() && ClientSocket)
+
+	auto Player = GetOwner<ACJS_LobbyPlayer>();
+	if (Player && Player->IsLocallyControlled())
 	{
-		if (bReceiveSuccess) ReceiveData();
-		else ReceiveRestData();
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Blue, FString::Printf(TEXT("Player: %s"), *Player->GetName()) );
+		if (ServerProcHandle.IsValid() && ClientSocket)
+		{
+			PRINTLOG(TEXT("ServerProcHandle.IsValid() && ClientSocket"));
+			if (bReceiveSuccess) ReceiveData();
+			else ReceiveRestData();
 
-		uint32 pendingData = 0;
-		ClientSocket->HasPendingData(pendingData);
-		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("%u"), pendingData));
+			uint32 pendingData = 0;
+			ClientSocket->HasPendingData(pendingData);
+			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("%u"), pendingData));
+		}
+	}	
+}
 
+void ASG_ServerManager::Active()
+{
+	PRINTLOG(TEXT("Active"));
+	auto* Player = GetOwner<ACJS_LobbyPlayer>();
+	if (Player && Player->IsLocallyControlled())
+	{
+		PRINTLOG(TEXT("Player && Player->IsLocallyControlled()"));
+		RunPythonScript(PyConnectServer);
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+			{
+				CreateClient();
+			}, 1.0f, false);
 	}
 }
 
@@ -77,14 +95,15 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 	FString scriptPath = PyDeafultPath + Path;
 	bool bPythonExe = FPaths::FileExists(pythonExePath);
 	bool bScript = FPaths::FileExists(scriptPath);
+	bool bPythonWindowHidden = false;
 	if (bPythonExe && bScript)
 	{
 		FString params = FString::Printf(TEXT("\"%s\""), *scriptPath);
 		ServerProcHandle = FPlatformProcess::CreateProc(*pythonExePath,
 			*params,
-			true,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
-			true,
-			true,
+			bPythonWindowHidden,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
+			bPythonWindowHidden,
+			bPythonWindowHidden,
 			&ServerPID,
 			0,
 			nullptr,
@@ -131,7 +150,7 @@ void ASG_ServerManager::CreateClient()
 	if (bIsConnect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *connectionStr);
-		Me->ActivateSmoke();
+		//Me->ActiveComponents();
 
 	}
 	else
@@ -207,7 +226,8 @@ void ASG_ServerManager::ReceiveData()
 			//UE_LOG(LogTemp, Warning, TEXT("DataLength: %u"), DataLength);
 			if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me, Me->Landmarks, Me->TargetJointLocations))
 			{
-				Me->SetJointPosition();
+				Me->SetJointPosition(Me->TargetJointLocations);
+				Me->TargetJointLocations.Empty();
 
 			}
 			return;
@@ -253,7 +273,8 @@ void ASG_ServerManager::ReceiveRestData()
 		//UE_LOG(LogTemp, Warning, TEXT("CurDataLength == TargetDataLength"));
 		if (USG_JsonUtilityLibrary::MediaPipeJsonParse(ReceivedJson, Me, Me->Landmarks, Me->TargetJointLocations))
 		{
-			Me->SetJointPosition();
+			Me->SetJointPosition(Me->TargetJointLocations);
+			Me->TargetJointLocations.Empty();
 		}
 		ReceivedJson = "";
 		CurDataLength = 0;

@@ -7,7 +7,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "SG_ServerManager.h"
 #include "Components/SceneComponent.h"
-
+#include "CJS/CJS_LobbyPlayer.h"
+#include <InteractiveMediaArt/InteractiveMediaArt.h>
 // Sets default values
 ASG_ArtPlayer::ASG_ArtPlayer()
 {
@@ -26,7 +27,6 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 		PoseableMeshComp->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 		PoseableMeshComp->SetVisibility(false);
 	}
-
 
 	SmokeNiagaraOnHeadComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnHeadComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
@@ -53,6 +53,8 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 	SmokeNiagaraOnHeadComp->bAutoActivate = false;
 	SmokeNiagaraOnLHandComp->bAutoActivate = false;
 	SmokeNiagaraOnRHandComp->bAutoActivate = false;
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -66,22 +68,21 @@ void ASG_ArtPlayer::BeginPlay()
 	InitLandmarkField();
 	InitBones();
 
-	ServerManager = GetWorld()->SpawnActor<ASG_ServerManager>(ASG_ServerManager::StaticClass());
-
-	check(ServerManager);
-	if (nullptr == ServerManager)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%hs is nullptr"), GET_NAME(ServerManager));
-	}
-
-	ServerManager->Me = this;
+	FTimerHandle handle;
+	GetWorldTimerManager().SetTimer(handle, [&]()
+		{
+			ActiveComponents();
+		}, 2.0f, false);
 }
 
 void ASG_ArtPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	ServerManager->Destroy();
+	if (nullptr != ServerManager)
+	{
+		ServerManager->Destroy();
+	}
 }
 
 // Called every frame
@@ -94,7 +95,6 @@ void ASG_ArtPlayer::Tick(float DeltaTime)
 
 void ASG_ArtPlayer::InitLandmarkField()
 {
-
 	Landmarks.Add(TEXT("NOSE"));
 	Landmarks.Add(TEXT("LEFT_SHOULDER"));
 	Landmarks.Add(TEXT("RIGHT_SHOULDER"));
@@ -147,19 +147,57 @@ void ASG_ArtPlayer::InitBones()
 	Bones.Add(TEXT("MyBoneEMPTY"));
 }
 
-void ASG_ArtPlayer::SetJointPosition()
+void ASG_ArtPlayer::SpawnServerManager()
+{
+	check(ServerManagerFactory); if (nullptr == ServerManagerFactory) return;
+
+	PRINTLOG(TEXT("SpawnManager"));
+	ServerManager = GetWorld()->SpawnActor<ASG_ServerManager>(ServerManagerFactory);
+	if (nullptr == ServerManager)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%hs is nullptr"), GET_NAME(ServerManager));
+		return;
+	}
+	ServerManager->SetOwner(GetOwner());
+	ServerManager->Me = this;
+
+	ServerManager->Active();
+	/*if (Me->IsLocallyControlled())
+	{
+
+	}*/
+}
+
+void ASG_ArtPlayer::SetJointPosition(const TArray<FVector>& JointPosition)
+{
+	PRINTLOG(TEXT("SetJointPosition"));
+	ServerRPC_SetJointPosition(JointPosition);
+}
+
+void ASG_ArtPlayer::ActiveComponents()
+{
+	ServerRPC_ActiveComponents();
+}
+
+void ASG_ArtPlayer::ServerRPC_SetJointPosition_Implementation(const TArray<FVector>& JointPosition)
+{
+	PRINTLOG(TEXT("ServerRPC_SetJointPosition_Implementation"));
+	MulticastRPC_SetJointPosition(JointPosition);
+}
+
+void ASG_ArtPlayer::MulticastRPC_SetJointPosition_Implementation(const TArray<FVector>& JointPosition)
 {
 	check(PoseableMeshComp); if (nullptr == PoseableMeshComp) return;
-
+	PRINTLOG(TEXT("MulticastRPC_SetJointPosition_Implementation"));
 	FVector CurLocation = GetActorLocation();
 	CurLocation.Z += 500;
-	for (int32 i = 0; i < TargetJointLocations.Num(); i++)
+	for (int32 i = 0; i < JointPosition.Num(); i++)
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s %s"), *Bones[i].ToString(), *Landmarks[i]));
 
-		float x = TargetJointLocations[i].X * MeshScale.X;
+		float x = JointPosition[i].X * MeshScale.X;
 		//float y = TargetJointLocations[i].Y * MeshScale.Y;
-		float z = TargetJointLocations[i].Z * MeshScale.Z;
+		float z = JointPosition[i].Z * MeshScale.Z;
 
 		// 관절의 본을 가져옵니다.
 		FTransform JointTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(Bones[i]));
@@ -172,24 +210,29 @@ void ASG_ArtPlayer::SetJointPosition()
 		PoseableMeshComp->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
 	}
 
-	FVector spine_04_loc = CurLocation + (TargetJointLocations[ELandmark::LEFT_SHOULDER] + TargetJointLocations[ELandmark::RIGHT_SHOULDER] +
-		TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 4 * MeshScale;
+	FVector spine_04_loc = CurLocation + (JointPosition[ELandmark::LEFT_SHOULDER] + JointPosition[ELandmark::RIGHT_SHOULDER] +
+		JointPosition[ELandmark::LEFT_HIP] + JointPosition[ELandmark::RIGHT_HIP]) / 4 * MeshScale;
 	spine_04_loc.Y = CurLocation.Y;
 	PoseableMeshComp->SetBoneLocationByName(TEXT("spine_04"), spine_04_loc, EBoneSpaces::WorldSpace);
 
-	FVector pelvis_loc = CurLocation + (TargetJointLocations[ELandmark::LEFT_HIP] + TargetJointLocations[ELandmark::RIGHT_HIP]) / 2 * MeshScale;
+	FVector pelvis_loc = CurLocation + (JointPosition[ELandmark::LEFT_HIP] + JointPosition[ELandmark::RIGHT_HIP]) / 2 * MeshScale;
 	pelvis_loc.Y = CurLocation.Y;
 	PoseableMeshComp->SetBoneLocationByName(TEXT("pelvis"), pelvis_loc, EBoneSpaces::WorldSpace);
 
-	TargetJointLocations.Empty();
 	GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("curLocation: %s, pelvis_loc: %s"), *CurLocation.ToString(), *pelvis_loc.ToString()));
 }
 
-void ASG_ArtPlayer::ActivateSmoke()
+void ASG_ArtPlayer::ServerRPC_ActiveComponents_Implementation()
+{
+	MulticastRPC_ActiveComponents();
+}
+
+void ASG_ArtPlayer::MulticastRPC_ActiveComponents_Implementation()
 {
 	PoseableMeshComp->SetVisibility(true);
 	SmokeNiagaraOnHeadComp->Activate(true);
 	SmokeNiagaraOnLHandComp->Activate(true);
 	SmokeNiagaraOnRHandComp->Activate(true);
+	UE_LOG(LogTemp, Warning, TEXT("PoseableMeshComp->Setvisibility: %d"), PoseableMeshComp->GetVisibleFlag());
 }
 

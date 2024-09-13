@@ -44,7 +44,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Python")
 	FString PyConnectServer = TEXT("TCP_response.py");
-	//FString PyConnectServer = TEXT("TCP_response_copy.py");
 
 	class FSocket* ClientSocket;
 
@@ -54,6 +53,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Object");
 	class ASG_ArtPlayer* Me;
+
+	void Active();
 
 	UFUNCTION()
 	void RunPythonScript(const FString& Path);
@@ -78,4 +79,7 @@ public:
 	uint32 CurDataLength;
 	uint32 TargetDataLength = 0;
 	uint32 DataLength;
+
+	// --------------------------------------------Multiplay--------------------------------------------
+
 };

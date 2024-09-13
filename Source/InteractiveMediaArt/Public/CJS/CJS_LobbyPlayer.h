@@ -130,5 +130,5 @@ public:
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
-	
+
 };

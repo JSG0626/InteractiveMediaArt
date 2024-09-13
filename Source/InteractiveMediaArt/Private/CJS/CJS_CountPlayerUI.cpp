@@ -31,12 +31,12 @@ void UCJS_CountPlayerUI::ShowPlayerNum(int32 curNum, int32 maxNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::ShowPlayerNum()"));
 
-
 	if (Txt_CurNum)
 	{
 		FNumberFormattingOptions Opts;
 		Opts.SetMaximumFractionalDigits(0);
 		Txt_CurNum->SetText(FText::AsNumber(curNum, &Opts));
+		UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::ShowPlayerNum() - Txt_CurNum updated to %d"), curNum);
 	}
 	else
 	{
@@ -48,6 +48,7 @@ void UCJS_CountPlayerUI::ShowPlayerNum(int32 curNum, int32 maxNum)
 		FNumberFormattingOptions Opts;
 		Opts.SetMaximumFractionalDigits(0);
 		Txt_MaxNum->SetText(FText::AsNumber(maxNum, &Opts));
+		UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::ShowPlayerNum() - Txt_MaxNum updated to %d"), maxNum);
 	}
 	else
 	{

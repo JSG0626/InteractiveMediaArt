@@ -3,8 +3,10 @@
 
 #include "CJS/CJS_CountPlayerUIActor.h"
 #include "CJS/CJS_CountPlayerUI.h"
-#include "Net/UnrealNetwork.h"
 #include "CJS/CJS_LobbyPlayer.h"
+
+#include "Net/UnrealNetwork.h"
+#include "GameFramework/PlayerState.h"
 
 
 // Sets default values
@@ -62,7 +64,6 @@ void ACJS_CountPlayerUIActor::BeginPlay()
 	//	UE_LOG(LogTemp, Error, TEXT("Failed to set Owner. PlayerPawn is null."));
 	//}
 
-	
 }
 
 // Called every frame
@@ -83,30 +84,70 @@ void ACJS_CountPlayerUIActor::InitCountPlayerUiActor(int32 curPlayer)
 	UpdatePlayerNum(curPlayer);  // Start with 0 players
 }
 
-void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(int32 AddNum)
+
+//void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(int32 AddNum)
+void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPlayer* Player, int32 AddNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation()"));
 	//SetOwner(GetWorld()->GetFirstPlayerController()->GetPawn());
 
-	 // 클라이언트에게 동기화
-	// Update the player count on the server
-	CurPlayer += AddNum;
-	if (CurPlayer > MaxPlayer)
+	if (Player)
 	{
-		CurPlayer = MaxPlayer;
-	}
-	OnRep_CurPlayer();
-	// Sync the value with clients
-	//OnRep_CurPlayer();
+		// 플레이어 정보를 배열에 저장
+		ClickedPlayers.Add(Player);
 
+		// 플레이어 정보 로그 출력
+		FString PlayerName = Player->GetName();
+		FString UniqueNetIdStr = TEXT("Unknown");
+
+		if (APlayerController* PlayerController = Cast<APlayerController>(Player->GetController()))
+		{
+			if (PlayerController->PlayerState && PlayerController->PlayerState->GetUniqueId().IsValid())
+			{
+				UniqueNetIdStr = PlayerController->PlayerState->GetUniqueId()->ToString();
+			}
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Player added: Name = %s, UniqueNetId = %s"), *PlayerName, *UniqueNetIdStr);
+
+		// 플레이어 정보 로그 출력
+		/*FString PlayerName = Player->GetName();
+		APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
+		int32 PlayerID = PlayerController ? PlayerController->GetUniqueID() : -1;
+
+		UE_LOG(LogTemp, Warning, TEXT("Player added: Name = %s, PlayerID = %d"), *PlayerName, PlayerID);*/
+
+
+		// Update the player count on the server
+		CurPlayer += AddNum;
+		if (CurPlayer > MaxPlayer)
+		{
+			CurPlayer = MaxPlayer;
+		}
+		// Sync the value with clients
+		OnRep_CurPlayer();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ServerRPC_AddPlayerInfo_Implementation: Player is null"));
+	}
 	
+
+
+	// 최대 인원수에 도달했을 때 처리
+	if (CurPlayer == MaxPlayer)
+	{
+		StartInteractiveExperience();
+	}
+
+
 	//MulticastRPC_UpdatePlayerNum(CurPlayer);
 	/*if (HasAuthority())
 	{
 
 	}*/
 }
-bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(int32 AddNum)
+//bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(int32 AddNum)
+bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(ACJS_LobbyPlayer* Player, int32 AddNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate()"));
 	return true;  // 기본적으로 유효성 검사는 항상 true로 설정
@@ -125,44 +166,6 @@ void ACJS_CountPlayerUIActor::OnRep_CurPlayer()
 	UpdatePlayerNum(CurPlayer);
 }
 
-
-// Multicast 함수로 모든 클라이언트에 값 전달
-void ACJS_CountPlayerUIActor::MulticastRPC_UpdatePlayerNum_Implementation(int32 NewPlayerNum)
-{
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::MulticastRPC_UpdatePlayerNum_Implementation()"));
-
-	// 서버와 클라이언트를 구분하여 출력
-	if (HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("This is the server broadcasting the player number update."));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("This is a client receiving the updated player number."));
-	}
-
-	UpdatePlayerNum(NewPlayerNum);
-}
-
-
-void ACJS_CountPlayerUIActor::AddPlayerNum()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::AddPlayerNum()"));
-	SetCurPlayerNum(1);
-	//CountPlayerUI->ShowPlayerNum(CurPlayer, MaxPlayer);
-}
-int32 ACJS_CountPlayerUIActor::GetCurPlayerNum()
-{
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::GetCurPlayerNum()"));
-	return CurPlayer;
-}
-void ACJS_CountPlayerUIActor::SetCurPlayerNum(int32 addNum)
-{
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::SetCurPlayerNum()"));
-	CurPlayer += addNum;
-	ServerRPC_AddPlayerNum(CurPlayer);
-}
-
 void ACJS_CountPlayerUIActor::UpdatePlayerNum(int32 NewPlayerNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::UpdatePlayerNum()"));
@@ -171,6 +174,58 @@ void ACJS_CountPlayerUIActor::UpdatePlayerNum(int32 NewPlayerNum)
 		CountPlayerUI->ShowPlayerNum(NewPlayerNum, MaxPlayer);
 	}
 }
+
+void ACJS_CountPlayerUIActor::StartInteractiveExperience()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::StartInteractiveExperience()"));
+
+	for (ACJS_LobbyPlayer* Player : ClickedPlayers)
+	{
+		if (Player)
+		{
+			// 플레이어를 원하는 위치로 이동
+			//FVector NewLocation = /* 원하는 위치 */;
+			//Player->SetActorLocation(NewLocation);
+
+			// 플레이어 클래스를 변경하거나 필요한 처리를 수행
+			// 예를 들어, ArtPlayer로 변경
+			//Player->ChangeToArtPlayer();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("StartInteractiveExperience: Player is null"));
+		}
+	}
+
+	// 클릭한 플레이어 목록 초기화 전에 로그 출력
+	UE_LOG(LogTemp, Warning, TEXT("Before clearing ClickedPlayers:"));
+	UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers.Num() = %d"), ClickedPlayers.Num());
+	for (int32 i = 0; i < ClickedPlayers.Num(); ++i)
+	{
+		if (ClickedPlayers[i])
+		{
+			FString PlayerName = ClickedPlayers[i]->GetName();
+			UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers[%d]: %s"), i, *PlayerName);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers[%d]: null"), i);
+		}
+	}
+
+	// 클릭한 플레이어 목록 초기화
+	ClickedPlayers.Empty();
+	CurPlayer = 0;
+
+	// 클릭한 플레이어 목록 초기화 후에 로그 출력
+	UE_LOG(LogTemp, Warning, TEXT("After clearing ClickedPlayers:"));
+	UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers.Num() = %d"), ClickedPlayers.Num());
+
+
+	// 클라이언트 동기화
+	OnRep_CurPlayer();
+}
+
 
 
 // 네트워크 동기화 하는 부분
@@ -181,6 +236,50 @@ void ACJS_CountPlayerUIActor::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	// CurPlayer가 네트워크 동기화가 되도록 설정
 	DOREPLIFETIME(ACJS_CountPlayerUIActor, CurPlayer);
 }
+
+
+
+
+
+
+
+// Multicast 함수로 모든 클라이언트에 값 전달
+//void ACJS_CountPlayerUIActor::MulticastRPC_UpdatePlayerNum_Implementation(int32 NewPlayerNum)
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::MulticastRPC_UpdatePlayerNum_Implementation()"));
+//
+//	// 서버와 클라이언트를 구분하여 출력
+//	if (HasAuthority())
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("This is the server broadcasting the player number update."));
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("This is a client receiving the updated player number."));
+//	}
+//
+//	UpdatePlayerNum(NewPlayerNum);
+//}
+
+
+//void ACJS_CountPlayerUIActor::AddPlayerNum()
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::AddPlayerNum()"));
+//	SetCurPlayerNum(1);
+//	//CountPlayerUI->ShowPlayerNum(CurPlayer, MaxPlayer);
+//}
+//int32 ACJS_CountPlayerUIActor::GetCurPlayerNum()
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::GetCurPlayerNum()"));
+//	return CurPlayer;
+//}
+//void ACJS_CountPlayerUIActor::SetCurPlayerNum(int32 addNum)
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::SetCurPlayerNum()"));
+//	CurPlayer += addNum;
+//	ServerRPC_AddPlayerNum(CurPlayer);
+//}
+
 
 
 void ACJS_CountPlayerUIActor::PrintNetLog()

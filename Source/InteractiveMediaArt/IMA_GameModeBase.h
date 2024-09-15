@@ -21,6 +21,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	ACameraActor* SharedCamera;
 
+
+	// LobbyPlayer NetActor ----------------------------------------
 	UPROPERTY()
 	class ACJS_CountPlayerUIActor* CountPlayerUIActor;
 	

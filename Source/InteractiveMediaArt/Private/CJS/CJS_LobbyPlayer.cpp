@@ -651,7 +651,8 @@ void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
 	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
 	{
 		if(GM->CountPlayerUIActor) 
-			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
+			//GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
+			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);  // <-- 클릭한 플레이어 정보도 같이 보냄.
 	}
 }
 

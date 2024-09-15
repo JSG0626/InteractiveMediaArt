@@ -38,13 +38,13 @@ public:
 	//// Replicated function called when CurPlayer is updated
  //   UFUNCTION()
  //   void OnRep_CurPlayer();
-	UFUNCTION()
-	void AddPlayerNum();
+	//UFUNCTION()
+	//void AddPlayerNum();
 	//void SubPlayerNum();
 	//void InitCountPlayerUiActor();
 
-	int32 GetCurPlayerNum();
-	void SetCurPlayerNum(int32 addNum);
+	//int32 GetCurPlayerNum();
+	//void SetCurPlayerNum(int32 addNum);
 
 	//// RPC
 	//UFUNCTION(Server, Reliable)
@@ -66,17 +66,27 @@ public:
     TSubclassOf<class UCJS_CountPlayerUI> WBP_CountPlayerUI;
     UCJS_CountPlayerUI* CountPlayerUI;
 
+	UPROPERTY()
+	TArray<ACJS_LobbyPlayer*> ClickedPlayers;
+
     // Replicated function called when CurPlayer is updated
     UFUNCTION()
     void OnRep_CurPlayer();
 
     // Function to add player count (only callable on the server)
     UFUNCTION(Server, Reliable, WithValidation)
-    void ServerRPC_AddPlayerNum(int32 AddNum);
-    bool ServerRPC_AddPlayerNum_Validate(int32 AddNum);
+    void ServerRPC_AddPlayerNum(ACJS_LobbyPlayer* Player, int32 AddNum);
+	//void ServerRPC_AddPlayerNum(int32 AddNum);
+    //bool ServerRPC_AddPlayerNum_Validate(int32 AddNum);
+    bool ServerRPC_AddPlayerNum_Validate(ACJS_LobbyPlayer* Player, int32 AddNum);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_UpdatePlayerNum(int32 NewPlayerNum);
+	// Function to add player Info
+	//UFUNCTION(Server, Reliable)
+    //void ServerRPC_AddPlayerInfo(ACJS_LobbyPlayer* Player);
+
+
+	//UFUNCTION(NetMulticast, Reliable)
+	//void MulticastRPC_UpdatePlayerNum(int32 NewPlayerNum);
 
     // Initialize the UI Actor
     void InitCountPlayerUiActor(int32 curPlayer);
@@ -91,4 +101,5 @@ public:
 private:
     // Function to update CurPlayer locally
     void UpdatePlayerNum(int32 NewPlayerNum);
+	void StartInteractiveExperience();
 };

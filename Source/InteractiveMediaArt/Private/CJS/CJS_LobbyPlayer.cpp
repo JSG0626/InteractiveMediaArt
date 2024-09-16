@@ -4,8 +4,13 @@
 #include "CJS/CJS_LobbyPlayer.h"
 #include "CJS/CJS_PopUpBnt.h"
 #include "CJS/CJS_AIChatbotBnt.h"
+#include "CJS/CJS_MovePosBnt.h"
+#include "CJS/CJS_CountPlayerUIActor.h"
+#include "CJS/CJS_CountPlayerUI.h"
 
 #include "ButtonExp.h"
+#include "AimPoint.h"
+#include "EscapeUI.h"
 #include "SG_ArtPlayer.h"
 
 #include "Components/CapsuleComponent.h"
@@ -18,11 +23,11 @@
 #include "GameFramework/Actor.h"
 #include "Camera/CameraActor.h"
 #include "Components/WidgetComponent.h"
-#include "CJS/CJS_MovePosBnt.h"
-#include "AimPoint.h"
-#include "EscapeUI.h"
+#include "Net/UnrealNetwork.h"
 #include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "../IMA_GameModeBase.h"
+
 
 
 // Sets default values
@@ -85,7 +90,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 		}
 	}
 
-	//AimPointUI 위젯 생성
+	// AimPointUI 위젯 생성
 	if (WBP_aimpoint)  // WBP_aimpoint가 올바르게 할당되어 있는지 확인
 	{
 		AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
@@ -105,12 +110,38 @@ void ACJS_LobbyPlayer::BeginPlay()
 		//UE_LOG(LogTemp, Error, TEXT("WBP_aimpoint is not assigned! Please assign it in the Blueprint."));
 	}
 
+	// WBP_EscapeUI 위젯 생성
 	if (WBP_EscapeUI)
 	{
 		EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
 		EscapeUI->AddToViewport();
 		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	
+
+	// 작품1 체험 인원 확인 UI
+	//if (WBP_CountPlayerUI) // WBP_CountPlayerUI가 유효한지 먼저 확인
+	//{
+	//	CountPlayerUI = CreateWidget<UCJS_CountPlayerUI>(GetWorld(), WBP_CountPlayerUI);
+	//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::BeginPlay()::WBP_CountPlayerUI created"))
+
+	//	if (CountPlayerUI) // CreateWidget으로 올바르게 생성되었는지 확인
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::BeginPlay()::CountPlayerUI created"))
+	//		CountPlayerUI->AddToViewport();
+	//		CountPlayerUI->SetVisibility(ESlateVisibility::Hidden);
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Error, TEXT("CountPlayerUI could not be created!"));
+	//	}
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("WBP_CountPlayerUI is not set!"));
+	//}
+
 
 	// AudioCapture 설정
 	FTransform VoiceMeterTransform1 = FTransform(FRotator(0, 0, 0), FVector(-5705, -1980, 670), FVector(1, 1, 1));
@@ -119,18 +150,18 @@ void ACJS_LobbyPlayer::BeginPlay()
 	VoiceMeter2 = GetWorld()->SpawnActor<AActor>(BP_VoiceMeterClass, VoiceMeterTransform2);
 	if (VoiceMeter1 && VoiceMeter2)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("VoiceMeter Spawn"));
+		//UE_LOG(LogTemp, Warning, TEXT("VoiceMeter Spawn"));
 
 		// VoiceMeter1의 Niagara 컴포넌트 크기 조정
 		UNiagaraComponent* NiagaraComponent1 = VoiceMeter1->FindComponentByClass<UNiagaraComponent>();
 		if (NiagaraComponent1)
 		{
 			NiagaraComponent1->SetWorldScale3D(FVector(3.0f));  // 스케일을 3으로 설정
-			UE_LOG(LogTemp, Warning, TEXT("VoiceMeter1 Niagara Scale Set to 3"));
+			//UE_LOG(LogTemp, Warning, TEXT("VoiceMeter1 Niagara Scale Set to 3"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent1 in VoiceMeter1"));
+			//UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent1 in VoiceMeter1"));
 		}
 
 		// VoiceMeter2의 Niagara 컴포넌트 크기 조정
@@ -138,18 +169,18 @@ void ACJS_LobbyPlayer::BeginPlay()
 		if (NiagaraComponent2)
 		{
 			NiagaraComponent2->SetWorldScale3D(FVector(3.0f));  // 스케일을 3으로 설정
-			UE_LOG(LogTemp, Warning, TEXT("VoiceMeter2 Niagara Scale Set to 3"));
+			//UE_LOG(LogTemp, Warning, TEXT("VoiceMeter2 Niagara Scale Set to 3"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter2"));
+			//UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter2"));
 		}
 
 		DisableAudioCapture();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
+		//UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
 		return;
 	}
 }
@@ -234,19 +265,52 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
 			if (HitActorName.Contains("BNT1_1"))
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
+				UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
 				AButtonExp* button1 = Cast<AButtonExp>(HitActor);
 				if (button1 != nullptr)
 				{
-					if (nullptr == ArtPlayer)
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button1 is OK"));
+	
+						UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is OK"));
+						
+						//CountPlayerUIActor->AddPlayerNum();
+
+						ServerRPC_StartInteraction();
+
+						//if (!HasAuthority())
+						//{
+						//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::!HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
+						//	// 클라이언트에서 서버로 RPC 요청
+						//}
+						//else
+						//{
+						//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
+						//	// 서버는 직접 플레이어 수를 증가
+						//	ServerRPC_StartInteraction();
+						//}
+						/*if (CountPlayerUIActor->CurPlayer == 2)
+						{
+							//MoveFirstArtPos(button1);
+							UE_LOG(LogTemp, Warning, TEXT("CountPlayerUI->CurPlayer == 2"));
+						}
+							if (CountPlayerUIActor)
+							{
+							}
+						else
+						{
+							UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is not OK"));
+						}*/
+
+					/*if (ArtPlayer == nullptr)
 					{
 						FActorSpawnParameters params;
 						params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button1->TargetTransform, params);
+
 						pc->SetViewTarget(Cast<AActor>(button1->TargetCamera));
 
 						FInputModeUIOnly UIOnlyMode;
@@ -254,7 +318,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 						HideAimPoint();
 						ShowMouseCursor();
 						ShowEscapeUI();
-					}
+					}*/
 				}
 			}
 			else if (HitActorName.Contains("BNT2_1"))
@@ -320,6 +384,41 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	}
 }
 
+//void ACJS_LobbyPlayer::MoveFirstArtPos(AButtonExp* button1)
+//{
+//	if (!ArtPlayer)  // 이렇게 간결하게 nullptr 체크
+//	{
+//		FActorSpawnParameters params;
+//		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+//
+//		// ArtPlayer를 스폰할 때 올바르게 TSubclassOf를 사용하여 스폰
+//		ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button1->TargetTransform, params);
+//
+//		// pc(PlayerController) 관련 처리
+//		if (pc)
+//		{
+//			pc->SetViewTarget(Cast<AActor>(button1->TargetCamera));
+//
+//			FInputModeUIOnly UIOnlyMode;
+//			pc->SetInputMode(UIOnlyMode);
+//
+//			// 비정적 멤버 함수 호출
+//			this->HideAimPoint();
+//			this->ShowMouseCursor();
+//			this->ShowEscapeUI();
+//		}
+//		else
+//		{
+//			UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
+//		}
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("ArtPlayer is already spawned"));
+//	}
+//}
+
+
 void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 {
 	FVector Start = FollowCamera->GetComponentLocation();
@@ -363,7 +462,7 @@ FString ACJS_LobbyPlayer::GetProjectSavedDir()
 	FString SavedDir = FPaths::ProjectSavedDir();
 
 	// 로그 출력
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::GetProjectSavedDir()::Project Saved Directory: %s"), *SavedDir);
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::GetProjectSavedDir()::Project Saved Directory: %s"), *SavedDir);
 
 	return SavedDir;
 }
@@ -466,20 +565,20 @@ void ACJS_LobbyPlayer::ExitArt()
 
 void ACJS_LobbyPlayer::EnableAudioCapture()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EnableAudioCapture()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EnableAudioCapture()"));
 	if (BP_VoiceMeterClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeterClass is valid"));
+		//UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeterClass is valid"));
 
 		if (VoiceMeter1 && VoiceMeter2)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeter instance is valid"));
+			//UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeter instance is valid"));
 
 			UAudioCaptureComponent* AudioCapture1 = VoiceMeter1->FindComponentByClass<UAudioCaptureComponent>();
 			UAudioCaptureComponent* AudioCapture2 = VoiceMeter2->FindComponentByClass<UAudioCaptureComponent>();
 			if (AudioCapture1 && AudioCapture2)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("AudioCapture component found"));
+				//UE_LOG(LogTemp, Warning, TEXT("AudioCapture component found"));
 
 				// AutoActivate 활성화
 				AudioCapture1->bAutoActivate = true;
@@ -488,39 +587,39 @@ void ACJS_LobbyPlayer::EnableAudioCapture()
 				// 즉시 활성화
 				AudioCapture1->Activate();
 				AudioCapture2->Activate();
-				UE_LOG(LogTemp, Warning, TEXT("AudioCapture has been activated"));
+				//UE_LOG(LogTemp, Warning, TEXT("AudioCapture has been activated"));
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("AudioCapture component not found"));
+				//UE_LOG(LogTemp, Error, TEXT("AudioCapture component not found"));
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeter instance is null"));
+			//UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeter instance is null"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
+		//UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
 	}
 }
 void ACJS_LobbyPlayer::DisableAudioCapture()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::DisableAudioCapture()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::DisableAudioCapture()"));
 	if (BP_VoiceMeterClass)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeterClass is valid"));
+		//UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeterClass is valid"));
 
 		if (VoiceMeter1 && VoiceMeter2)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeter instance is valid"));
+			//UE_LOG(LogTemp, Warning, TEXT("BP_VoiceMeter instance is valid"));
 
 			UAudioCaptureComponent* AudioCapture1 = VoiceMeter1->FindComponentByClass<UAudioCaptureComponent>();
 			UAudioCaptureComponent* AudioCapture2 = VoiceMeter2->FindComponentByClass<UAudioCaptureComponent>();
 			if (AudioCapture1 && AudioCapture2)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("AudioCapture component found"));
+				//UE_LOG(LogTemp, Warning, TEXT("AudioCapture component found"));
 
 				// AutoActivate 비활성화
 				AudioCapture1->bAutoActivate = false;
@@ -529,21 +628,31 @@ void ACJS_LobbyPlayer::DisableAudioCapture()
 				// 즉시 비활성화
 				AudioCapture1->Deactivate();
 				AudioCapture2->Deactivate();
-				UE_LOG(LogTemp, Warning, TEXT("AudioCapture has been deactivated"));
+				//UE_LOG(LogTemp, Warning, TEXT("AudioCapture has been deactivated"));
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("AudioCapture component not found"));
+				//UE_LOG(LogTemp, Error, TEXT("AudioCapture component not found"));
 			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeter instance is null"));
+			//UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeter instance is null"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
+		//UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
+	}
+}
+
+void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
+{
+	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
+	{
+		if(GM->CountPlayerUIActor) 
+			//GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
+			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);  // <-- 클릭한 플레이어 정보도 같이 보냄.
 	}
 }
 

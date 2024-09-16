@@ -21,7 +21,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -94,6 +93,14 @@ public:
 	void OnExitBnt();
 	bool bExitBnt2_1;
 
+
+	// 작품 1의 체험 인원 표시 UI
+	/*UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_CountPlayerUI;
+	UPROPERTY()
+	class UCJS_CountPlayerUI* CountPlayerUI;*/
+	
+	// 작품 1의 플레이어
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
 	UPROPERTY()
@@ -102,6 +109,9 @@ public:
 	UPROPERTY()
 	class APlayerController* pc;
 
+	//void MoveFirstArtPos(AButtonExp* button1);
+
+	// 작품 2의 요소
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()
@@ -113,5 +123,6 @@ public:
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
-	
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartInteraction();
 };

@@ -22,5 +22,8 @@ public:
 
 	UFUNCTION()
 	void CR_OnClickCreateSession();
+	
+	UFUNCTION()
+	void OnSessionSearchComplete();
 
 };

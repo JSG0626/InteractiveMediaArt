@@ -34,19 +34,25 @@ public:
     void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
-	FVector TargetLocation;
-	FRotator TargetRotation;
-	FTransform TargetTransform;
+	//FVector TargetLocation;
+	//FRotator TargetRotation;
+	FTransform Art1_Single_TargetTransform;
+	FTransform Art1_Multi1_TargetTransform;
+	FTransform Art1_Multi2_TargetTransform;
+
+	FTransform Art2_TargetTransform;
 
 	UPROPERTY(EditDefaultsOnly)
-	class ACameraActor* TargetCamera;
+	class ACameraActor* Art1_Single_TargetCamera;
+	UPROPERTY(EditDefaultsOnly)
+	class ACameraActor* Art1_Multi_TargetCamera;
+	UPROPERTY(EditDefaultsOnly)
+	class ACameraActor* Art2_TargetCamera;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class ACameraActor> cameraFactory;
 
-	/*UPROPERTY(EditDefaultsOnly)
-	TSubclassOf <class UUserWidget> WBP_aimpoint;
-	UPROPERTY()
-	class UAimPoint* AimpointUI;*/
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class ASG_ArtPlayer> ArtPlayerFactory;
 
 };

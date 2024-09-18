@@ -267,51 +267,22 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			FString HitActorName = HitActor->GetName();
 			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
-			if (HitActorName.Contains("BNT1_1"))
+			if (HitActorName.Contains("BTN1_1_Single"))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BNT1_1 Clicked"));
-				AButtonExp* button1 = Cast<AButtonExp>(HitActor);
-				if (button1 != nullptr)
+				UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Single Clicked"));
+				ACJS_MovePosBnt* btn_SinglePlay = Cast<ACJS_MovePosBnt>(HitActor);
+				if (btn_SinglePlay != nullptr)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button1 is OK"));
-	
-						UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is OK"));
-						
-						//CountPlayerUIActor->AddPlayerNum();
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_SinglePlay is OK"));
 
-						ServerRPC_StartInteraction();
-
-						//if (!HasAuthority())
-						//{
-						//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::!HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
-						//	// 클라이언트에서 서버로 RPC 요청
-						//}
-						//else
-						//{
-						//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::HasAuthority() CountPlayerUIActor->ServerRPC_AddPlayerNum(1);"));
-						//	// 서버는 직접 플레이어 수를 증가
-						//	ServerRPC_StartInteraction();
-						//}
-						/*if (CountPlayerUIActor->CurPlayer == 2)
-						{
-							//MoveFirstArtPos(button1);
-							UE_LOG(LogTemp, Warning, TEXT("CountPlayerUI->CurPlayer == 2"));
-						}
-							if (CountPlayerUIActor)
-							{
-							}
-						else
-						{
-							UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is not OK"));
-						}*/
-
+					MoveToArtPos(btn_SinglePlay);
 					/*if (ArtPlayer == nullptr)
 					{
 						FActorSpawnParameters params;
 						params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button1->TargetTransform, params);
+						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, btn_SinglePlay->TargetTransform, params);
 
-						pc->SetViewTarget(Cast<AActor>(button1->TargetCamera));
+						pc->SetViewTarget(Cast<AActor>(btn_SinglePlay->TargetCamera));
 
 						FInputModeUIOnly UIOnlyMode;
 						pc->SetInputMode(UIOnlyMode);
@@ -321,6 +292,25 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					}*/
 				}
 			}
+			if (HitActorName.Contains("BTN1_1_Multi"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
+				ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(HitActor);
+				if (btn_MultiPlay != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
+
+					ServerRPC_StartInteraction();
+
+					//if (CountPlayerUIActor->CurPlayer == 2;)
+					//{
+					//}
+					//else
+					//{
+					//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is not OK"));
+					//}
+				}
+			}
 			else if (HitActorName.Contains("BNT2_1"))
 			{
 				bExitBnt2_1 = true;
@@ -328,7 +318,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
 				{
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->TargetCamera));
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->Art2_TargetCamera));
 					FInputModeUIOnly UIOnlyMode;
 					pc->SetInputMode(UIOnlyMode);
 
@@ -384,39 +374,54 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	}
 }
 
-//void ACJS_LobbyPlayer::MoveFirstArtPos(AButtonExp* button1)
-//{
-//	if (!ArtPlayer)  // 이렇게 간결하게 nullptr 체크
-//	{
-//		FActorSpawnParameters params;
-//		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-//
-//		// ArtPlayer를 스폰할 때 올바르게 TSubclassOf를 사용하여 스폰
-//		ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button1->TargetTransform, params);
-//
-//		// pc(PlayerController) 관련 처리
-//		if (pc)
-//		{
-//			pc->SetViewTarget(Cast<AActor>(button1->TargetCamera));
-//
-//			FInputModeUIOnly UIOnlyMode;
-//			pc->SetInputMode(UIOnlyMode);
-//
-//			// 비정적 멤버 함수 호출
-//			this->HideAimPoint();
-//			this->ShowMouseCursor();
-//			this->ShowEscapeUI();
-//		}
-//		else
-//		{
-//			UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
-//		}
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("ArtPlayer is already spawned"));
-//	}
-//}
+void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
+{
+	if (button == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MoveToArtPos: button is null"));
+		return;
+	}
+
+	if (ArtPlayer == nullptr)
+	{
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		// ArtPlayer 생성
+		ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button->Art1_Single_TargetTransform, params);
+
+		if (ArtPlayer)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ArtPlayer spawned successfully"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to spawn ArtPlayer"));
+			return;
+		}
+
+		// 플레이어 컨트롤러 가져오기
+		//APlayerController* pc = Cast<APlayerController>(GetController());
+		if (pc && button->Art1_Single_TargetCamera)
+		{
+			// 카메라 뷰 변경
+			pc->SetViewTarget(Cast<AActor>(button->Art1_Single_TargetCamera));
+
+			// 입력 모드 변경
+			FInputModeUIOnly UIOnlyMode;
+			pc->SetInputMode(UIOnlyMode);
+
+			// 마우스 커서 및 에임 포인트 처리
+			HideAimPoint();
+			ShowMouseCursor();
+			ShowEscapeUI();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("MoveToArtPos: PlayerController or TargetCamera is null"));
+		}
+	}
+}
 
 
 void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
@@ -665,49 +670,4 @@ void ACJS_LobbyPlayer::HideAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 }
-
-
-
-//void ACJS_LobbyPlayer::AIChatbot(ACJS_AIChatbotBnt* buttonexp)
-//{
-//	// AI 챗봇 동작
-//	// 블루프린트의 ActivateAIChatbot 함수 호출
-//	UFunction* AIChatbotFunction = buttonexp->FindFunction(FName("ActivateAIChatbot"));
-//	if (AIChatbotFunction)
-//	{
-//		buttonexp->ProcessEvent(AIChatbotFunction, nullptr);
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateAIChatbot function"));
-//	}
-//}
-//void ACJS_LobbyPlayer::VoiceRecord(ACJS_AIChatbotBnt* buttonexp)
-//{
-//	// 블루프린트의 ActivateVoiceRecord 함수 호출 (음성 저장)
-//	UFunction* StopRecordingFunction = buttonexp->FindFunction(FName("ActivateVoiceRecord"));
-//	if (StopRecordingFunction)
-//	{
-//		buttonexp->ProcessEvent(StopRecordingFunction, nullptr);
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Error, TEXT("Could not find ActivateVoiceRecord function"));
-//	}
-//}
-//void ACJS_LobbyPlayer::HideMouseCursor()
-//{
-//	if (pc)
-//	{
-//		// 마우스 커서를 숨기고 카메라 회전을 활성화
-//		pc->bShowMouseCursor = false;
-//		pc->bEnableMouseOverEvents = true;
-//		FInputModeGameOnly InputMode;
-//		pc->SetInputMode(InputMode);
-//
-//		// 카메라 회전 활성화
-//		bUseControllerRotationYaw = true;
-//		GetCharacterMovement()->bOrientRotationToMovement = false;  // 이동할 때 플레이어의 방향을 카메라의 회전에 맞춤
-//	}
-//}
 

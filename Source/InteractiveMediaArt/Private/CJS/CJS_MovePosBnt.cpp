@@ -7,6 +7,7 @@
 #include "Camera/CameraActor.h"
 #include "AimPoint.h"
 #include "CJS/CJS_LobbyPlayer.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 ACJS_MovePosBnt::ACJS_MovePosBnt()
@@ -45,12 +46,25 @@ ACJS_MovePosBnt::ACJS_MovePosBnt()
 void ACJS_MovePosBnt::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(-5710, -1470, 850), FRotator(0, -90, 0));
+		
+	Art1_Single_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2150, 840), FRotator(0, -90, 0));   // <--- 수정 필요
+	auto* TargetCameraComp = Art1_Single_TargetCamera->GetCameraComponent();
+	TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+	TargetCameraComp->OrthoWidth = 3200.f;
+	Art1_Single_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1897, 3652, 210));   // (X=-1896.847102,Y=-3651.908160,Z=210.000006)
 
-	TargetLocation = TargetCamera->GetActorLocation();
-	TargetRotation = TargetCamera->GetActorRotation();
-	TargetTransform = FTransform(TargetRotation, TargetLocation);
+
+	Art1_Multi_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2150, 840), FRotator(0, -90, 0));    
+	auto* TargetCameraComp = Art1_Multi_TargetCamera->GetCameraComponent();
+	TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+	TargetCameraComp->OrthoWidth = 3200.f;
+	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 300));  // 왼쪽  
+	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3217, 3580, 210));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
+	
+	Art2_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(-5710, -1470, 850), FRotator(0, -90, 0));
+	FVector targetLocation = Art2_TargetCamera->GetActorLocation();
+	FRotator targetRotation = Art2_TargetCamera->GetActorRotation();
+	Art2_TargetTransform = FTransform(targetRotation, targetLocation);
 }
 
 // Called every frame
@@ -69,19 +83,6 @@ void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 	{
 		Player->ShowAimPoint();
 	}
-	/*
-	if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
-		{
-		}
-
-		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
-		{
-			AimpointUI->AddToViewport();
-		}
-	}*/
 }
 
 void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -92,17 +93,5 @@ void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAc
 	{
 		Player->HideAimPoint();
 	}
-	/*if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
-		{
-		}
-
-		if (AimpointUI != nullptr && WBP_aimpoint != nullptr)
-		{
-			AimpointUI->RemoveFromParent();
-		}
-	}*/
 }
 

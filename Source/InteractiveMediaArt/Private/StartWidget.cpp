@@ -13,7 +13,7 @@ void UStartWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	CR_Btn_CreateSession->OnClicked.AddDynamic(this, &UStartWidget::CR_OnClickCreateSession);
-	//CR_Btn_JoinSession->OnClicked.AddDynamic(this, &UStartWidget::CR_OnClickJoinSession);
+	CR_Btn_JoinSession->OnClicked.AddDynamic(this, &UStartWidget::CR_OnClickJoinSession);
 }
 
 void UStartWidget::CR_OnClickCreateSession()

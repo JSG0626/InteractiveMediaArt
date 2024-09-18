@@ -110,6 +110,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartInteraction();
 
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_MultiplaySetting();
+
 	
 
 

@@ -7,6 +7,8 @@
 
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/PlayerState.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 
 
 // Sets default values
@@ -64,6 +66,17 @@ void ACJS_CountPlayerUIActor::BeginPlay()
 	//	UE_LOG(LogTemp, Error, TEXT("Failed to set Owner. PlayerPawn is null."));
 	//}
 
+
+	Art1_Multi_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2090, 750), FRotator(0, -90, 0));    // (X=2470.000000,Y=-2090.000000,Z=750.000000)
+	auto* Art1_Multi_TargetCameraComp = Art1_Multi_TargetCamera->GetCameraComponent();
+	Art1_Multi_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+	Art1_Multi_TargetCameraComp->OrthoWidth = 3200.f;
+	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 300));  // 왼쪽  
+	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3217, 3580, 300));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
+
+	// 이동할 위치와 카메라 설정
+	TargetTransforms.Add(Art1_Multi1_TargetTransform);
+	TargetTransforms.Add(Art1_Multi2_TargetTransform);
 }
 
 // Called every frame
@@ -131,20 +144,11 @@ void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPl
 		UE_LOG(LogTemp, Error, TEXT("ServerRPC_AddPlayerInfo_Implementation: Player is null"));
 	}
 	
-
-
 	// 최대 인원수에 도달했을 때 처리
 	if (CurPlayer == MaxPlayer)
 	{
 		StartInteractiveExperience();
 	}
-
-
-	//MulticastRPC_UpdatePlayerNum(CurPlayer);
-	/*if (HasAuthority())
-	{
-
-	}*/
 }
 //bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(int32 AddNum)
 bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(ACJS_LobbyPlayer* Player, int32 AddNum)
@@ -152,6 +156,7 @@ bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(ACJS_LobbyPlayer* 
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate()"));
 	return true;  // 기본적으로 유효성 검사는 항상 true로 설정
 }
+
 
 void ACJS_CountPlayerUIActor::OnRep_CurPlayer()
 {
@@ -165,7 +170,6 @@ void ACJS_CountPlayerUIActor::OnRep_CurPlayer()
 
 	UpdatePlayerNum(CurPlayer);
 }
-
 void ACJS_CountPlayerUIActor::UpdatePlayerNum(int32 NewPlayerNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::UpdatePlayerNum()"));
@@ -175,21 +179,37 @@ void ACJS_CountPlayerUIActor::UpdatePlayerNum(int32 NewPlayerNum)
 	}
 }
 
+
 void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::StartInteractiveExperience()"));
 
-	for (ACJS_LobbyPlayer* Player : ClickedPlayers)
+	// 플레이어 수 확인
+	if (ClickedPlayers.Num() != 2)
 	{
+		UE_LOG(LogTemp, Error, TEXT("StartInteractiveExperience: Expected 2 players, but got %d"), ClickedPlayers.Num());
+		return;
+	}
+
+	for (int32 i = 0; i < ClickedPlayers.Num(); ++i)
+	{
+		ACJS_LobbyPlayer* Player = ClickedPlayers[i];
 		if (Player)
 		{
-			// 플레이어를 원하는 위치로 이동
-			//FVector NewLocation = /* 원하는 위치 */;
-			//Player->SetActorLocation(NewLocation);
+			// 플레이어의 현재 위치 로그 출력
+			FString PlayerName = Player->GetName();
+			FVector CurrentLocation = Player->GetActorLocation();
+			UE_LOG(LogTemp, Warning, TEXT("Player %s current location: %s"), *PlayerName, *CurrentLocation.ToString());
 
-			// 플레이어 클래스를 변경하거나 필요한 처리를 수행
-			// 예를 들어, ArtPlayer로 변경
-			//Player->ChangeToArtPlayer();
+			// 서버에서 플레이어 위치 이동
+			Player->SetActorTransform(TargetTransforms[i]);
+
+			// 플레이어의 새로운 위치 로그 출력
+			FVector NewLocation = Player->GetActorLocation();
+			UE_LOG(LogTemp, Warning, TEXT("Player %s moved to new location: %s"), *PlayerName, *NewLocation.ToString());
+
+			// 클라이언트에서 카메라 및 UI 설정을 위해 ClientRPC 호출
+			Player->ClientRPC_MultiplaySetting();
 		}
 		else
 		{

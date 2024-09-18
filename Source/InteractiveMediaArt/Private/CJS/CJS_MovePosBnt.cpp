@@ -47,17 +47,17 @@ void ACJS_MovePosBnt::BeginPlay()
 {
 	Super::BeginPlay();
 		
-	Art1_Single_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2150, 840), FRotator(0, -90, 0));   // <--- 수정 필요
-	auto* TargetCameraComp = Art1_Single_TargetCamera->GetCameraComponent();
-	TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
-	TargetCameraComp->OrthoWidth = 3200.f;
+	Art1_Single_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(-1870, -2310, 810), FRotator(0, -90, 0));   // (X=-1870.000000,Y=-2310.000000,Z=810.000000)
+	auto* Art1_Single_TargetCameraComp = Art1_Single_TargetCamera->GetCameraComponent();
+	Art1_Single_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+	Art1_Single_TargetCameraComp->OrthoWidth = 3200.f;
 	Art1_Single_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1897, 3652, 210));   // (X=-1896.847102,Y=-3651.908160,Z=210.000006)
 
 
-	Art1_Multi_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2150, 840), FRotator(0, -90, 0));    
-	auto* TargetCameraComp = Art1_Multi_TargetCamera->GetCameraComponent();
-	TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
-	TargetCameraComp->OrthoWidth = 3200.f;
+	Art1_Multi_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2090, 750), FRotator(0, -90, 0));    // (X=2470.000000,Y=-2090.000000,Z=750.000000)
+	auto* Art1_Multi_TargetCameraComp = Art1_Multi_TargetCamera->GetCameraComponent();
+	Art1_Multi_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+	Art1_Multi_TargetCameraComp->OrthoWidth = 3200.f;
 	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 300));  // 왼쪽  
 	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3217, 3580, 210));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
 	

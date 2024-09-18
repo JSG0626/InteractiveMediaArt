@@ -276,20 +276,6 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_SinglePlay is OK"));
 
 					MoveToArtPos(btn_SinglePlay);
-					/*if (ArtPlayer == nullptr)
-					{
-						FActorSpawnParameters params;
-						params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-						ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, btn_SinglePlay->TargetTransform, params);
-
-						pc->SetViewTarget(Cast<AActor>(btn_SinglePlay->TargetCamera));
-
-						FInputModeUIOnly UIOnlyMode;
-						pc->SetInputMode(UIOnlyMode);
-						HideAimPoint();
-						ShowMouseCursor();
-						ShowEscapeUI();
-					}*/
 				}
 			}
 			if (HitActorName.Contains("BTN1_1_Multi"))
@@ -390,6 +376,12 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 		// ArtPlayer 생성
 		ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button->Art1_Single_TargetTransform, params);
 
+		// Art1_Single_TargetTransform의 값 로그 출력
+		UE_LOG(LogTemp, Warning, TEXT("Art1_Single_TargetTransform: Location = %s, Rotation = %s, Scale = %s"),
+			*button->Art1_Single_TargetTransform.GetLocation().ToString(),
+			*button->Art1_Single_TargetTransform.GetRotation().Rotator().ToString(),
+			*button->Art1_Single_TargetTransform.GetScale3D().ToString());
+
 		if (ArtPlayer)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ArtPlayer spawned successfully"));
@@ -404,6 +396,11 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 		//APlayerController* pc = Cast<APlayerController>(GetController());
 		if (pc && button->Art1_Single_TargetCamera)
 		{
+			// Art1_Single_TargetCamera의 값 로그 출력
+			UE_LOG(LogTemp, Warning, TEXT("Art1_Single_TargetCamera: Name = %s, Location = %s"),
+				*button->Art1_Single_TargetCamera->GetName(),
+				*button->Art1_Single_TargetCamera->GetActorLocation().ToString());
+
 			// 카메라 뷰 변경
 			pc->SetViewTarget(Cast<AActor>(button->Art1_Single_TargetCamera));
 
@@ -553,19 +550,44 @@ void ACJS_LobbyPlayer::OnExitBnt()
 
 void ACJS_LobbyPlayer::ExitArt()
 {
-	FInputModeGameOnly inputMode;
-	pc->bShowMouseCursor = false;
-	pc->bEnableMouseOverEvents = false;
-	pc->SetInputMode(inputMode);
+	// PlayerController 유효성 검사
+	if (pc)
+	{
+		FInputModeGameOnly inputMode;
+		pc->bShowMouseCursor = false;
+		pc->bEnableMouseOverEvents = false;
+		pc->SetInputMode(inputMode);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ExitArt: PlayerController (pc) is null"));
+	}
 
-	check(ArtPlayer);
+	HideEscapeUI();
+
+	// PlayerController 유효성 검사 후 ViewTarget 설정
+	if (pc)
+	{
+		pc->SetViewTarget(this);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ExitArt: PlayerController (pc) is null when setting ViewTarget"));
+	}
+
+	ShowAimPoint();
+
+	// ArtPlayer 유효성 검사 및 파괴
 	if (ArtPlayer)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ExitArt: Destroying ArtPlayer: %s"), *ArtPlayer->GetName());
 		ArtPlayer->Destroy();
+		ArtPlayer = nullptr; // 포인터 초기화
 	}
-	HideEscapeUI();
-	pc->SetViewTarget(this);
-	ShowAimPoint();
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ExitArt: ArtPlayer is null or already destroyed"));
+	}
 }
 
 void ACJS_LobbyPlayer::EnableAudioCapture()
@@ -658,6 +680,52 @@ void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
 		if(GM->CountPlayerUIActor) 
 			//GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
 			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);  // <-- 클릭한 플레이어 정보도 같이 보냄.
+	}
+}
+
+void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT(" ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()"));
+
+	// PlayerController 초기화
+	if (pc == nullptr)
+	{
+		pc = Cast<APlayerController>(GetController());
+		if (pc == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: pc is null"));
+			return;
+		}
+	}
+
+	// 클라이언트에서 카메라 액터 생성
+	FVector CameraLocation = FVector(2470, -2090, 750);
+	FRotator CameraRotation = FRotator(0, -90, 0);
+
+	ACameraActor* LocalTargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), CameraLocation, CameraRotation);
+	if (LocalTargetCamera)
+	{
+		auto* CameraComp = LocalTargetCamera->GetCameraComponent();
+		CameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
+		CameraComp->OrthoWidth = 3200.f;
+
+		// 카메라 뷰 변경
+		pc->SetViewTarget(LocalTargetCamera);
+
+		// 입력 모드 변경
+		FInputModeUIOnly UIOnlyMode;
+		pc->SetInputMode(UIOnlyMode);
+
+		// 마우스 커서 및 에임 포인트 처리
+		HideAimPoint();
+		ShowMouseCursor();
+		ShowEscapeUI();
+
+		UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: Failed to spawn LocalTargetCamera"));
 	}
 }
 

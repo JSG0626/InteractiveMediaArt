@@ -18,12 +18,15 @@ public:
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta=(Bindwidget))
-	class UButton* CR_Btn_Start;
+	class UButton* CR_Btn_CreateSession;
+	
+	UPROPERTY(meta=(Bindwidget))
+	class UButton* CR_Btn_JoinSession;
 
 	UFUNCTION()
 	void CR_OnClickCreateSession();
 	
 	UFUNCTION()
-	void OnSessionSearchComplete();
+	void CR_OnClickJoinSession();
 
 };

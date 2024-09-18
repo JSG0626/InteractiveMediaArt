@@ -86,7 +86,6 @@ void ADoorActor::CloseDoor(float DeltaSeconds)
 		LeftDoor->SetRelativeRotation(LeftDoorNewRotation);
 		RightDoor->SetRelativeRotation(RightDoorNewRotation);
 	}
-	
 }
 
 void ADoorActor::Exit()

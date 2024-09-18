@@ -14,21 +14,21 @@ USTRUCT(BlueprintType)
 	 GENERATED_BODY()
 
 	 //UPROPERTY(BlueprintReadOnly)
-	 FString roomName;
+	 //FString roomName;
 	 UPROPERTY(BlueprintReadOnly)
 	 FString hostName;
-	 UPROPERTY(BlueprintReadOnly)
-	 int32 maxPlayerCount;
-	 UPROPERTY(BlueprintReadOnly)
-	 int32 currentPlayerCount;
-	 UPROPERTY(BlueprintReadOnly)
-	 int32 pingMS;
+	 //UPROPERTY(BlueprintReadOnly)
+	 //int32 maxPlayerCount;
+	 //UPROPERTY(BlueprintReadOnly)
+	 //int32 currentPlayerCount;
+	 //UPROPERTY(BlueprintReadOnly)
+	 //int32 pingMS;
 
 	 int32 index;
 
 	 FString ToString()
 	 {
-		return FString::Printf(TEXT("%d) [%s][%s] (%d / %d) -> %dms"), index, *roomName, *hostName, currentPlayerCount, maxPlayerCount, pingMS);
+		return FString::Printf(TEXT("%d) [%s]"), index, /**roomName,*/ *hostName/*, currentPlayerCount, maxPlayerCount, pingMS*/);
 	 }
  };
 
@@ -50,7 +50,7 @@ public:
 	FString MySessionName = FString("Lee Session");
 	
 	UFUNCTION()
-	// 방생성 요청
+	// 방생성 요청 -> UI에서 호출
 	void CreateMySession(/*FString roomName, int32 playerCount*/);
 
 	UFUNCTION()
@@ -60,20 +60,18 @@ public:
 	// 찾을 방의 목록
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	
-	// 방 찾기 요청
+	// 방 찾기 요청 -> UI에서 호출
 	void FindSessions();
 
 	// 방 찾기 응답
 	void OnMyFindSessionsCompleteDelegates(bool bWasSuccessful);
 
 	UPROPERTY()
-	FOnSessionSearchComplete OnSessionSearchCompleteDelegate;
+	FOnSessionSearchComplete OnSearchSessionCompleteDelegate;
 
 	//FSearchSignature OnSearchSignatureCompleteDelegate;
 
-	int32 SessionSearchIndex;
-
-	void UpdateInfo(const struct FRoomInfo& info);
+	//int32 SessionSearchIndex;
 
 
 	// 방 입장 요청

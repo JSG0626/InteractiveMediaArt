@@ -13,10 +13,22 @@ void UExhibitionGameInstance::Init()
 {
 	Super::Init();
 
-	IOnlineSubsystem* SubSystem = IOnlineSubsystem::Get();
+	IOnlineSubsystem* SubSystem = IOnlineSubsystem::Get(); // IOnlineSubsystem 가져오기
+
 	if (SubSystem)
 	{
 		PRINTLOG(TEXT("OnlineSubsystem: %s"), *SubSystem->GetSubsystemName().ToString());
+
+		SessionInterface = SubSystem->GetSessionInterface(); // SessionInterface 가져오기
+
+		if (SessionInterface.IsValid())
+		{
+			PRINTLOG(TEXT("SessionInterface is valid"));
+		}
+		else
+		{
+			PRINTLOG(TEXT("SessionInterface is invalid"));
+		}
 	}
 	else
 	{
@@ -55,9 +67,12 @@ void UExhibitionGameInstance::CreateMySession()
 	settings.bIsDedicated = false;
 
 	// 2. 랜선(LAN)으로 매치하는가?
-	//FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
-	//settings.bIsLANMatch = subsystemName == "NULL";
-	settings.bIsLANMatch = false;
+	FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
+	settings.bIsLANMatch = subsystemName == "NULL";
+	settings.bIsLANMatch = true;
+
+	// 로비기능을 활성화한다. (Host 하려면 필요)
+	settings.bUseLobbiesIfAvailable = true; 
 
 	// 3. 매칭이 공개(true) 혹은 비공개(false, 초대를 통해서 매칭)
 	settings.bShouldAdvertise = true;
@@ -72,10 +87,9 @@ void UExhibitionGameInstance::CreateMySession()
 	settings.bAllowJoinViaPresenceFriendsOnly = false;
 	settings.bAntiCheatProtected = false;
 	settings.bUseLobbiesIfAvailable = true;
-	settings.BuildUniqueId = 1;
 
 	// 6. 최대 인원수
-	//settings.NumPublicConnections = playerCount;
+	settings.NumPublicConnections = 100;
 
 	// 7. 커스텀 정보, Ping = 통수신에 걸리는 시간
 	//settings.Set(FName("ROOM_NAME"), roomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
@@ -84,8 +98,8 @@ void UExhibitionGameInstance::CreateMySession()
 	PRINTLOG(TEXT("Attempting to create session with name: %s"), *MySessionName);
 	PRINTLOG(TEXT("Create Session Start hostName : %s"), *MySessionName);
 
-	FUniqueNetIdPtr netID = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
-	SessionInterface->CreateSession(*netID, FName(MySessionName), settings);
+	//FUniqueNetIdPtr netID = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
+	SessionInterface->CreateSession(0, FName(MySessionName), settings);
 
 }
 
@@ -95,7 +109,7 @@ void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool 
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
 		PRINTLOG(TEXT("Session created successfully with name: %s"), *SessionName.ToString());
-		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/CJS/Maps/CJS_Exhibition?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/CJS/Maps/CJS_Alpha_Exhibition?listen"));
 	}
 	else
 	{
@@ -116,36 +130,35 @@ void UExhibitionGameInstance::FindSessions()
 
 	if (!SessionInterface.IsValid())
 	{
-		PRINTLOG(TEXT("Reinitializing SessionInterface"));
-		if (auto* SubSystem = IOnlineSubsystem::Get())
-		{
-			SessionInterface = SubSystem->GetSessionInterface();
-		}
+		PRINTLOG(TEXT("FindSessions: SessionInterface is invalid. Cannot find sessions."));
+		return;
 	}
 
-	SessionSearch = MakeShareable(new FOnlineSessionSearch);
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+
 	if (!SessionSearch.IsValid())
 	{
 		PRINTLOG(TEXT("FindSessions: Failed to create SessionSearch!"));
 		return;
 	}
 
-	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
-	SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
-	//SessionSearch->QuerySettings.Set(FName("HOST_NAME"), MySessionName, EOnlineComparisonOp::Equals);
-	//SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	SessionSearch->bIsLanQuery = false;
-	SessionSearch->MaxSearchResults = 100;
-	SessionSearch->TimeoutInSeconds = 60;
 
-	FUniqueNetIdPtr UserId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId().GetUniqueNetId();
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	//SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+	SessionSearch->QuerySettings.Set(FName("HOST_NAME"), MySessionName, EOnlineComparisonOp::Equals);
+	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	SessionSearch->bIsLanQuery = true;
+	SessionSearch->MaxSearchResults = 40;
+	//SessionSearch->TimeoutInSeconds = 60;
+
+	/*FUniqueNetIdPtr UserId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId().GetUniqueNetId();
 	if (!UserId.IsValid())
 	{
 		PRINTLOG(TEXT("FindSessions: UserId is invalid!"));
 		return;
-	}
+	}*/
 
-	if (!SessionInterface->FindSessions(*UserId, SessionSearch.ToSharedRef()))
+	if (!SessionInterface->FindSessions(0, SessionSearch.ToSharedRef()))
 	{
 		PRINTLOG(TEXT("FindSessions: Failed to start FindSessions!"));
 	}
@@ -154,47 +167,48 @@ void UExhibitionGameInstance::FindSessions()
 		PRINTLOG(TEXT("FindSessions: Successfully started FindSessions"));
 	}
 
-	PRINTLOG(TEXT("Searching for sessions with name: %s, IsLAN: %s"), *MySessionName, SessionSearch->bIsLanQuery ? TEXT("True") : TEXT("False"));
+	//PRINTLOG(TEXT("Searching for sessions with name: %s, IsLAN: %s"), *MySessionName, SessionSearch->bIsLanQuery ? TEXT("True") : TEXT("False"));
 }
 
 void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccessful)
 {
-
-	if (!SessionInterface.IsValid())
+	// 서버에서 호출되지 않게함
+	if (GetWorld()->GetNetMode() == NM_ListenServer || GetWorld()->GetNetMode() == NM_DedicatedServer)
 	{
-		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: SessionInterface is invalid!"));
+		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: Skipping on server"));
 		return;
 	}
-
-	if (!SessionSearch.IsValid())
+	
+	if (!SessionInterface.IsValid() || !SessionSearch.IsValid())
 	{
-		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: SessionSearch is invalid!"));
+		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: SessionInterface or SessionSearch is invalid!"));
 		return;
 	}
 
 	if (bWasSuccessful)
 	{
+		// TArray<FServerData> 
 		TArray<FOnlineSessionSearchResult> results = SessionSearch->SearchResults;
 		PRINTLOG(TEXT("Found %d sessions"), results.Num());
 
 		for (int32 i = 0; i < results.Num(); i++)
 		{
-			FString SessionId = results[i].GetSessionIdStr();
+			FOnlineSessionSearchResult ret = results[i];
+			if (false == ret.IsValid())
+			{
+				continue;
+			}
+			
+			FRoomInfo roomInfo;
+			roomInfo.index = i;
+
 			FString HostName;
 			results[i].Session.SessionSettings.Get(FName("HOST_NAME"), HostName);
-			PRINTLOG(TEXT("Session %d: ID=%s, HostName=%s"), i, *SessionId, *HostName);
+			PRINTLOG(TEXT("Session %d: HostName=%s"), i, *HostName);
+
+			JoinSession(roomInfo.index);
 		}
 
-		if (results.Num() > 0)
-		{
-			// 세션을 찾았음을 알림
-			OnSessionSearchCompleteDelegate.Broadcast();
-            PRINTLOG(TEXT("Session found. Broadcasting OnSessionSearchCompleteDelegate."));
-		}
-		else
-		{
-			PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: No sessions found"));
-		}
 	}
 	else
 	{
@@ -218,19 +232,25 @@ void UExhibitionGameInstance::JoinSession(int32 index)
 
 void UExhibitionGameInstance::OnMyJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type EOnJoinSessionCompleteResult)
 {
-	if (EOnJoinSessionCompleteResult::Success == EOnJoinSessionCompleteResult)
+	if (EOnJoinSessionCompleteResult == EOnJoinSessionCompleteResult::Success)
 	{
 		// 서버가 있는 레벨로 여행을 떠나고 싶다.
 		auto* pc = GetWorld()->GetFirstPlayerController();
 
 		FString url;
-		SessionInterface->GetResolvedConnectString(SessionName, url);
-		if (false == url.IsEmpty())
+		if (SessionInterface->GetResolvedConnectString(SessionName, url))
 		{
+			PRINTLOG(TEXT("Travelling to session URL: %s"), *url);
 			pc->ClientTravel(url, ETravelType::TRAVEL_Absolute);
-
-			PRINTLOG(TEXT("OnMyJoinSessionComplete is Succeed!!!"));
 		}
+		else
+		{
+			PRINTLOG(TEXT("Failed to get resolved connect string for session."));
+		}
+	}
+	else
+	{
+		PRINTLOG(TEXT("JoinSession failed with result: %d"), static_cast<int32>(EOnJoinSessionCompleteResult));
 	}
 }
 
@@ -256,9 +276,5 @@ void UExhibitionGameInstance::OnMyDestroySessionComplete(FName SessionName, bool
 	{
 		// 프로그램을 종료하고 싶다.
 		FGenericPlatformMisc::RequestExit(false);
-		
-		// 클라이언트는 로비로 여행을 가고싶다.
-		//auto* pc = GetWorld()->GetFirstPlayerController();
-		//pc->ClientTravel(TEXT("/Game/ArtProject/LHM/Maps/LHM_Exit"), ETravelType::TRAVEL_Absolute);
 	}
 }

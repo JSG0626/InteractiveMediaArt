@@ -27,6 +27,7 @@
 #include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../IMA_GameModeBase.h"
+#include "CJS/CJS_CancelBtn.h"
 
 
 
@@ -183,6 +184,31 @@ void ACJS_LobbyPlayer::BeginPlay()
 		//UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
 		return;
 	}
+
+
+	// 월드에서 모든 ACJS_CancelBtn 액터를 찾습니다.
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACJS_CancelBtn::StaticClass(), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		// 필요한 경우 특정 조건을 사용하여 원하는 CancelButton을 선택합니다.
+		// 여기서는 첫 번째 CancelButton을 사용합니다.
+		CancelButton = Cast<ACJS_CancelBtn>(FoundActors[0]);
+
+		if (CancelButton)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CancelButton assigned successfully in BeginPlay."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to cast FoundActor to ACJS_CancelBtn."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No ACJS_CancelBtn instances found in the world."));
+	}
 }
 
 // Called every frame
@@ -288,13 +314,10 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 
 					ServerRPC_StartInteraction();
 
-					//if (CountPlayerUIActor->CurPlayer == 2;)
-					//{
-					//}
-					//else
-					//{
-					//	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::CountPlayerUI is not OK"));
-					//}
+					btn_MultiPlay->SetActorHiddenInGame(true);
+					
+					// CancelButton을 스폰하는 함수 호출
+					SpawnCancelButton();
 				}
 			}
 			else if (HitActorName.Contains("BNT2_1"))
@@ -726,6 +749,45 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: Failed to spawn LocalTargetCamera"));
+	}
+}
+
+void ACJS_LobbyPlayer::SpawnCancelButton()
+{
+	if (CancelButton == nullptr)
+	{
+		if (CancelButtonFactory != nullptr)
+		{
+			// 스폰 위치와 회전을 지정합니다.
+			FVector SpawnLocation = FVector(-140.0f, -710.0f, 100.0f);
+			FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
+
+			// 스폰 파라미터 설정
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = this;
+			SpawnParams.Instigator = GetInstigator();
+
+			// CancelBtn 스폰
+			CancelButton = GetWorld()->SpawnActor<ACJS_CancelBtn>(CancelButtonFactory, SpawnLocation, SpawnRotation, SpawnParams);
+			if (CancelButton)
+			{
+				CancelButton->ShowCancelBtn();
+				UE_LOG(LogTemp, Warning, TEXT("CancelButton spawned at location: %s"), *SpawnLocation.ToString());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Failed to spawn ACJS_CancelBtn."));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CancelButtonClass is not set."));
+		}
+	}
+	else
+	{
+		// 이미 스폰되어 있으면 보이도록 설정
+		CancelButton->SetActorHiddenInGame(false);
 	}
 }
 

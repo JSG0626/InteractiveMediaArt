@@ -18,20 +18,20 @@ ACJS_PopUpBnt::ACJS_PopUpBnt()
 	ButtonComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ButtonComp"));
 	ButtonComp->SetupAttachment(RootComponent);
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tempButton(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cylinder.Cylinder'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempButton(TEXT("/Script/Engine.StaticMesh'/Game/ArtProject/CJS/Blueprints/CJS_Button.CJS_Button'"));
 	if (tempButton.Succeeded())
 	{
 		ButtonComp->SetStaticMesh(tempButton.Object);
-		ButtonComp->SetRelativeScale3D(FVector(0.7, 0.7, 0.1));
-		ButtonComp->SetRelativeRotation(FRotator(0, 90, 0));
+		//ButtonComp->SetRelativeScale3D(FVector(0.7, 0.7, 0.1));
+		//ButtonComp->SetRelativeRotation(FRotator(0, 90, 0));
 		ButtonComp->SetVisibility(false);
 		ButtonComp->SetGenerateOverlapEvents(true);
 	}
 
 	VisibleBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("VisibleBoxComp"));
 	VisibleBoxComp->SetupAttachment(ButtonComp);
-	VisibleBoxComp->SetRelativeLocation(FVector(-585, 260, 2140));
-	VisibleBoxComp->SetRelativeScale3D(FVector(17.5f, 2.5f, 75));
+	//VisibleBoxComp->SetRelativeLocation(FVector(-585, 260, 2140));
+	//VisibleBoxComp->SetRelativeScale3D(FVector(17.5f, 2.5f, 75));
 	VisibleBoxComp->SetCollisionProfileName(TEXT("OverlapAll"));
 	VisibleBoxComp->SetGenerateOverlapEvents(true);
 

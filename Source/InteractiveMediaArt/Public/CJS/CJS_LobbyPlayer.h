@@ -113,6 +113,13 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_MultiplaySetting();
 
+	// 작품 1의 캔슬 Btn
+	UPROPERTY(EditDefaultsOnly, Category = "Buttons")
+	TSubclassOf<class ACJS_CancelBtn> CancelButtonFactory;
+	UPROPERTY()
+	class ACJS_CancelBtn* CancelButton;
+	void SpawnCancelButton();
+
 	
 
 

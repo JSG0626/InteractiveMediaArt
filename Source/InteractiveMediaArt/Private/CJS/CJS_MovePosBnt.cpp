@@ -19,27 +19,25 @@ ACJS_MovePosBnt::ACJS_MovePosBnt()
 	ButtonComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ButtonComp"));
 	ButtonComp->SetupAttachment(RootComponent);
 
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tempButton(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cylinder.Cylinder'"));
-	if (tempButton.Succeeded())
+	ConstructorHelpers::FObjectFinder<UStaticMesh> temp1Button(TEXT("/Script/Engine.StaticMesh'/Game/ArtProject/CJS/Blueprints/CJS_Button.CJS_Button'"));
+	if (temp1Button.Succeeded())
 	{
-		ButtonComp->SetStaticMesh(tempButton.Object);
-		ButtonComp->SetRelativeScale3D(FVector(0.7, 0.7, 0.1));
-		ButtonComp->SetRelativeRotation(FRotator(0, 90, 0));
+		ButtonComp->SetStaticMesh(temp1Button.Object);
+		//ButtonComp->SetRelativeScale3D(FVector(0.5));
+		//ButtonComp->SetRelativeRotation(FRotator(0, 90, 0));
 		ButtonComp->SetVisibility(false);
 		ButtonComp->SetGenerateOverlapEvents(true);
 	}
 
 	VisibleBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("VisibleBoxComp"));
 	VisibleBoxComp->SetupAttachment(ButtonComp);
-	VisibleBoxComp->SetRelativeLocation(FVector(520, 130, 1640));  
-	VisibleBoxComp->SetRelativeScale3D(FVector(15, 2.5, 50));
+	//VisibleBoxComp->SetRelativeLocation(FVector(520, 130, 1640));  
+	//VisibleBoxComp->SetRelativeScale3D(FVector(15, 2.5, 50));
 	VisibleBoxComp->SetCollisionProfileName(TEXT("OverlapAll"));
 	VisibleBoxComp->SetGenerateOverlapEvents(true);
 
 	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapBegin);
 	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapEnd);
-
-	//AimpointUI = CreateWidget<UAimPoint>(GetWorld(), WBP_aimpoint);
 }
 
 // Called when the game starts or when spawned
@@ -77,6 +75,7 @@ void ACJS_MovePosBnt::Tick(float DeltaTime)
 void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ButtonComp->SetVisibility(true);
+
 	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
 
 	if (Player)
@@ -88,7 +87,8 @@ void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	ButtonComp->SetVisibility(false);
-	auto Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+
+	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
 	if (Player)
 	{
 		Player->HideAimPoint();

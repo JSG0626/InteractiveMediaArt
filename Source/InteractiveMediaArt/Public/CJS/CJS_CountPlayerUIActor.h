@@ -60,7 +60,8 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerRPC_AddPlayerNum(ACJS_LobbyPlayer* Player, int32 AddNum);
     bool ServerRPC_AddPlayerNum_Validate(ACJS_LobbyPlayer* Player, int32 AddNum);
-
+    UFUNCTION(Server, Reliable)
+    void ServerRPC_RemovePlayerNum(ACJS_LobbyPlayer* Player, int32 RemoveNum);
 
     // Initialize the UI Actor
     void InitCountPlayerUiActor(int32 curPlayer);

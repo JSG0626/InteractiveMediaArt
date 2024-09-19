@@ -72,7 +72,7 @@ void UExhibitionGameInstance::CreateMySession()
 	settings.bIsLANMatch = true;
 
 	// 로비기능을 활성화한다. (Host 하려면 필요)
-	settings.bUseLobbiesIfAvailable = true; 
+	settings.bUseLobbiesIfAvailable = true;
 
 	// 3. 매칭이 공개(true) 혹은 비공개(false, 초대를 통해서 매칭)
 	settings.bShouldAdvertise = true;
@@ -106,7 +106,7 @@ void UExhibitionGameInstance::CreateMySession()
 void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (bWasSuccessful)
-	{                                                                                                                                                                                                                                                                                                                                                                                                                                       
+	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
 		PRINTLOG(TEXT("Session created successfully with name: %s"), *SessionName.ToString());
 		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/CJS/Maps/CJS_Alpha_Exhibition?listen"));
@@ -149,7 +149,7 @@ void UExhibitionGameInstance::FindSessions()
 	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	SessionSearch->bIsLanQuery = true;
 	SessionSearch->MaxSearchResults = 40;
-	
+
 
 	if (!SessionInterface->FindSessions(0, SessionSearch.ToSharedRef()))
 	{
@@ -171,7 +171,7 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: Skipping on server"));
 		return;
 	}
-	
+
 	if (!SessionInterface.IsValid() || !SessionSearch.IsValid())
 	{
 		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: SessionInterface or SessionSearch is invalid!"));
@@ -180,45 +180,39 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 
 	if (bWasSuccessful)
 	{
-		// TArray<FServerData> 
 		TArray<FOnlineSessionSearchResult> results = SessionSearch->SearchResults;
 		PRINTLOG(TEXT("Found %d sessions"), results.Num());
-
-		if (results.Num() == 0)
+		bool bJoinSession = false;
+		for (int32 i = 0; i < results.Num(); i++)
 		{
-			CreateMySession();
-		}
-		else
-		{
-			for (int32 i = 0; i < results.Num(); i++)
+			FOnlineSessionSearchResult ret = results[i];
+			if (false == ret.IsValid())
 			{
-				FOnlineSessionSearchResult ret = results[i];
-				if (false == ret.IsValid())
-				{
-					continue;
-				}
-				
-				FRoomInfo roomInfo;
-				roomInfo.index = i;
+				continue;
+			}
 
-				FString HostName;
-				results[i].Session.SessionSettings.Get(FName("HOST_NAME"), HostName);
-				PRINTLOG(TEXT("Session %d: HostName=%s"), i, *HostName);
+			FRoomInfo roomInfo;
+			roomInfo.index = i;
 
-				if (HostName.TrimStartAndEnd().IsEmpty())
-				{
-					CreateMySession();
-				}
-				else if (HostName == MySessionName)
-				{
-					JoinSession(roomInfo.index);
-					break;
-				}
-					
+			FString HostName;
+			results[i].Session.SessionSettings.Get(FName("HOST_NAME"), HostName);
+			PRINTLOG(TEXT("Session %d: HostName=%s"), i, *HostName);
+
+			if (HostName == MySessionName)
+			{
+				JoinSession(roomInfo.index);
+				bJoinSession = true;
+				PRINTLOG(TEXT("Join Session Call"));
+				break;
 			}
 		}
 
+		if (!bJoinSession)
+		{
+			CreateMySession();
+		}
 	}
+
 	else
 	{
 		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates is Failed!!!"));
@@ -229,6 +223,8 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 void UExhibitionGameInstance::JoinSession(int32 index)
 {
 	// SessionSearch가 유효한지 확인
+	PRINTLOG(TEXT("Join Session Called"));
+
 	if (!SessionSearch.IsValid() || SessionSearch->SearchResults.Num() <= index)
 	{
 		PRINTLOG(TEXT("JoinSession failed: SessionSearch is invalid or no search results."));
@@ -241,6 +237,7 @@ void UExhibitionGameInstance::JoinSession(int32 index)
 
 void UExhibitionGameInstance::OnMyJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type EOnJoinSessionCompleteResult)
 {
+	PRINTLOG(TEXT("OnMyJoinSessionComplete"));
 	if (EOnJoinSessionCompleteResult == EOnJoinSessionCompleteResult::Success)
 	{
 		// 서버가 있는 레벨로 여행을 떠나고 싶다.

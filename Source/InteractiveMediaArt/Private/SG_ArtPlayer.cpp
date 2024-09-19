@@ -83,12 +83,16 @@ void ASG_ArtPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		ServerManager->Destroy();
 	}
+
+	PRINTLOG(TEXT(""));
 }
 
 // Called every frame
 void ASG_ArtPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s"), *GetActorLocation().ToString()));
 	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
 
 }

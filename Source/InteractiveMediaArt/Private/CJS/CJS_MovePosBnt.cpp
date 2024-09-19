@@ -49,7 +49,7 @@ void ACJS_MovePosBnt::BeginPlay()
 	auto* Art1_Single_TargetCameraComp = Art1_Single_TargetCamera->GetCameraComponent();
 	Art1_Single_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
 	Art1_Single_TargetCameraComp->OrthoWidth = 3200.f;
-	Art1_Single_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1897, 3652, 210));   // (X=-1896.847102,Y=-3651.908160,Z=210.000006)
+	Art1_Single_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(-1897, -3652, 210));   // (X=-1896.847102,Y=-3651.908160,Z=210.000006)
 
 
 	Art1_Multi_TargetCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FVector(2470, -2090, 750), FRotator(0, -90, 0));    // (X=2470.000000,Y=-2090.000000,Z=750.000000)

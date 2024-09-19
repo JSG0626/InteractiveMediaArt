@@ -28,6 +28,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../IMA_GameModeBase.h"
 #include "CJS/CJS_CancelBtn.h"
+#include "../InteractiveMediaArt.h"
 
 // Sets default values
 ACJS_LobbyPlayer::ACJS_LobbyPlayer()
@@ -310,7 +311,8 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
 
-					ServerRPC_StartInteraction();
+					ServerRPC_StartInteraction(btn_MultiPlay->Art1_Multi1_TargetTransform);
+					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(btn_MultiPlay->Art1_Multi_TargetCamera));
 
 					btn_MultiPlay->SetActorHiddenInGame(true);
 					
@@ -391,12 +393,19 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 
 	if (ArtPlayer == nullptr)
 	{
+		// ArtPlayer 생성
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		// ArtPlayer 생성
 		ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button->Art1_Single_TargetTransform, params);
-
+		if (IsLocallyControlled())
+		{
+			pc->SetViewTarget(Cast<AActor>(button->Art1_Single_TargetCamera));
+			FInputModeUIOnly UIOnlyMode;
+			pc->SetInputMode(UIOnlyMode);
+			HideAimPoint();
+			ShowMouseCursor();
+			ShowEscapeUI();
+		}
 		// Art1_Single_TargetTransform의 값 로그 출력
 		UE_LOG(LogTemp, Warning, TEXT("Art1_Single_TargetTransform: Location = %s, Rotation = %s, Scale = %s"),
 			*button->Art1_Single_TargetTransform.GetLocation().ToString(),
@@ -572,8 +581,19 @@ void ACJS_LobbyPlayer::OnExitBnt()
 void ACJS_LobbyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
+	
 	DOREPLIFETIME(ACJS_LobbyPlayer, ArtPlayer);
+}
+
+void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform TargetTransform)
+{
+	FActorSpawnParameters params;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
+	ArtPlayer->Me = this;
+	ArtPlayer->SetOwner(this);
+	PRINTLOG(TEXT("SpawnServerManager"));
+	ArtPlayer->SpawnServerManager();
 }
 
 void ACJS_LobbyPlayer::ExitArt()
@@ -701,13 +721,21 @@ void ACJS_LobbyPlayer::DisableAudioCapture()
 	}
 }
 
-void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
+void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation(FTransform TargetTransform)
 {
+	FActorSpawnParameters params;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
+	ArtPlayer->Me = this;
+	ArtPlayer->SetOwner(this);
+	PRINTLOG(TEXT("SpawnServerManager"));
+	ArtPlayer->SpawnServerManager();
+
 	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
 	{
-		if(GM->CountPlayerUIActor) 
+		//if(GM->CountPlayerUIActor) 
 			//GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
-			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);  // <-- 클릭한 플레이어 정보도 같이 보냄.
+		//	GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);  // <-- 클릭한 플레이어 정보도 같이 보냄.
 	}
 }
 

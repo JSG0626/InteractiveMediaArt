@@ -7,6 +7,8 @@
 #include "Components/BoxComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "../InteractiveMediaArt.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 
 // Sets default values
@@ -78,29 +80,68 @@ void ACJS_PopUpBnt::Tick(float DeltaTime)
 
 void ACJS_PopUpBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && (OtherActor != this) && OtherComp)
+	PRINTLOG(TEXT("OnOverlapBegin"));
+	if (OtherActor)
 	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
+		auto* player = Cast<ACJS_LobbyPlayer>(OtherActor);
+		if (player)
 		{
-			ButtonComp->SetVisibility(true);
-			//WidgetComp->SetVisibility(true);
-			UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - Button shown"));
+			auto* pc = Cast<APlayerController>(player->Controller);
+			if (pc)
+			{
+				if (GetWorld()->GetFirstPlayerController() == pc)
+				{
+					ButtonComp->SetVisibility(true);
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_PopUpBnt::OnOverlapBegin"));
+				}
+			}
+
 		}
+	
 	}
+
+	//if ((OtherActor == this) && OtherComp)
+	//{
+	//	ACharacter* pc = Cast<ACharacter>(OtherActor);
+	//	if (pc)
+	//	{
+	//		ButtonComp->SetVisibility(true);
+	//		//WidgetComp->SetVisibility(true);
+	//		UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - Button shown"));
+	//	}
+	//}
 }
 
 void ACJS_PopUpBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor && (OtherActor != this) && OtherComp)
+
+	PRINTLOG(TEXT("OnOverlapEnd"));
+	if (OtherActor)
 	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
+		auto* player = Cast<ACJS_LobbyPlayer>(OtherActor);
+		if (player)
 		{
-			ButtonComp->SetVisibility(false);
-			//WidgetComp->SetVisibility(false);
-			UE_LOG(LogTemp, Warning, TEXT("Overlap End - Button and Widget hidden"));
+			auto* pc = Cast<APlayerController>(player->Controller);
+			if (pc)
+			{
+				if (GetWorld()->GetFirstPlayerController() == pc)
+				{
+					ButtonComp->SetVisibility(false);
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_PopUpBnt::OnOverlapEnd"));
+				}
+			}
 		}
 	}
+
+	//if (OtherActor && (OtherActor == this) && OtherComp)
+	//{
+	//	ACharacter* pc = Cast<ACharacter>(OtherActor);
+	//	if (pc)
+	//	{
+	//		ButtonComp->SetVisibility(false);
+	//		//WidgetComp->SetVisibility(false);
+	//		UE_LOG(LogTemp, Warning, TEXT("Overlap End - Button and Widget hidden"));
+	//	}
+	//}
 }
 

@@ -103,8 +103,11 @@ public:
 	UPROPERTY(Replicated)
 	class ASG_ArtPlayer* ArtPlayer;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION(Server, Reliable)
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void ServerRPC_SpawnArtPlayer(FTransform TargetTransform);
+
 	// ----------------------------------------JSG----------------------------------------
 	void ExitArt();
 	UPROPERTY()
@@ -115,7 +118,7 @@ public:
 
 	// 작품 1의 멀티 플레이
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_StartInteraction();
+	void ServerRPC_StartInteraction(FTransform TargetTransform);
 
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_MultiplaySetting();

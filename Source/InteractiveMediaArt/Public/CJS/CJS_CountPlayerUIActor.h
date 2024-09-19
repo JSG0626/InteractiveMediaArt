@@ -24,50 +24,33 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
-	// 작품 1의 체험 인원 표시 UI
-	//UPROPERTY(EditDefaultsOnly)
-	//TSubclassOf <class UUserWidget> WBP_CountPlayerUI;
-	//UPROPERTY()
-	//class UCJS_CountPlayerUI* CountPlayerUI;
+    // 멀티플레이 카메라와 위치
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Multiplayer")
+    ACameraActor* Art1_Multi_TargetCamera;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Multiplayer")
+    FTransform Art1_Multi1_TargetTransform;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Multiplayer")
+    FTransform Art1_Multi2_TargetTransform;
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Multiplayer")
+    TArray<FTransform> TargetTransforms;
 
-	//UPROPERTY(ReplicatedUsing = AddPlayerNum, EditDefaultsOnly, Category = "PlayerNum") // 현재 참여 인원 변수 동기화
-	//int32 CurPlayer;
-	//UPROPERTY(EditDefaultsOnly, Category = "PlayerNum")
-	//int32 MaxPlayer = 2;
-
-	//// Replicated function called when CurPlayer is updated
- //   UFUNCTION()
- //   void OnRep_CurPlayer();
-	//UFUNCTION()
-	//void AddPlayerNum();
-	//void SubPlayerNum();
-	//void InitCountPlayerUiActor();
-
-	//int32 GetCurPlayerNum();
-	//void SetCurPlayerNum(int32 addNum);
-
-	//// RPC
-	//UFUNCTION(Server, Reliable)
-	//void ServerRPC_ChangePlayerNum(const int32 playerNum);
-
-	//UFUNCTION(NetMulticast, Reliable)
-	//void MulticastRPC_ChangePlayerNum(const int32 playerNum);
-
-
-	// The current number of players
-    UPROPERTY(ReplicatedUsing=OnRep_CurPlayer, VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-    int32 CurPlayer = 0;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-    int32 MaxPlayer = 2;
 
     // Reference to UI widget
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<class UCJS_CountPlayerUI> WBP_CountPlayerUI;
     UCJS_CountPlayerUI* CountPlayerUI;
 
+
+    // Save Clicked Player Info
 	UPROPERTY()
 	TArray<ACJS_LobbyPlayer*> ClickedPlayers;
+
+    // The current number of players
+    UPROPERTY(ReplicatedUsing=OnRep_CurPlayer, VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+    int32 CurPlayer = 0;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
+    int32 MaxPlayer = 2;
+
 
     // Replicated function called when CurPlayer is updated
     UFUNCTION()
@@ -76,23 +59,16 @@ public:
     // Function to add player count (only callable on the server)
     UFUNCTION(Server, Reliable, WithValidation)
     void ServerRPC_AddPlayerNum(ACJS_LobbyPlayer* Player, int32 AddNum);
-	//void ServerRPC_AddPlayerNum(int32 AddNum);
-    //bool ServerRPC_AddPlayerNum_Validate(int32 AddNum);
     bool ServerRPC_AddPlayerNum_Validate(ACJS_LobbyPlayer* Player, int32 AddNum);
 
-	// Function to add player Info
-	//UFUNCTION(Server, Reliable)
-    //void ServerRPC_AddPlayerInfo(ACJS_LobbyPlayer* Player);
-
-
-	//UFUNCTION(NetMulticast, Reliable)
-	//void MulticastRPC_UpdatePlayerNum(int32 NewPlayerNum);
 
     // Initialize the UI Actor
     void InitCountPlayerUiActor(int32 curPlayer);
 
     // Override to ensure variable replication
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 
 	void PrintNetLog();
 	void FindOwner();
@@ -102,4 +78,6 @@ private:
     // Function to update CurPlayer locally
     void UpdatePlayerNum(int32 NewPlayerNum);
 	void StartInteractiveExperience();
+
+
 };

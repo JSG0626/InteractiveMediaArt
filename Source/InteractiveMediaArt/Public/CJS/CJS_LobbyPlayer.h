@@ -93,12 +93,6 @@ public:
 	void OnExitBnt();
 	bool bExitBnt2_1;
 
-
-	// 작품 1의 체험 인원 표시 UI
-	/*UPROPERTY(EditDefaultsOnly)
-	TSubclassOf <class UUserWidget> WBP_CountPlayerUI;
-	UPROPERTY()
-	class UCJS_CountPlayerUI* CountPlayerUI;*/
 	
 	// 작품 1의 플레이어
 	UPROPERTY(EditDefaultsOnly)
@@ -109,7 +103,26 @@ public:
 	UPROPERTY()
 	class APlayerController* pc;
 
-	//void MoveFirstArtPos(AButtonExp* button1);
+	UFUNCTION()
+	void MoveToArtPos(ACJS_MovePosBnt* button);
+
+	// 작품 1의 멀티 플레이
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartInteraction();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_MultiplaySetting();
+
+	// 작품 1의 캔슬 Btn
+	UPROPERTY(EditDefaultsOnly, Category = "Buttons")
+	TSubclassOf<class ACJS_CancelBtn> CancelButtonFactory;
+	UPROPERTY()
+	class ACJS_CancelBtn* CancelButton;
+	void SpawnCancelButton();
+
+	
+
+
 
 	// 작품 2의 요소
 	UPROPERTY(EditDefaultsOnly)
@@ -118,11 +131,8 @@ public:
 	class AActor* VoiceMeter1;
 	UPROPERTY()
 	class AActor* VoiceMeter2;
-	//UPROPERTY(EditDefaultsOnly)
-	//class UAudioCaptureComponent* AudioCapture;
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
-	UFUNCTION(Server, Reliable)
-	void ServerRPC_StartInteraction();
+	
 };

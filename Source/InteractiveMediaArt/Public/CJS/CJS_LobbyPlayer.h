@@ -21,7 +21,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -94,6 +93,8 @@ public:
 	void OnExitBnt();
 	bool bExitBnt2_1;
 
+	
+	// 작품 1의 플레이어
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
 	UPROPERTY()
@@ -102,14 +103,34 @@ public:
 	UPROPERTY()
 	class APlayerController* pc;
 
+	UFUNCTION()
+	void MoveToArtPos(ACJS_MovePosBnt* button);
+
+	// 작품 1의 멀티 플레이
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_StartInteraction();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_MultiplaySetting();
+
+	// 작품 1의 캔슬 Btn
+	UPROPERTY(EditDefaultsOnly, Category = "Buttons")
+	TSubclassOf<class ACJS_CancelBtn> CancelButtonFactory;
+	UPROPERTY()
+	class ACJS_CancelBtn* CancelButton;
+	void SpawnCancelButton();
+
+	
+
+
+
+	// 작품 2의 요소
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()
 	class AActor* VoiceMeter1;
 	UPROPERTY()
 	class AActor* VoiceMeter2;
-	//UPROPERTY(EditDefaultsOnly)
-	//class UAudioCaptureComponent* AudioCapture;
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 

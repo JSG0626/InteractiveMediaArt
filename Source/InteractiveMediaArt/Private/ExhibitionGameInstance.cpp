@@ -205,7 +205,16 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 				results[i].Session.SessionSettings.Get(FName("HOST_NAME"), HostName);
 				PRINTLOG(TEXT("Session %d: HostName=%s"), i, *HostName);
 
-				JoinSession(roomInfo.index);
+				if (HostName.TrimStartAndEnd().IsEmpty())
+				{
+					CreateMySession();
+				}
+				else if (HostName == MySessionName)
+				{
+					JoinSession(roomInfo.index);
+					break;
+				}
+					
 			}
 		}
 

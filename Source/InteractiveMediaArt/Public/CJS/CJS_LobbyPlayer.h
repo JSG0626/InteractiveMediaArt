@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "UObject/CoreNet.h"
 #include "CJS_LobbyPlayer.generated.h"
 
 UCLASS()
@@ -95,10 +96,16 @@ public:
 
 	
 	// 작품 1의 플레이어
+	// ----------------------------------------JSG----------------------------------------
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ArtPlayer> ArtPlayerFactory;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class ASG_ArtPlayer* ArtPlayer;
+
+	UFUNCTION(Server, Reliable)
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	// ----------------------------------------JSG----------------------------------------
 	void ExitArt();
 	UPROPERTY()
 	class APlayerController* pc;
@@ -135,4 +142,6 @@ public:
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
 	
+
+
 };

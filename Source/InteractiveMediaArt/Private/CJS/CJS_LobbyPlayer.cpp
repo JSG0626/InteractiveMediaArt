@@ -29,8 +29,6 @@
 #include "../IMA_GameModeBase.h"
 #include "CJS/CJS_CancelBtn.h"
 
-
-
 // Sets default values
 ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 {
@@ -569,6 +567,13 @@ void ACJS_LobbyPlayer::OnExitBnt()
 			bExitBnt2_1 = false;	
 		}
 	}
+}
+
+void ACJS_LobbyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACJS_LobbyPlayer, ArtPlayer);
 }
 
 void ACJS_LobbyPlayer::ExitArt()

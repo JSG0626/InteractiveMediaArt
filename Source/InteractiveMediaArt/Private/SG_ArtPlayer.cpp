@@ -61,7 +61,7 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 void ASG_ArtPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	UE_LOG(LogTemp, Warning, TEXT("ASG_ArtPlayer::BeginPlay()"));
 	PoseableMeshComp->SetRelativeScale3D(MeshScale);
 	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
 	MeshScale = FVector(3.5, 7, 3.5);

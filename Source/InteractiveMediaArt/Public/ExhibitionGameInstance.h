@@ -48,7 +48,7 @@ public:
 
 	UPROPERTY()
 	FString MySessionName = FString("Lee Session");
-	
+
 	UFUNCTION()
 	// 방생성 요청 -> UI에서 호출
 	void CreateMySession(/*FString roomName, int32 playerCount*/);
@@ -65,14 +65,6 @@ public:
 
 	// 방 찾기 응답
 	void OnMyFindSessionsCompleteDelegates(bool bWasSuccessful);
-
-	UPROPERTY()
-	FOnSessionSearchComplete OnSearchSessionCompleteDelegate;
-
-	//FSearchSignature OnSearchSignatureCompleteDelegate;
-
-	//int32 SessionSearchIndex;
-
 
 	// 방 입장 요청
 	void JoinSession(int32 index);

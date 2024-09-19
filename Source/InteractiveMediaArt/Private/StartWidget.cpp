@@ -13,7 +13,7 @@ void UStartWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	CR_Btn_CreateSession->OnClicked.AddDynamic(this, &UStartWidget::CR_OnClickCreateSession);
-	CR_Btn_JoinSession->OnClicked.AddDynamic(this, &UStartWidget::CR_OnClickJoinSession);
+	//CR_Btn_JoinSession->OnClicked.AddDynamic(this, &UStartWidget::CR_OnClickJoinSession);
 }
 
 void UStartWidget::CR_OnClickCreateSession()
@@ -21,16 +21,19 @@ void UStartWidget::CR_OnClickCreateSession()
 	auto* gi = Cast<UExhibitionGameInstance>(GetWorld()->GetGameInstance());
 	if (!gi) return;
 	
-	PRINTLOG(TEXT("Server is creating session"));
-	gi->CreateMySession();
-}
-
-void UStartWidget::CR_OnClickJoinSession()
-{
-	auto* gi = Cast<UExhibitionGameInstance>(GetWorld()->GetGameInstance());
-	if (!gi) return;
+	//PRINTLOG(TEXT("Server is creating session"));
+	//gi->CreateMySession();
 
 	PRINTLOG(TEXT("Searching for existing sessions"));
 	gi->FindSessions();
 }
+
+//void UStartWidget::CR_OnClickJoinSession()
+//{
+//	auto* gi = Cast<UExhibitionGameInstance>(GetWorld()->GetGameInstance());
+//	if (!gi) return;
+//
+//	PRINTLOG(TEXT("Searching for existing sessions"));
+//	gi->FindSessions();
+//}
 

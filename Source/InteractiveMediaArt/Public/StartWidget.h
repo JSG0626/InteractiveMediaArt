@@ -20,13 +20,13 @@ public:
 	UPROPERTY(meta=(Bindwidget))
 	class UButton* CR_Btn_CreateSession;
 	
-	UPROPERTY(meta=(Bindwidget))
-	class UButton* CR_Btn_JoinSession;
+	//UPROPERTY(meta=(Bindwidget))
+	//class UButton* CR_Btn_JoinSession;
 
 	UFUNCTION()
 	void CR_OnClickCreateSession();
 	
-	UFUNCTION()
-	void CR_OnClickJoinSession();
+	//UFUNCTION()
+	//void CR_OnClickJoinSession();
 
 };

@@ -106,7 +106,7 @@ void UExhibitionGameInstance::CreateMySession()
 void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (bWasSuccessful)
-	{
+	{                                                                                                                                                                                                                                                                                                                                                                                                                                       
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
 		PRINTLOG(TEXT("Session created successfully with name: %s"), *SessionName.ToString());
 		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/CJS/Maps/CJS_Alpha_Exhibition?listen"));
@@ -149,14 +149,7 @@ void UExhibitionGameInstance::FindSessions()
 	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	SessionSearch->bIsLanQuery = true;
 	SessionSearch->MaxSearchResults = 40;
-	//SessionSearch->TimeoutInSeconds = 60;
-
-	/*FUniqueNetIdPtr UserId = GetWorld()->GetFirstLocalPlayerFromController()->GetPreferredUniqueNetId().GetUniqueNetId();
-	if (!UserId.IsValid())
-	{
-		PRINTLOG(TEXT("FindSessions: UserId is invalid!"));
-		return;
-	}*/
+	
 
 	if (!SessionInterface->FindSessions(0, SessionSearch.ToSharedRef()))
 	{
@@ -191,22 +184,29 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 		TArray<FOnlineSessionSearchResult> results = SessionSearch->SearchResults;
 		PRINTLOG(TEXT("Found %d sessions"), results.Num());
 
-		for (int32 i = 0; i < results.Num(); i++)
+		if (results.Num() == 0)
 		{
-			FOnlineSessionSearchResult ret = results[i];
-			if (false == ret.IsValid())
+			CreateMySession();
+		}
+		else
+		{
+			for (int32 i = 0; i < results.Num(); i++)
 			{
-				continue;
+				FOnlineSessionSearchResult ret = results[i];
+				if (false == ret.IsValid())
+				{
+					continue;
+				}
+				
+				FRoomInfo roomInfo;
+				roomInfo.index = i;
+
+				FString HostName;
+				results[i].Session.SessionSettings.Get(FName("HOST_NAME"), HostName);
+				PRINTLOG(TEXT("Session %d: HostName=%s"), i, *HostName);
+
+				JoinSession(roomInfo.index);
 			}
-			
-			FRoomInfo roomInfo;
-			roomInfo.index = i;
-
-			FString HostName;
-			results[i].Session.SessionSettings.Get(FName("HOST_NAME"), HostName);
-			PRINTLOG(TEXT("Session %d: HostName=%s"), i, *HostName);
-
-			JoinSession(roomInfo.index);
 		}
 
 	}

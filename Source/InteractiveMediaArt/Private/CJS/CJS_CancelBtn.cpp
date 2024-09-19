@@ -83,14 +83,14 @@ void ACJS_CancelBtn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 
 void ACJS_CancelBtn::HideCancelBtn()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CancelBtn::HideCancelBtn()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CancelBtn::HideCancelBtn()"));
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 }
 
 void ACJS_CancelBtn::ShowCancelBtn()
 {	
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CancelBtn::ShowCancelBtn()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CancelBtn::ShowCancelBtn()"));
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 }

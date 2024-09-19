@@ -88,6 +88,7 @@ void ACJS_CountPlayerUIActor::Tick(float DeltaTime)
 	//FindOwner();
 }
 
+
 void ACJS_CountPlayerUIActor::InitCountPlayerUiActor(int32 curPlayer)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::InitCountPlayerUiActor()"));
@@ -97,6 +98,47 @@ void ACJS_CountPlayerUIActor::InitCountPlayerUiActor(int32 curPlayer)
 	UpdatePlayerNum(curPlayer);  // Start with 0 players
 }
 
+
+void ACJS_CountPlayerUIActor::ServerRPC_RemovePlayerNum_Implementation(ACJS_LobbyPlayer* Player, int32 RemoveNum)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::ServerRPC_RemovePlayerNum_Implementation()"));
+	if (Player)
+	{
+		ClickedPlayers.Remove(Player);
+		CurPlayer -= RemoveNum;
+
+		if (CurPlayer <= 0)
+		{
+			CurPlayer = 0;
+		}
+
+		// 플레이어 제거 후 ClickedPlayers와 CurPlayer 값 출력
+		UE_LOG(LogTemp, Warning, TEXT("After removing player:"));
+		UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers.Num() = %d"), ClickedPlayers.Num());
+		UE_LOG(LogTemp, Warning, TEXT("CurPlayer = %d"), CurPlayer);
+
+		// ClickedPlayers 배열의 내용 출력
+		for (int32 i = 0; i < ClickedPlayers.Num(); ++i)
+		{
+			if (ClickedPlayers[i])
+			{
+				FString PlayerName = ClickedPlayers[i]->GetName();
+				UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers[%d]: %s"), i, *PlayerName);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers[%d]: nullptr"), i);
+			}
+		}
+
+		// 클라이언트와 동기화
+		OnRep_CurPlayer();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ServerRPC_RemovePlayerNum_Implementation: Player is null"));
+	}	
+}
 
 //void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(int32 AddNum)
 void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPlayer* Player, int32 AddNum)

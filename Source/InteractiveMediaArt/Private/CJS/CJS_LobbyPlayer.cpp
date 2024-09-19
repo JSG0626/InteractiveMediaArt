@@ -187,28 +187,27 @@ void ACJS_LobbyPlayer::BeginPlay()
 
 
 	// 월드에서 모든 ACJS_CancelBtn 액터를 찾습니다.
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACJS_CancelBtn::StaticClass(), FoundActors);
+	//TArray<AActor*> FoundActors;
+	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACJS_CancelBtn::StaticClass(), FoundActors);
+	//if (FoundActors.Num() > 0)
+	//{
+	//	// 필요한 경우 특정 조건을 사용하여 원하는 CancelButton을 선택합니다.
+	//	// 여기서는 첫 번째 CancelButton을 사용합니다.
+	//	CancelButton = Cast<ACJS_CancelBtn>(FoundActors[0]);
 
-	if (FoundActors.Num() > 0)
-	{
-		// 필요한 경우 특정 조건을 사용하여 원하는 CancelButton을 선택합니다.
-		// 여기서는 첫 번째 CancelButton을 사용합니다.
-		CancelButton = Cast<ACJS_CancelBtn>(FoundActors[0]);
-
-		if (CancelButton)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("CancelButton assigned successfully in BeginPlay."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to cast FoundActor to ACJS_CancelBtn."));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("No ACJS_CancelBtn instances found in the world."));
-	}
+	//	if (CancelButton)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("CancelButton assigned successfully in BeginPlay."));
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Error, TEXT("Failed to cast FoundActor to ACJS_CancelBtn."));
+	//	}
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("No ACJS_CancelBtn instances found in the world."));
+	//}
 }
 
 // Called every frame
@@ -274,16 +273,30 @@ void ACJS_LobbyPlayer::OnMyActionLook(const struct FInputActionValue& Value)
 
 void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()"));
+
 	FVector Start = FollowCamera->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
 	FHitResult Outhit;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
 
+	// 디버그 선 그리기
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+
+
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_GameTraceChannel4);
+	
 	if (bHit)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+
+		if (Outhit.Component.IsValid())
+		{
+			FString HitComponentName = Outhit.Component->GetName();
+			UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitComponentName);
+		}
+
 		AActor* HitActor = Outhit.GetActor();
 		auto* hitComp = Outhit.GetComponent();
 		if (hitComp)
@@ -304,7 +317,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					MoveToArtPos(btn_SinglePlay);
 				}
 			}
-			if (HitActorName.Contains("BTN1_1_Multi"))
+			else if (HitActorName.Contains("BTN1_1_Multi"))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
 				ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(HitActor);
@@ -315,9 +328,25 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					ServerRPC_StartInteraction();
 
 					btn_MultiPlay->SetActorHiddenInGame(true);
+					btn_MultiPlay->SetActorEnableCollision(false);
 					
 					// CancelButton을 스폰하는 함수 호출
 					SpawnCancelButton();
+				}
+			}
+			else if (HitActorName.Contains("CancelBtn"))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Cancel_BTN Clicked"));
+				ACJS_CancelBtn* btn_Cancel = Cast<ACJS_CancelBtn>(HitActor);
+				if (btn_Cancel != nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_Cancel is OK"));
+
+					OnCancelButtonClicked();
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("btn_Cancel is null"));
 				}
 			}
 			else if (HitActorName.Contains("BNT2_1"))
@@ -374,12 +403,12 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
 	}
 }
 
@@ -701,7 +730,6 @@ void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
 	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
 	{
 		if(GM->CountPlayerUIActor) 
-			//GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(1);
 			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);  // <-- 클릭한 플레이어 정보도 같이 보냄.
 	}
 }
@@ -788,6 +816,50 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 	{
 		// 이미 스폰되어 있으면 보이도록 설정
 		CancelButton->SetActorHiddenInGame(false);
+	}
+}
+
+void ACJS_LobbyPlayer::OnCancelButtonClicked()
+{
+	// CancelButton 제거
+	if (CancelButton)
+	{
+		//CancelButton->HideCancelBtn();
+		CancelButton->Destroy();
+		CancelButton = nullptr;
+	}
+
+	// 멀티 버튼 다시 보이게 설정
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("MultiButton"), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(FoundActors[0]);
+		if (btn_MultiPlay)
+		{
+			btn_MultiPlay->SetActorHiddenInGame(false);
+			btn_MultiPlay->SetActorEnableCollision(true);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found."));
+	}
+
+	// 서버에 RPC 호출하여 대기 취소 처리
+	ServerRPC_CancelInteraction();
+}
+
+void ACJS_LobbyPlayer::ServerRPC_CancelInteraction_Implementation()
+{
+	// 서버에서 플레이어를 대기 취소 목록에서 제거
+	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
+	{
+		if (GM->CountPlayerUIActor)
+		{
+			GM->CountPlayerUIActor->ServerRPC_RemovePlayerNum(this, 1);
+		}
 	}
 }
 

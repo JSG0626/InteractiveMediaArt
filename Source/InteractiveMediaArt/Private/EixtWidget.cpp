@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "ExhibitionGameInstance.h"
 #include "DoorActor.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 void UEixtWidget::NativeConstruct()
 {
@@ -31,21 +32,14 @@ void UEixtWidget::VisibleExitUI()
 
 void UEixtWidget::OnRetry()
 {
-
 	SetVisibility(ESlateVisibility::Hidden);
-
+	
 	auto* pc = GetWorld()->GetFirstPlayerController();
 	if (pc)
 	{
 		pc->SetShowMouseCursor(false);
 		FInputModeGameOnly InputModeData;
 		pc->SetInputMode(InputModeData);
-
-		// DoorActorÀÇ CloseDoor È£Ãâ
-		if (DoorActor)
-		{
-			DoorActor->Return();
-		}
 	}
 }
 
@@ -57,9 +51,4 @@ void UEixtWidget::OnExit()
 	{
 		gi->ExitSession();
 	}
-}
-
-void UEixtWidget::SetDoorActor(ADoorActor* InDoorActor)
-{
-	DoorActor = InDoorActor;
 }

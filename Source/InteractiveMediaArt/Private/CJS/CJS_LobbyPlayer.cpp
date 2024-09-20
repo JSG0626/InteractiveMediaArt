@@ -75,7 +75,7 @@ ACJS_LobbyPlayer::ACJS_LobbyPlayer()
 void ACJS_LobbyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
+	PRINTLOG(TEXT("JeonSungGeon BeginPlay"));
 	// 컨트롤러를 가져와서 캐스팅
 	pc = Cast<APlayerController>(Controller);
 	//2. 캐스팅 성공했다면 
@@ -311,8 +311,8 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
 
+					//StartInteract1(bt)
 					ServerRPC_StartInteraction(btn_MultiPlay->Art1_Multi1_TargetTransform);
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(btn_MultiPlay->Art1_Multi_TargetCamera));
 
 					btn_MultiPlay->SetActorHiddenInGame(true);
 					
@@ -585,6 +585,7 @@ void ACJS_LobbyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACJS_LobbyPlayer, ArtPlayer);
 }
 
+
 void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform TargetTransform)
 {
 	FActorSpawnParameters params;
@@ -729,8 +730,9 @@ void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation(FTransform Targ
 	ArtPlayer->Me = this;
 	ArtPlayer->SetOwner(this);
 	PRINTLOG(TEXT("SpawnServerManager"));
+	
 	ArtPlayer->SpawnServerManager();
-
+	// -----------------------------------------------------------------------------------------
 	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
 	{
 		//if(GM->CountPlayerUIActor) 

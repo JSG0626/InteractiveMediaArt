@@ -13,13 +13,13 @@ void UExhibitionGameInstance::Init()
 {
 	Super::Init();
 
-	IOnlineSubsystem* SubSystem = IOnlineSubsystem::Get(); // IOnlineSubsystem °¡Á®¿À±â
+	IOnlineSubsystem* SubSystem = IOnlineSubsystem::Get(); // IOnlineSubsystem ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	if (SubSystem)
 	{
 		PRINTLOG(TEXT("OnlineSubsystem: %s"), *SubSystem->GetSubsystemName().ToString());
 
-		SessionInterface = SubSystem->GetSessionInterface(); // SessionInterface °¡Á®¿À±â
+		SessionInterface = SubSystem->GetSessionInterface(); // SessionInterface ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 		if (SessionInterface.IsValid())
 		{
@@ -39,16 +39,16 @@ void UExhibitionGameInstance::Init()
 	{
 		SessionInterface = subSystem->GetSessionInterface();
 
-		// ¹æ »ý¼º ¿äÃ» -> ÀÀ´ä
+		// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã» -> ï¿½ï¿½ï¿½ï¿½
 		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UExhibitionGameInstance::OnMyCreateSessionComplete);
 
-		// ¹æ Ã£±â ÀÀ´ä
+		// ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates);
 
-		// ¹æ ÀÔÀå ÀÀ´ä
+		// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UExhibitionGameInstance::OnMyJoinSessionComplete);
 
-		// ¹æ ÅðÀå ÀÀ´ä
+		// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UExhibitionGameInstance::OnMyDestroySessionComplete);
 	}
 
@@ -63,24 +63,24 @@ void UExhibitionGameInstance::CreateMySession()
 {
 	FOnlineSessionSettings settings;
 
-	// 1. Àü¿ë ¼­¹ö¸¦ »ç¿ëÇÏ´Â°¡? ¾Æ´Ï¿ä;
+	// 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´Â°ï¿½? ï¿½Æ´Ï¿ï¿½;
 	settings.bIsDedicated = false;
 
-	// 2. ·£¼±(LAN)À¸·Î ¸ÅÄ¡ÇÏ´Â°¡?
+	// 2. ï¿½ï¿½ï¿½ï¿½(LAN)ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ï´Â°ï¿½?
 	FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
-	settings.bIsLANMatch = subsystemName == "NULL";
-	settings.bIsLANMatch = true;
+	//settings.bIsLANMatch = subsystemName == "NULL";
+	settings.bIsLANMatch = false;
 
-	// ·Îºñ±â´ÉÀ» È°¼ºÈ­ÇÑ´Ù. (Host ÇÏ·Á¸é ÇÊ¿ä)
+	// ï¿½Îºï¿½ï¿½ï¿½ï¿½ï¿½ È°ï¿½ï¿½È­ï¿½Ñ´ï¿½. (Host ï¿½Ï·ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½)
 	settings.bUseLobbiesIfAvailable = true;
 
-	// 3. ¸ÅÄªÀÌ °ø°³(true) È¤Àº ºñ°ø°³(false, ÃÊ´ë¸¦ ÅëÇØ¼­ ¸ÅÄª)
+	// 3. ï¿½ï¿½Äªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(true) È¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½(false, ï¿½Ê´ë¸¦ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½Äª)
 	settings.bShouldAdvertise = true;
 
-	// 4. À¯ÀúÀÇ »óÅÂ Á¤º¸ »ç¿ë ¿©ºÎ ( ¿Â¶óÀÎ, ÀÚ¸® ¿©ºÎ µîµî )
+	// 4. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ( ï¿½Â¶ï¿½ï¿½ï¿½, ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ )
 	settings.bUsesPresence = true;
 
-	// 5. Áß°£¿¡ ³­ÀÔ °¡´ÉÇÑ°¡?
+	// 5. ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ°ï¿½?
 	settings.bAllowJoinViaPresence = true;
 	settings.bAllowJoinInProgress = true;
 
@@ -88,10 +88,10 @@ void UExhibitionGameInstance::CreateMySession()
 	settings.bAntiCheatProtected = false;
 	settings.bUseLobbiesIfAvailable = true;
 
-	// 6. ÃÖ´ë ÀÎ¿ø¼ö
+	// 6. ï¿½Ö´ï¿½ ï¿½Î¿ï¿½ï¿½ï¿½
 	settings.NumPublicConnections = 100;
 
-	// 7. Ä¿½ºÅÒ Á¤º¸, Ping = Åë¼ö½Å¿¡ °É¸®´Â ½Ã°£
+	// 7. Ä¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, Ping = ï¿½ï¿½ï¿½ï¿½Å¿ï¿½ ï¿½É¸ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 	//settings.Set(FName("ROOM_NAME"), roomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	settings.Set(FName("HOST_NAME"), MySessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
@@ -105,6 +105,7 @@ void UExhibitionGameInstance::CreateMySession()
 
 void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	PRINTLOG(TEXT("JSG "));
 	if (bWasSuccessful)
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
@@ -142,12 +143,11 @@ void UExhibitionGameInstance::FindSessions()
 		return;
 	}
 
-
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	//SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 	SessionSearch->QuerySettings.Set(FName("HOST_NAME"), MySessionName, EOnlineComparisonOp::Equals);
-	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	SessionSearch->bIsLanQuery = true;
+	//SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	SessionSearch->bIsLanQuery = false;
 	SessionSearch->MaxSearchResults = 40;
 
 
@@ -165,7 +165,7 @@ void UExhibitionGameInstance::FindSessions()
 
 void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccessful)
 {
-	// ¼­¹ö¿¡¼­ È£ÃâµÇÁö ¾Ê°ÔÇÔ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê°ï¿½ï¿½ï¿½
 	if (GetWorld()->GetNetMode() == NM_ListenServer || GetWorld()->GetNetMode() == NM_DedicatedServer)
 	{
 		PRINTLOG(TEXT("OnMyFindSessionsCompleteDelegates: Skipping on server"));
@@ -200,9 +200,11 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 
 			if (HostName == MySessionName)
 			{
-				JoinSession(roomInfo.index);
-				bJoinSession = true;
 				PRINTLOG(TEXT("Join Session Call"));
+				JoinSession(roomInfo.index);
+
+
+				bJoinSession = true;
 				break;
 			}
 		}
@@ -222,7 +224,7 @@ void UExhibitionGameInstance::OnMyFindSessionsCompleteDelegates(bool bWasSuccess
 
 void UExhibitionGameInstance::JoinSession(int32 index)
 {
-	// SessionSearch°¡ À¯È¿ÇÑÁö È®ÀÎ
+	// SessionSearchï¿½ï¿½ ï¿½ï¿½È¿ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	PRINTLOG(TEXT("Join Session Called"));
 
 	if (!SessionSearch.IsValid() || SessionSearch->SearchResults.Num() <= index)
@@ -240,7 +242,7 @@ void UExhibitionGameInstance::OnMyJoinSessionComplete(FName SessionName, EOnJoin
 	PRINTLOG(TEXT("OnMyJoinSessionComplete"));
 	if (EOnJoinSessionCompleteResult == EOnJoinSessionCompleteResult::Success)
 	{
-		// ¼­¹ö°¡ ÀÖ´Â ·¹º§·Î ¿©ÇàÀ» ¶°³ª°í ½Í´Ù.
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Í´ï¿½.
 		auto* pc = GetWorld()->GetFirstPlayerController();
 
 		FString url;
@@ -272,7 +274,7 @@ void UExhibitionGameInstance::ServerRPCExitSession_Implementation()
 
 void UExhibitionGameInstance::MulticastRPCExitSession_Implementation()
 {
-	// ¹æ ÅðÀå ¿äÃ».
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã».
 	SessionInterface->DestroySession(FName(MySessionName));
 }
 
@@ -280,7 +282,7 @@ void UExhibitionGameInstance::OnMyDestroySessionComplete(FName SessionName, bool
 {
 	if (bWasSuccessful)
 	{
-		// ÇÁ·Î±×·¥À» Á¾·áÇÏ°í ½Í´Ù.
+		// ï¿½ï¿½ï¿½Î±×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Í´ï¿½.
 		FGenericPlatformMisc::RequestExit(false);
 	}
 }

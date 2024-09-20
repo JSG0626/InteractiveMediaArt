@@ -9,6 +9,7 @@
 #include "Components/SceneComponent.h"
 #include "CJS/CJS_LobbyPlayer.h"
 #include <InteractiveMediaArt/InteractiveMediaArt.h>
+#include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraDataInterfaceExport.h"
 // Sets default values
 ASG_ArtPlayer::ASG_ArtPlayer()
 {
@@ -239,4 +240,36 @@ void ASG_ArtPlayer::MulticastRPC_ActiveComponents_Implementation()
 	SmokeNiagaraOnRHandComp->Activate(true);
 	UE_LOG(LogTemp, Warning, TEXT("PoseableMeshComp->Setvisibility: %d"), PoseableMeshComp->GetVisibleFlag());
 }
+
+void ASG_ArtPlayer::ServerRPC_HitLetter_Implementation(const TArray<FBasicParticleData>& Datas)
+{
+	const float SphereTraceRadius = 100;
+	const float ForceMinValue = -300;
+	const float ForceMaxValue = 300;
+	const float ForceZValue = 500;
+
+	for (auto data : Datas)
+	{
+		float X = data.Position.X;
+		float Y = data.Position.Y;
+		float Z = data.Position.Z;
+
+		ETraceTypeQuery traceChannel = ETraceTypeQuery::TraceTypeQuery3;
+		TArray<AActor*> actorsToIgnore;
+		TArray<FHitResult> hitInfos;
+		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), FVector(X, Y + 50, Z), FVector(X, Y - 100, Z), SphereTraceRadius, traceChannel,
+		false, actorsToIgnore, EDrawDebugTrace::None, hitInfos, true);
+
+		for (auto hitInfo : hitInfos)
+		{
+			auto hitComp = hitInfo.GetComponent();
+			if (hitComp)
+			{
+				FVector force = FVector(FMath::FRandRange(ForceMinValue, ForceMaxValue), 0, ForceZValue);
+				hitComp->AddImpulse(force);
+			}
+		}
+	}
+}
+
 

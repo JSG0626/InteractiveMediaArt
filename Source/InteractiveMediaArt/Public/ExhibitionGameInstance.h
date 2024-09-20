@@ -43,36 +43,39 @@ class INTERACTIVEMEDIAART_API UExhibitionGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 	
-	/** ¿Â¶óÀÎ ¼¼¼Ç ÀÎÅÍÆäÀÌ½º */
+	/** ï¿½Â¶ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ */
 	IOnlineSessionPtr SessionInterface;
 
 	UPROPERTY()
 	FString MySessionName = FString("Lee Session");
 
 	UFUNCTION()
-	// ¹æ»ý¼º ¿äÃ» -> UI¿¡¼­ È£Ãâ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã» -> UIï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
 	void CreateMySession(/*FString roomName, int32 playerCount*/);
 
 	UFUNCTION()
-	// ¹æ»ý¼º ÀÀ´ä
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	void OnMyCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 
-	// Ã£À» ¹æÀÇ ¸ñ·Ï
+	// Ã£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	
-	// ¹æ Ã£±â ¿äÃ» -> UI¿¡¼­ È£Ãâ
+	// ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½Ã» -> UIï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
+	UFUNCTION()
 	void FindSessions();
 
-	// ¹æ Ã£±â ÀÀ´ä
+	// ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	UFUNCTION()
 	void OnMyFindSessionsCompleteDelegates(bool bWasSuccessful);
 
-	// ¹æ ÀÔÀå ¿äÃ»
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã»
+	UFUNCTION()
 	void JoinSession(int32 index);
 
-	// ¹æ ÀÔÀå ÀÀ´ä
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	void OnMyJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type);
 
-	// ¹æ ÅðÀå ¿äÃ» -> UI¿¡¼­ È£Ãâ
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã» -> UIï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
 	void ExitSession();
 
 	UFUNCTION(Server, Reliable)
@@ -81,6 +84,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCExitSession();
 
-	// ¹æ ÅðÀå ÀÀ´ä
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	UFUNCTION()
 	void OnMyDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 };

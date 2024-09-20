@@ -93,7 +93,6 @@ void ASG_ArtPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s"), *GetActorLocation().ToString()));
 	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
 
 }
@@ -243,6 +242,7 @@ void ASG_ArtPlayer::MulticastRPC_ActiveComponents_Implementation()
 
 void ASG_ArtPlayer::ServerRPC_HitLetter_Implementation(const TArray<FBasicParticleData>& Datas)
 {
+	
 	const float SphereTraceRadius = 100;
 	const float ForceMinValue = -300;
 	const float ForceMaxValue = 300;

@@ -29,8 +29,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly)
-	//FString ServerIP = TEXT("18.177.76.42");
-	//FString ServerIP = TEXT("127.0.0.l");
 	FString ServerIP = TEXT("192.168.0.77");
 	
 	UPROPERTY(EditDefaultsOnly)

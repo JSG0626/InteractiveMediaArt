@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "../InteractiveMediaArt.h"
 
 
 // Sets default values
@@ -72,7 +73,7 @@ void ACJS_CountPlayerUIActor::BeginPlay()
 	Art1_Multi_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
 	Art1_Multi_TargetCameraComp->OrthoWidth = 3200.f;
 	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 300));  // 왼쪽  
-	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3217, 3580, 300));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
+	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3217, -3580, 300));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
 
 	// 이동할 위치와 카메라 설정
 	TargetTransforms.Add(Art1_Multi1_TargetTransform);
@@ -143,11 +144,12 @@ void ACJS_CountPlayerUIActor::ServerRPC_RemovePlayerNum_Implementation(ACJS_Lobb
 //void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(int32 AddNum)
 void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPlayer* Player, int32 AddNum)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation() playerName: %s, Addnum: %d"), *Player->GetName(), AddNum);
 	//SetOwner(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 	if (Player)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation() if (player)"));
 		// 플레이어 정보를 배열에 저장
 		ClickedPlayers.Add(Player);
 
@@ -173,6 +175,7 @@ void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPl
 
 
 		// Update the player count on the server
+		UE_LOG(LogTemp, Warning, TEXT("CurPlayer += AddNum;"));
 		CurPlayer += AddNum;
 		if (CurPlayer > MaxPlayer)
 		{
@@ -189,6 +192,7 @@ void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPl
 	// 최대 인원수에 도달했을 때 처리
 	if (CurPlayer == MaxPlayer)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("	if (CurPlayer == MaxPlayer) "));
 		StartInteractiveExperience();
 	}
 }
@@ -246,6 +250,7 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 			// 서버에서 플레이어 위치 이동
 			//Player->SetActorTransform(TargetTransforms[i]);
 			Player->ServerRPC_SpawnArtPlayer(TargetTransforms[i]);
+			PRINTLOG(TEXT("Player->ServerRPC_SpawnArtPlayer(%s);"), *TargetTransforms[i].ToString());
 			// 플레이어의 새로운 위치 로그 출력
 			FVector NewLocation = Player->GetActorLocation();
 			//UE_LOG(LogTemp, Warning, TEXT("Player %s moved to new location: %s"), *PlayerName, *NewLocation.ToString());

@@ -13,6 +13,7 @@ ALHM_ArticleText::ALHM_ArticleText()
 
     RootComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RootComp"));
     RootComp->SetupAttachment(RootComponent);
+    bReplicates = true;
 
     // Static Mesh ������Ʈ ����
     for (int32 i = 1; i <= MeshCount; i++)

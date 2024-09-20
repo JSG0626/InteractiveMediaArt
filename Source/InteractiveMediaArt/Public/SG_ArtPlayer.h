@@ -105,4 +105,5 @@ public:
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPC_HitLetter(const TArray<struct FBasicParticleData>& Datas);
+
 };

@@ -5,73 +5,92 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/TimerHandle.h"
 
-void UCJS_UIManager::BeginPlay()
-{
-	Super::BeginPlay();
 
-	// 시작 패널
+UCJS_UIManager::UCJS_UIManager() : StartPanelInstance(nullptr), EndPanelInstance(nullptr), WorldRef(nullptr)
+{}
+
+void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory)
+{
+	WorldRef = World;
+	StartPanelFactory = InStartPanelFactory;
+	EndPanelFactory = InEndPanelFactory;
+
+	if (!WorldRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UCJS_UIManager::Initialize(): WorldRef is null"));
+		return;
+	}
+
+	// 시작 패널 인스턴스 생성
 	if (StartPanelFactory)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay()::StartPanelFactory OK"));
-		StartPanelInstance = CreateWidget<UUserWidget>(GetWorld(), StartPanelFactory);
+		StartPanelInstance = CreateWidget<UUserWidget>(WorldRef, StartPanelFactory);
 		if (StartPanelInstance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay():StartPanelInstance OK"));
 			StartPanelInstance->AddToViewport();
 			HideStartPanel();
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay():StartPanelInstance is null"));
-		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay()::StartPanelFactory is null"));
+		UE_LOG(LogTemp, Error, TEXT("StartPanelFactory is not set!"));
 	}
 
-	// 종료 패널
+	// 종료 패널 인스턴스 생성
 	if (EndPanelFactory)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay()::EndPanelFactory OK"));
-		EndPanelInstance = CreateWidget<UUserWidget>(GetWorld(), EndPanelFactory);
+		EndPanelInstance = CreateWidget<UUserWidget>(WorldRef, EndPanelFactory);
 		if (EndPanelInstance)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay():EndPanelInstance OK"));
 			EndPanelInstance->AddToViewport();
 			HideEndPanel();
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay():EndPanelInstance is null"));
-		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::BeginPlay()::EndPanelFactory is null"));
+		UE_LOG(LogTemp, Error, TEXT("EndPanelFactory is not set!"));
 	}
 }
 
 void UCJS_UIManager::ShowStartPanel()
 {
-	StartPanelInstance->SetVisibility(ESlateVisibility::Visible);
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::ShowStartPanel()"));
+	if (StartPanelInstance && WorldRef)
+	{
+		StartPanelInstance->SetVisibility(ESlateVisibility::Visible);
 
-	FTimerHandle HideTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &UCJS_UIManager::HideStartPanel, 3.f, false);
+		FTimerHandle HideTimerHandle;
+		WorldRef->GetTimerManager().SetTimer(HideTimerHandle, this, &UCJS_UIManager::HideStartPanel, 3.f, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("StartPanelInstance or WorldRef is null in ShowStartPanel()"));
+	}
 }
 void UCJS_UIManager::ShowEndPanel()
 {
-	EndPanelInstance-> SetVisibility(ESlateVisibility::Visible);
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::ShowEndPanel()"));
 
-	FTimerHandle HideTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &UCJS_UIManager::HideEndPanel, 3.f, false);
+	if (EndPanelInstance && WorldRef)
+	{
+		EndPanelInstance->SetVisibility(ESlateVisibility::Visible);
+
+		FTimerHandle HideTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &UCJS_UIManager::HideEndPanel, 3.f, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EndPanelInstance or WorldRef is null in ShowEndPanel()"));
+	}
 }
 
 void UCJS_UIManager::HideStartPanel()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::HideStartPanel()"));
 	StartPanelInstance->SetVisibility(ESlateVisibility::Hidden);
 }
 void UCJS_UIManager::HideEndPanel()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::HideEndPanel()"));
 	EndPanelInstance->SetVisibility(ESlateVisibility::Hidden);
 }

@@ -15,7 +15,11 @@ class INTERACTIVEMEDIAART_API UCJS_UIManager : public UObject
 	GENERATED_BODY()
 
 public:
-    virtual void BeginPlay() override;
+    // 생성자
+    UCJS_UIManager();
+
+    // 초기화 함수
+    void Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory);
 
     // 시작 및 종료 패널을 표시하는 함수
     void ShowStartPanel();
@@ -40,6 +44,7 @@ private:
     UPROPERTY()
     class UUserWidget* EndPanelInstance;
 
-
+    // 월드 레퍼런스 (UObject에서는 GetWorld()를 직접 사용할 수 없으므로, 월드 레퍼런스를 멤버 변수로 저장하면 좋음)
+    class UWorld* WorldRef;
 	
 };

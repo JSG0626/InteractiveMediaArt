@@ -91,6 +91,31 @@ void ACJS_LobbyPlayer::BeginPlay()
 			subSys->AddMappingContext(IMC_LobbyPlayer, 0);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in BeginPlay"));
+		return;
+	}
+
+	// UI 매니저 인스턴스 생성 및 초기화	
+	//if (pc && pc->IsLocalPlayerController()) // APlayerController를 사용하는 경우: IsLocalPlayerController()
+	if (IsLocallyControlled())  // APawn, ACharacter 클래스의 함수로, 해당 폰이 로컬에서 제어되는지 확인
+	{
+		UIManager = NewObject<UCJS_UIManager>(this);
+		if (UIManager)
+		{
+			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
+			UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not locally controlled, UIManager not initialized"));
+	}
 
 	// AimPointUI 위젯 생성
 	if (WBP_aimpoint)  // WBP_aimpoint가 올바르게 할당되어 있는지 확인
@@ -119,7 +144,6 @@ void ACJS_LobbyPlayer::BeginPlay()
 		EscapeUI->AddToViewport();
 		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
 	}
-
 
 	// AudioCapture 설정
 	FTransform VoiceMeterTransform1 = FTransform(FRotator(0, 0, 0), FVector(-5705, -1980, 670), FVector(1, 1, 1));
@@ -160,19 +184,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
 		return;
-	}
-
-	// UI 매니저 인스턴스 생성 및 초기화	
-	UIManager = NewObject<UCJS_UIManager>(this);
-	if (UIManager)
-	{
-		UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
-	}
-	
+	}	
 }
 
 // Called every frame
@@ -317,16 +329,36 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
 				{
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->Art2_TargetCamera));
+					/*GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->Art2_TargetCamera));
 					FInputModeUIOnly UIOnlyMode;
 					pc->SetInputMode(UIOnlyMode);
 
 					HideAimPoint();
 					ShowMouseCursor();
-					ShowEscapeUI();
+					UIManager->ShowQuitUI();
 
 					StartExperience();
 
+					EnableAudioCapture();*/
+
+					if (!pc)
+					{
+						pc = Cast<APlayerController>(GetController());
+						if (!pc)
+						{
+							UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in OnMouseClick"));
+							return;
+						}
+					}
+
+					pc->SetViewTarget(Cast<AActor>(buttonArt2->Art2_TargetCamera));
+					FInputModeUIOnly UIOnlyMode;
+					pc->SetInputMode(UIOnlyMode);
+
+					HideAimPoint();
+					ShowMouseCursor();
+					UIManager->ShowQuitUI();
+					StartExperience();
 					EnableAudioCapture();
 				}
 			}
@@ -554,7 +586,6 @@ void ACJS_LobbyPlayer::OnExitBnt()
 	if (bExitBnt2_1)
 	{
 		DisableAudioCapture();
-
 		EndExperience();
 
 		if (pc)
@@ -564,14 +595,18 @@ void ACJS_LobbyPlayer::OnExitBnt()
 			
 			// 2. 입력 모드를 게임 전용으로 설정
 			FInputModeGameOnly inputMode;
+			pc->SetInputMode(inputMode);
 			pc->bShowMouseCursor = false;
 			pc->bEnableMouseOverEvents = false;
-			pc->SetInputMode(inputMode);
-
-			// 3. Escape UI 제거
-			if (EscapeUI)
+			
+			// 3. Quit UI 제거
+			if (UIManager)
 			{
-				HideEscapeUI();
+				UIManager->HideQuitUI();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("UIManager is null in OnExitBnt"));
 			}
 
 			// 4. AimPoint 다시 표시 (필요하다면)
@@ -579,6 +614,10 @@ void ACJS_LobbyPlayer::OnExitBnt()
 			UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
 
 			bExitBnt2_1 = false;	
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in OnExitBnt"));
 		}
 	}
 }

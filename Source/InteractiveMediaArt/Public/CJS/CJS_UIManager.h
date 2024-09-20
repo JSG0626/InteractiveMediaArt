@@ -19,7 +19,7 @@ public:
     UCJS_UIManager();
 
     // 초기화 함수
-    void Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory);
+    void Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory, TSubclassOf<UUserWidget> InQuitUIFactory, APlayerController* InPC);
 
     // 시작 및 종료 패널을 표시하는 함수
     void ShowStartPanel();
@@ -29,9 +29,16 @@ public:
     void HideStartPanel();
     void HideEndPanel();
 
+    // 종료 버튼
+    UFUNCTION()
+    void ShowQuitUI();
+    void HideQuitUI();
+
 
 private:
-    
+    UPROPERTY()
+    class APlayerController* PC;
+
     // 시작 및 종료 패널 위젯 클래스
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<class UUserWidget> StartPanelFactory;
@@ -43,6 +50,15 @@ private:
     class UUserWidget* StartPanelInstance;
     UPROPERTY()
     class UUserWidget* EndPanelInstance;
+
+    // Quit UI
+    UPROPERTY(EditDefaultsOnly)
+    TSubclassOf<class UUserWidget> QuitUIFactory;
+    UPROPERTY()
+    class UUserWidget* QuitUIInstance;
+    //UPROPERTY()
+	//class UButton* Button_Quit;
+
 
     // 월드 레퍼런스 (UObject에서는 GetWorld()를 직접 사용할 수 없으므로, 월드 레퍼런스를 멤버 변수로 저장하면 좋음)
     class UWorld* WorldRef;

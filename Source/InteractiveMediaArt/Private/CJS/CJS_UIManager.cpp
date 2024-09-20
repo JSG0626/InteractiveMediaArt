@@ -4,31 +4,40 @@
 #include "CJS/CJS_UIManager.h"
 #include "Blueprint/UserWidget.h"
 #include "Engine/TimerHandle.h"
+#include "Components/Button.h"
 
 
-UCJS_UIManager::UCJS_UIManager() : StartPanelInstance(nullptr), EndPanelInstance(nullptr), WorldRef(nullptr)
+UCJS_UIManager::UCJS_UIManager() : StartPanelInstance(nullptr), EndPanelInstance(nullptr), QuitUIInstance(nullptr), WorldRef(nullptr)
 {}
 
-void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory)
+void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory, TSubclassOf<UUserWidget> InQuitUIFactory, APlayerController* InPC)
 {
 	WorldRef = World;
 	StartPanelFactory = InStartPanelFactory;
 	EndPanelFactory = InEndPanelFactory;
+	QuitUIFactory = InQuitUIFactory;
+	PC = InPC;
 
-	if (!WorldRef)
+
+
+	if (!WorldRef || !PC)
 	{
-		UE_LOG(LogTemp, Error, TEXT("UCJS_UIManager::Initialize(): WorldRef is null"));
+		UE_LOG(LogTemp, Error, TEXT("UCJS_UIManager::Initialize(): WorldRef or PC is null"));
 		return;
 	}
 
 	// 시작 패널 인스턴스 생성
 	if (StartPanelFactory)
 	{
-		StartPanelInstance = CreateWidget<UUserWidget>(WorldRef, StartPanelFactory);
+		StartPanelInstance = CreateWidget<UUserWidget>(PC, StartPanelFactory);
 		if (StartPanelInstance)
 		{
 			StartPanelInstance->AddToViewport();
 			HideStartPanel();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create StartPanelInstance"));
 		}
 	}
 	else
@@ -39,11 +48,34 @@ void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartP
 	// 종료 패널 인스턴스 생성
 	if (EndPanelFactory)
 	{
-		EndPanelInstance = CreateWidget<UUserWidget>(WorldRef, EndPanelFactory);
+		EndPanelInstance = CreateWidget<UUserWidget>(PC, EndPanelFactory);
 		if (EndPanelInstance)
 		{
 			EndPanelInstance->AddToViewport();
 			HideEndPanel();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create EndPanelInstance"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EndPanelFactory is not set!"));
+	}
+
+	// 종료 UI 
+	if (QuitUIFactory)
+	{
+		QuitUIInstance = CreateWidget<UUserWidget>(PC, QuitUIFactory);
+		if (QuitUIInstance)
+		{
+			//QuitUIInstance->AddToViewport();
+			HideQuitUI();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create QuitUIInstance"));
 		}
 	}
 	else
@@ -93,4 +125,41 @@ void UCJS_UIManager::HideEndPanel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::HideEndPanel()"));
 	EndPanelInstance->SetVisibility(ESlateVisibility::Hidden);
+}
+
+
+void UCJS_UIManager::ShowQuitUI()
+{
+	if (QuitUIInstance && PC)
+	{
+		QuitUIInstance->AddToViewport();
+
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(QuitUIInstance->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = true;
+		PC->bEnableMouseOverEvents = true;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("QuitUIInstance or PC is null in ShowQuitUI"));
+	}
+}
+
+void UCJS_UIManager::HideQuitUI()
+{
+	if (QuitUIInstance && PC)
+	{
+		QuitUIInstance->RemoveFromViewport();
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+		PC->bEnableMouseOverEvents = false;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("QuitUIInstance or PC is null in HideQuitUI"));
+	}
 }

@@ -129,8 +129,6 @@ public:
 	
 
 	// 작품 2의 요소
-	//UPROPERTY(EditDefaultsOnly, Category = "UI")
-	//TSubclassOf<class UCJS_UIManager> UIManagerFactory;
 	UPROPERTY()
 	class UCJS_UIManager* UIManager;
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -138,6 +136,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> EndPanelFactory;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> QuitUIFactory;
+	void StartExperience();
+	void EndExperience();
+
 
 
 	UPROPERTY(EditDefaultsOnly)
@@ -149,8 +152,7 @@ public:
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
-	void StartExperience();
-	void EndExperience();
+	
 
 	
 };

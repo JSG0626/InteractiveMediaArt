@@ -61,15 +61,17 @@ public:
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 	
 	// 방 찾기 요청 -> UI에서 호출
+	UFUNCTION()
 	void FindSessions();
 
 	// 방 찾기 응답
 	void OnMyFindSessionsCompleteDelegates(bool bWasSuccessful);
 
 	// 방 입장 요청
+	UFUNCTION()
 	void JoinSession(int32 index);
 
-	// 방 입장 응답
+	// 방 입장 응답	
 	void OnMyJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type);
 
 	// 방 퇴장 요청 -> UI에서 호출
@@ -81,6 +83,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCExitSession();
 
-	// 방 퇴장 응답
+	// 방 퇴장 응답	
 	void OnMyDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 };

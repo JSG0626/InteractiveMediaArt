@@ -14,6 +14,12 @@ ACJS_CancelBtn::ACJS_CancelBtn()
 
 	CancleComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CancleComp"));
 	RootComponent = CancleComp;
+	// CancleComp 콜리전 설정 추가
+	CancleComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CancleComp->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel4);
+	CancleComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CancleComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECollisionResponse::ECR_Block);
+
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> temp2Button(TEXT("/Script/Engine.StaticMesh'/Game/ArtProject/CJS/Blueprints/CJS_Button.CJS_Button'"));
 	if (temp2Button.Succeeded())
@@ -77,11 +83,15 @@ void ACJS_CancelBtn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 
 void ACJS_CancelBtn::HideCancelBtn()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CancelBtn::HideCancelBtn()"));
 	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
 }
 
 void ACJS_CancelBtn::ShowCancelBtn()
-{
+{	
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CancelBtn::ShowCancelBtn()"));
 	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
 }
 

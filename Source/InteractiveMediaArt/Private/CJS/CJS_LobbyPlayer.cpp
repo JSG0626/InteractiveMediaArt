@@ -7,11 +7,14 @@
 #include "CJS/CJS_MovePosBnt.h"
 #include "CJS/CJS_CountPlayerUIActor.h"
 #include "CJS/CJS_CountPlayerUI.h"
+#include "CJS/CJS_CancelBtn.h"
+#include "CJS/CJS_UIManager.h"
 
 #include "ButtonExp.h"
 #include "AimPoint.h"
 #include "EscapeUI.h"
 #include "SG_ArtPlayer.h"
+#include "../IMA_GameModeBase.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -24,10 +27,8 @@
 #include "Camera/CameraActor.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
-#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
-#include "../IMA_GameModeBase.h"
-#include "CJS/CJS_CancelBtn.h"
+#include "AudioCaptureComponent.h"
+#include "NiagaraComponent.h"
 
 
 

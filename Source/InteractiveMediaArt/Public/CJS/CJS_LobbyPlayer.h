@@ -122,7 +122,7 @@ public:
 	//UPROPERTY()
 	//class ACJS_MovePosBnt* MultiButton;
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_StartInteraction(FTransform TargetTransform);
+	void ServerRPC_StartInteraction();
 
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_MultiplaySetting();

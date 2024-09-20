@@ -375,6 +375,24 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	}
 }
 
+void ACJS_LobbyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACJS_LobbyPlayer, ArtPlayer);
+}
+
+void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform TargetTransform)
+{
+	FActorSpawnParameters params;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
+	ArtPlayer->Me = this;
+	ArtPlayer->SetOwner(this);
+	PRINTLOG(TEXT("SpawnServerManager"));
+	ArtPlayer->SpawnServerManager();
+}
+
 void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 {
 	if (button == nullptr)

@@ -7,6 +7,7 @@
 #include "../InteractiveMediaArt.h"
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void UExhibitionGameInstance::Init()
@@ -110,7 +111,7 @@ void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool 
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
 		PRINTLOG(TEXT("Session created successfully with name: %s"), *SessionName.ToString());
-		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/CJS/Maps/CJS_Alpha_Exhibition?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/Main/Alpha_Exhibition?listen"));
 	}
 	else
 	{

@@ -117,6 +117,10 @@ public:
 	void MoveToArtPos(ACJS_MovePosBnt* button);
 
 	// 작품 1의 멀티 플레이
+	/*UPROPERTY(EditDefaultsOnly, Category = "Buttons")
+	TSubclassOf<class ACJS_MovePosBnt> MultiButtonFactory;*/
+	//UPROPERTY()
+	//class ACJS_MovePosBnt* MultiButton;
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartInteraction(FTransform TargetTransform);
 
@@ -129,7 +133,9 @@ public:
 	UPROPERTY()
 	class ACJS_CancelBtn* CancelButton;
 	void SpawnCancelButton();
-
+	void OnCancelButtonClicked();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_CancelInteraction();
 	
 
 

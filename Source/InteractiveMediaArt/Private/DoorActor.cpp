@@ -6,6 +6,7 @@
 #include "ExhibitionGameInstance.h"
 #include "EixtWidget.h"
 #include "Components/StaticMeshComponent.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 // Sets default values
 ADoorActor::ADoorActor()
@@ -36,11 +37,12 @@ void ADoorActor::BeginPlay()
 	Super::BeginPlay();
 	
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ADoorActor::OnOverlapBegin);
+	SphereComp->OnComponentEndOverlap.AddDynamic(this, &ADoorActor::OnOverlapEnd);
 
 	if (WBP_ExitWidget)
 	{
 		ExitWidget = CreateWidget<UEixtWidget>(GetWorld(), WBP_ExitWidget);
-		ExitWidget->SetDoorActor(this);
+		//ExitWidget->SetDoorActor(this);
 	}
 }
 
@@ -102,9 +104,29 @@ void ADoorActor::Return()
 void ADoorActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Exit();
-	// 1초 후에 CallExitUI 함수 호출
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ADoorActor::CallExitUI, 1.0f, false);
+
+	if (OtherActor)
+	{
+		auto* player = Cast<ACJS_LobbyPlayer>(OtherActor);
+		if (player)
+		{
+			auto* pc = Cast<APlayerController>(player->Controller);
+			if (pc)
+			{
+				if (GetWorld()->GetFirstPlayerController() == pc)
+				{
+					// 1초 후에 CallExitUI 함수 호출
+					FTimerHandle TimerHandle;
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ADoorActor::CallExitUI, 1.0f, false);
+				}
+			}
+		}
+	}
+}
+
+void ADoorActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	Return();
 }
 
 void ADoorActor::CallExitUI()
@@ -114,4 +136,5 @@ void ADoorActor::CallExitUI()
 		ExitWidget->VisibleExitUI();
 	}
 }
+
 

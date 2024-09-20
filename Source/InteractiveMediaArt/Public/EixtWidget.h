@@ -31,13 +31,4 @@ public:
 
 	UFUNCTION()
 	void OnExit();
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Door")
-	//TSubclassOf<class AActor> BP_Door;
-
-    UPROPERTY()
-    class ADoorActor* DoorActor;
-
-	void SetDoorActor(ADoorActor* InDoorActor);
-
 };

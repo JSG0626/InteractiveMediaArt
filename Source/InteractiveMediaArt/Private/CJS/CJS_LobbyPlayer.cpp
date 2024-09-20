@@ -7,11 +7,14 @@
 #include "CJS/CJS_MovePosBnt.h"
 #include "CJS/CJS_CountPlayerUIActor.h"
 #include "CJS/CJS_CountPlayerUI.h"
+#include "CJS/CJS_CancelBtn.h"
+#include "CJS/CJS_UIManager.h"
 
 #include "ButtonExp.h"
 #include "AimPoint.h"
 #include "EscapeUI.h"
 #include "SG_ArtPlayer.h"
+#include "../IMA_GameModeBase.h"
 
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -24,10 +27,8 @@
 #include "Camera/CameraActor.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "../../../../Plugins/Runtime/AudioCapture/Source/AudioCapture/Public/AudioCaptureComponent.h"
-#include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
-#include "../IMA_GameModeBase.h"
-#include "CJS/CJS_CancelBtn.h"
+#include "AudioCaptureComponent.h"
+#include "NiagaraComponent.h"
 
 
 
@@ -127,18 +128,18 @@ void ACJS_LobbyPlayer::BeginPlay()
 	VoiceMeter2 = GetWorld()->SpawnActor<AActor>(BP_VoiceMeterClass, VoiceMeterTransform2);
 	if (VoiceMeter1 && VoiceMeter2)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("VoiceMeter Spawn"));
+		//UE_LOG(LogTemp, Warning, TEXT("VoiceMeter Spawn"));
 
 		// VoiceMeter1의 Niagara 컴포넌트 크기 조정
 		UNiagaraComponent* NiagaraComponent1 = VoiceMeter1->FindComponentByClass<UNiagaraComponent>();
 		if (NiagaraComponent1)
 		{
 			NiagaraComponent1->SetWorldScale3D(FVector(3.0f));  // 스케일을 3으로 설정
-			UE_LOG(LogTemp, Warning, TEXT("VoiceMeter1 Niagara Scale Set to 3"));
+			//UE_LOG(LogTemp, Warning, TEXT("VoiceMeter1 Niagara Scale Set to 3"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent1 in VoiceMeter1"));
+			//UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent1 in VoiceMeter1"));
 		}
 
 		// VoiceMeter2의 Niagara 컴포넌트 크기 조정
@@ -146,11 +147,11 @@ void ACJS_LobbyPlayer::BeginPlay()
 		if (NiagaraComponent2)
 		{
 			NiagaraComponent2->SetWorldScale3D(FVector(3.0f));  // 스케일을 3으로 설정
-			UE_LOG(LogTemp, Warning, TEXT("VoiceMeter2 Niagara Scale Set to 3"));
+			//UE_LOG(LogTemp, Warning, TEXT("VoiceMeter2 Niagara Scale Set to 3"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter2"));
+			//UE_LOG(LogTemp, Error, TEXT("Failed to find NiagaraComponent in VoiceMeter2"));
 		}
 
 		DisableAudioCapture();
@@ -160,6 +161,18 @@ void ACJS_LobbyPlayer::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
 		return;
 	}
+
+	// UI 매니저 인스턴스 생성 및 초기화	
+	UIManager = NewObject<UCJS_UIManager>(this);
+	if (UIManager)
+	{
+		UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+	}
+	
 }
 
 // Called every frame
@@ -311,6 +324,8 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					HideAimPoint();
 					ShowMouseCursor();
 					ShowEscapeUI();
+
+					StartExperience();
 
 					EnableAudioCapture();
 				}
@@ -517,10 +532,12 @@ void ACJS_LobbyPlayer::HideEscapeUI()
 
 void ACJS_LobbyPlayer::OnExitBnt()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnExitBnt()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnExitBnt()"));
 	if (bExitBnt2_1)
 	{
 		DisableAudioCapture();
+
+		EndExperience();
 
 		if (pc)
 		{
@@ -541,7 +558,7 @@ void ACJS_LobbyPlayer::OnExitBnt()
 
 			// 4. AimPoint 다시 표시 (필요하다면)
 			ShowAimPoint();
-			//UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
+			UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
 
 			bExitBnt2_1 = false;	
 		}
@@ -670,6 +687,33 @@ void ACJS_LobbyPlayer::DisableAudioCapture()
 	else
 	{
 		//UE_LOG(LogTemp, Error, TEXT("BP_VoiceMeterClass is null"));
+	}
+}
+
+void ACJS_LobbyPlayer::StartExperience()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()"));
+	if (UIManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is OK"));
+		UIManager->ShowStartPanel();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is null"));
+	}
+}
+void ACJS_LobbyPlayer::EndExperience()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()"));
+	if (UIManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is OK"));
+		UIManager->ShowEndPanel();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is null"));
 	}
 }
 

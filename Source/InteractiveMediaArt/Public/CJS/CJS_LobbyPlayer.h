@@ -138,9 +138,18 @@ public:
 	void ServerRPC_CancelInteraction();
 	
 
-
-
 	// 작품 2의 요소
+	//UPROPERTY(EditDefaultsOnly, Category = "UI")
+	//TSubclassOf<class UCJS_UIManager> UIManagerFactory;
+	UPROPERTY()
+	class UCJS_UIManager* UIManager;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> StartPanelFactory;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> EndPanelFactory;
+
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()
@@ -149,6 +158,9 @@ public:
 	class AActor* VoiceMeter2;
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
+
+	void StartExperience();
+	void EndExperience();
 
 	
 

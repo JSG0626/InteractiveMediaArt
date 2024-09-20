@@ -231,7 +231,7 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::StartInteractiveExperience()"));
 
 	// 플레이어 수 확인
-	if (ClickedPlayers.Num() != 2)
+	if (ClickedPlayers.Num() != MaxPlayer)
 	{
 		//UE_LOG(LogTemp, Error, TEXT("StartInteractiveExperience: Expected 2 players, but got %d"), ClickedPlayers.Num());
 		return;

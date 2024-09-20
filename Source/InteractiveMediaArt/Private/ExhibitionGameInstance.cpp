@@ -7,6 +7,7 @@
 #include "../InteractiveMediaArt.h"
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void UExhibitionGameInstance::Init()
@@ -68,8 +69,8 @@ void UExhibitionGameInstance::CreateMySession()
 
 	// 2. 랜선(LAN)으로 매치하는가?
 	FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
-	settings.bIsLANMatch = subsystemName == "NULL";
-	settings.bIsLANMatch = true;
+	//settings.bIsLANMatch = subsystemName == "NULL";
+	settings.bIsLANMatch = false;
 
 	// 로비기능을 활성화한다. (Host 하려면 필요)
 	settings.bUseLobbiesIfAvailable = true;
@@ -109,7 +110,7 @@ void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool 
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
 		PRINTLOG(TEXT("Session created successfully with name: %s"), *SessionName.ToString());
-		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/CJS/Maps/CJS_Alpha_Exhibition?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/Main/Alpha_Exhibition?listen"));
 	}
 	else
 	{
@@ -146,8 +147,8 @@ void UExhibitionGameInstance::FindSessions()
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	//SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 	SessionSearch->QuerySettings.Set(FName("HOST_NAME"), MySessionName, EOnlineComparisonOp::Equals);
-	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	SessionSearch->bIsLanQuery = true;
+	//SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	SessionSearch->bIsLanQuery = false;
 	SessionSearch->MaxSearchResults = 40;
 
 

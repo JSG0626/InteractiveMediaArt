@@ -99,6 +99,7 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 	if (bPythonExe && bScript)
 	{
 		FString params = FString::Printf(TEXT("\"%s\""), *scriptPath);
+		UE_LOG(LogTemp, Warning, TEXT("params: %s"), *params);
 		ServerProcHandle = FPlatformProcess::CreateProc(*pythonExePath,
 			*params,
 			bPythonWindowHidden,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움

@@ -106,12 +106,11 @@ void UExhibitionGameInstance::CreateMySession()
 
 void UExhibitionGameInstance::OnMyCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
-	PRINTLOG(TEXT("JSG "));
 	if (bWasSuccessful)
 	{
 		PRINTLOG(TEXT("OnMyCreateSessionComplete is Success"));
 		PRINTLOG(TEXT("Session created successfully with name: %s"), *SessionName.ToString());
-		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/JSG/Maps/JSG_Alpha_Exhibition?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/ArtProject/Main/Alpha_Exhibition'?listen"));
 	}
 	else
 	{

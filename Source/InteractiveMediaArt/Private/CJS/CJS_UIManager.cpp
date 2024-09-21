@@ -18,70 +18,68 @@ void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartP
 	QuitUIFactory = InQuitUIFactory;
 	PC = InPC;
 
+    if (!WorldRef || !PC)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UCJS_UIManager::Initialize(): WorldRef or PC is null"));
+        return;
+    }
 
+    // 시작 패널 인스턴스 생성
+    if (StartPanelFactory)
+    {
+        StartPanelInstance = CreateWidget<UUserWidget>(PC, StartPanelFactory);
+        if (StartPanelInstance)
+        {
+            StartPanelInstance->AddToViewport();
+            HideStartPanel();
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Failed to create StartPanelInstance"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("StartPanelFactory is not set!"));
+    }
 
-	if (!WorldRef || !PC)
-	{
-		UE_LOG(LogTemp, Error, TEXT("UCJS_UIManager::Initialize(): WorldRef or PC is null"));
-		return;
-	}
+    // 종료 패널 인스턴스 생성
+    if (EndPanelFactory)
+    {
+        EndPanelInstance = CreateWidget<UUserWidget>(PC, EndPanelFactory);
+        if (EndPanelInstance)
+        {
+            EndPanelInstance->AddToViewport();
+            HideEndPanel();
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Failed to create EndPanelInstance"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("EndPanelFactory is not set!"));
+    }
 
-	// 시작 패널 인스턴스 생성
-	if (StartPanelFactory)
-	{
-		StartPanelInstance = CreateWidget<UUserWidget>(PC, StartPanelFactory);
-		if (StartPanelInstance)
-		{
-			StartPanelInstance->AddToViewport();
-			HideStartPanel();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create StartPanelInstance"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("StartPanelFactory is not set!"));
-	}
-
-	// 종료 패널 인스턴스 생성
-	if (EndPanelFactory)
-	{
-		EndPanelInstance = CreateWidget<UUserWidget>(PC, EndPanelFactory);
-		if (EndPanelInstance)
-		{
-			EndPanelInstance->AddToViewport();
-			HideEndPanel();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create EndPanelInstance"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("EndPanelFactory is not set!"));
-	}
-
-	// 종료 UI 
-	if (QuitUIFactory)
-	{
-		QuitUIInstance = CreateWidget<UUserWidget>(PC, QuitUIFactory);
-		if (QuitUIInstance)
-		{
-			//QuitUIInstance->AddToViewport();
-			HideQuitUI();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create QuitUIInstance"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("EndPanelFactory is not set!"));
-	}
+    // 종료 UI 인스턴스 생성
+    if (QuitUIFactory)
+    {
+        QuitUIInstance = CreateWidget<UUserWidget>(PC, QuitUIFactory);
+        if (QuitUIInstance)
+        {
+            //QuitUIInstance->AddToViewport();
+            HideQuitUI();
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Failed to create QuitUIInstance"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("QuitUIFactory is not set!"));
+    }
 }
 
 void UCJS_UIManager::ShowStartPanel()

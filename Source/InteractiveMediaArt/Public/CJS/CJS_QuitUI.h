@@ -15,13 +15,13 @@ class INTERACTIVEMEDIAART_API UCJS_QuitUI : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(meta = (BindWidget))
 	class UButton* Button_Quit;
 
 	//UPROPERTY()
 	//class ACJS_LobbyPlayer* Me;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
     void OnQuitButtonClicked();
 
 protected:

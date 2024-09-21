@@ -109,18 +109,13 @@ public:
 	void ServerRPC_SpawnArtPlayer(FTransform TargetTransform);
 
 	// ----------------------------------------JSG----------------------------------------
+	
 	void ExitArt();
-	UPROPERTY()
-	class APlayerController* pc;
 
 	UFUNCTION()
 	void MoveToArtPos(ACJS_MovePosBnt* button);
 
 	// 작품 1의 멀티 플레이
-	/*UPROPERTY(EditDefaultsOnly, Category = "Buttons")
-	TSubclassOf<class ACJS_MovePosBnt> MultiButtonFactory;*/
-	//UPROPERTY()
-	//class ACJS_MovePosBnt* MultiButton;
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartInteraction();
 
@@ -151,8 +146,11 @@ public:
 	void StartExperience();
 	void EndExperience();
 
+	UPROPERTY()
+	class APlayerController* pc;
+	virtual void PossessedBy(AController* NewController) override;
 
-
+	// 작품 2의 Voice Input
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()

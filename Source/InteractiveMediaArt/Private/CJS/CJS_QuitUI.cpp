@@ -14,10 +14,12 @@ void UCJS_QuitUI::OnQuitButtonClicked()
 
 	APlayerController* PC = GetOwningPlayer();
 	if (PC)
-	{
+	{	
+		UE_LOG(LogTemp, Warning, TEXT("UCJS_QuitUI::OnQuitButtonClicked() PC is Ok"));
 		ACJS_LobbyPlayer* LobbyPlayer = Cast<ACJS_LobbyPlayer>(PC->GetPawn());
 		if (LobbyPlayer)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("UCJS_QuitUI::OnQuitButtonClicked() LobbyPlayer is Ok"));
 			LobbyPlayer->OnExitBnt();
 		}
 		else
@@ -34,6 +36,7 @@ void UCJS_QuitUI::OnQuitButtonClicked()
 void UCJS_QuitUI::NativeConstruct()
 {
 	Super::NativeConstruct();
+
 
 	if (Button_Quit)
 	{

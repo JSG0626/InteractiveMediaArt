@@ -212,6 +212,33 @@ void ACJS_LobbyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+
+void ACJS_LobbyPlayer::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	pc = Cast<APlayerController>(NewController);
+
+	if (IsLocallyControlled())
+	{
+		UIManager = NewObject<UCJS_UIManager>(this);
+		if (UIManager)
+		{
+			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
+			UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
+	}
+}
+
+
 void ACJS_LobbyPlayer::OnMyActionMove(const struct FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -421,7 +448,7 @@ void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform Target
 	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
 	ArtPlayer->Me = this;
 	ArtPlayer->SetOwner(this);
-	PRINTLOG(TEXT("SpawnServerManager"));
+	//PRINTLOG(TEXT("SpawnServerManager"));
 	ArtPlayer->SpawnServerManager();
 }
 
@@ -773,6 +800,7 @@ void ACJS_LobbyPlayer::EndExperience()
 		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is null"));
 	}
 }
+
 
 void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
 {

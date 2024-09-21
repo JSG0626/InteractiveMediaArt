@@ -231,7 +231,7 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::StartInteractiveExperience()"));
 
 	// 플레이어 수 확인
-	if (ClickedPlayers.Num() != 2)
+	if (ClickedPlayers.Num() != MaxPlayer)
 	{
 		//UE_LOG(LogTemp, Error, TEXT("StartInteractiveExperience: Expected 2 players, but got %d"), ClickedPlayers.Num());
 		return;
@@ -249,8 +249,9 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 
 			// 서버에서 플레이어 위치 이동
 			//Player->SetActorTransform(TargetTransforms[i]);
-			Player->ServerRPC_SpawnArtPlayer(TargetTransforms[i]);
-			PRINTLOG(TEXT("Player->ServerRPC_SpawnArtPlayer(%s);"), *TargetTransforms[i].ToString());
+			Player->SpawnArtPlayer(TargetTransforms[i]);
+			//Player->ServerRPC_SpawnArtPlayer(TargetTransforms[i]);
+
 			// 플레이어의 새로운 위치 로그 출력
 			FVector NewLocation = Player->GetActorLocation();
 			//UE_LOG(LogTemp, Warning, TEXT("Player %s moved to new location: %s"), *PlayerName, *NewLocation.ToString());

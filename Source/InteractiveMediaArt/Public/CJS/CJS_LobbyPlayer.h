@@ -56,7 +56,6 @@ public:
 	void OnMouseClick(const FInputActionInstance& Value);
 	void OnMouseClickRelease(const FInputActionInstance& Value);
 
-
 	/** Widgets */
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> PopUpUIClass;
@@ -104,6 +103,8 @@ public:
 	class ASG_ArtPlayer* ArtPlayer;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SpawnArtPlayer(FTransform TargetTransform);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SpawnArtPlayer(FTransform TargetTransform);

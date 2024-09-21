@@ -48,7 +48,7 @@ void ASG_Player::BeginPlay()
 	}
 
 	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ServerManager Spawn")));
-	//ServerManager->Me = this;
+	//ServerManager->Player = this;
 }
 
 // Called every frame

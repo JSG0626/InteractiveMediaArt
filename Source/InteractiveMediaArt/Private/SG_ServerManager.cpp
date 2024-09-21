@@ -15,6 +15,7 @@
 #include "SG_ArtPlayer.h"
 #include "../InteractiveMediaArt.h"
 #include "CJS/CJS_LobbyPlayer.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 const uint32 MIN_JSON_SIZE = 1500;
 const uint32 MAX_JSON_SIZE = 3000;
@@ -32,9 +33,8 @@ ASG_ServerManager::ASG_ServerManager()
 void ASG_ServerManager::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString::Printf(TEXT("IPString: %s, Port: %d"), *ServerIP, ServerPort));
 
-	
+
 }
 
 void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -51,42 +51,86 @@ void ASG_ServerManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
+void ASG_ServerManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	DOREPLIFETIME(ASG_ServerManager, Me);
+	DOREPLIFETIME(ASG_ServerManager, Player);
+}
+
 // Called every frame
 void ASG_ServerManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	//TestReceiveData();
 
-	auto Player = GetOwner<ACJS_LobbyPlayer>();
+	if (Player)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("[%s] Owner: [%s] isLocallyControlled(): %d"), NETMODE, *Player->GetName(), Player->IsLocallyControlled()));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, TEXT("나 Player 널인데??"));
+	}
 	if (Player && Player->IsLocallyControlled())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Blue, FString::Printf(TEXT("Player: %s"), *Player->GetName()) );
+		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("나는 클라이언트 플레이어다~")));
 		if (ServerProcHandle.IsValid() && ClientSocket)
 		{
-			PRINTLOG(TEXT("ServerProcHandle.IsValid() && ClientSocket"));
+			//PRINTLOG(TEXT("Player && Player->IsLocallyControlled() && ServerProcHandle.IsValid() && ClientSocket"));
 			if (bReceiveSuccess) ReceiveData();
 			else ReceiveRestData();
 
 			uint32 pendingData = 0;
 			ClientSocket->HasPendingData(pendingData);
 			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("%u"), pendingData));
+			//PRINTLOG(TEXT("%s"), *ReceivedJson);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("프로세스가 안켜졌거나 소켓 연결이 안됐거나임")));
 		}
 	}	
+	else
+	{
+		//PRINTLOG(TEXT("Player is not locallyControlled"));
+	}
+}
+
+void ASG_ServerManager::OnRep_Player()
+{
+	PRINTLOG(TEXT("Active"));
+	if (Player && Player->IsLocallyControlled())
+	{
+		PRINTLOG(TEXT("if (Player && Player->IsLocallyControlled())"));
+		RunPythonScript(PyConnectServer);
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [&]()
+			{
+				CreateClient();
+			}, 2.0f, false);
+	}
+	else
+	{
+		PRINTLOG(TEXT("Player is not local player"));
+	}
 }
 
 void ASG_ServerManager::Active()
 {
 	PRINTLOG(TEXT("Active"));
-	auto* Player = GetOwner<ACJS_LobbyPlayer>();
 	if (Player && Player->IsLocallyControlled())
 	{
-		PRINTLOG(TEXT("Player && Player->IsLocallyControlled()"));
+		PRINTLOG(TEXT("if (Player && Player->IsLocallyControlled())"));
 		RunPythonScript(PyConnectServer);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 			{
 				CreateClient();
 			}, 1.0f, false);
+	}
+	else
+	{
+		PRINTLOG(TEXT("Player is not local player"));
 	}
 }
 
@@ -99,6 +143,7 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 	if (bPythonExe && bScript)
 	{
 		FString params = FString::Printf(TEXT("\"%s\""), *scriptPath);
+		UE_LOG(LogTemp, Warning, TEXT("params: %s"), *params);
 		ServerProcHandle = FPlatformProcess::CreateProc(*pythonExePath,
 			*params,
 			bPythonWindowHidden,	// bLaunchDetached: false 로 설정하여 CMD 창을 띄움
@@ -110,6 +155,7 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 			nullptr
 		);
 
+		PRINTLOG(TEXT("ServerProcHandle is valid = %d"), ServerProcHandle.IsValid());
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("ServerProcHandle is valid = %d"), ServerProcHandle.IsValid()));
 	}
 	else
@@ -117,12 +163,13 @@ void ASG_ServerManager::RunPythonScript(const FString& Path)
 		if (!bPythonExe) UE_LOG(LogTemp, Warning, TEXT("error: %s is not exist"), *pythonExePath);
 		if (!bScript) UE_LOG(LogTemp, Warning, TEXT("error: %s is not exist"), *scriptPath);
 
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Python executable or script not found")));
+		PRINTLOG(TEXT("Python executable or script not found"));
 	}
 }
 
 void ASG_ServerManager::CreateClient()
 {
+	PRINTLOG(TEXT("CreateClient"));
 	// 클라이언트 소켓 생성
 	ClientSocket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("TCP Client"), false);
 	ServerAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
@@ -146,22 +193,26 @@ void ASG_ServerManager::CreateClient()
 	bool bIsConnect = ClientSocket->Connect(*ServerAddr);
 	FString connectionStr = bIsConnect ? TEXT("서버 연결 완료") : TEXT("서버 연결 실패");
 	GEngine->AddOnScreenDebugMessage(-1, 20, FColor::Green, FString::Printf(TEXT("%s"), *connectionStr));
+	PRINTLOG(TEXT("%s"), *connectionStr);
 
 	if (bIsConnect)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *connectionStr);
 		//Me->ActiveComponents();
-
 	}
 	else
 	{
+		/*
+			이곳에 기존 플레이어인 LobbyPlayer로 돌아가는 로직이 필요함.
+		*/
 		Destroy();
+
 	}
 }
 
 
 bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& BytesReceived)
-{
+{	
+	PRINTLOG(TEXT("RecvAll"));
 	bool bSuccess = true;
 	if (Length >= 3000)
 	{
@@ -183,6 +234,7 @@ bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& By
 
 void ASG_ServerManager::ReceiveData()
 {
+	PRINTLOG(TEXT("ReceiveData"));
 	//UE_LOG(LogTemp, Warning, TEXT("[ReceiveData]"));
 	uint32 PackedLength = 0;
 	if (ClientSocket && ClientSocket->GetConnectionState() != SCS_Connected)
@@ -244,6 +296,7 @@ void ASG_ServerManager::ReceiveData()
 
 void ASG_ServerManager::ReceiveRestData()
 {
+	PRINTLOG(TEXT("ReceiveRestData"));
 	uint32 bodyPendingData;
 	if (!ClientSocket->HasPendingData(bodyPendingData)) return;
 

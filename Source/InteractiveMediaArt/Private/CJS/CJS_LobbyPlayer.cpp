@@ -29,6 +29,7 @@
 #include "Net/UnrealNetwork.h"
 #include "AudioCaptureComponent.h"
 #include "NiagaraComponent.h"
+#include <InteractiveMediaArt/InteractiveMediaArt.h>
 
 
 
@@ -382,15 +383,23 @@ void ACJS_LobbyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACJS_LobbyPlayer, ArtPlayer);
 }
 
+void ACJS_LobbyPlayer::SpawnArtPlayer(FTransform TargetTransform)
+{
+	ServerRPC_SpawnArtPlayer_Implementation(TargetTransform);
+	ArtPlayer->SpawnServerManager();
+	//ArtPlayer->MulticastRPC_SpawnServerManager();
+}
+
 void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform TargetTransform)
 {
+	PRINTLOG(TEXT("ServerRPC_SpawnArtPlayer"));
 	FActorSpawnParameters params;
 	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	check(ArtPlayerFactory); if (nullptr == ArtPlayerFactory) return;
 	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
-	ArtPlayer->Me = this;
-	ArtPlayer->SetOwner(this);
-	PRINTLOG(TEXT("SpawnServerManager"));
-	ArtPlayer->SpawnServerManager();
+	ArtPlayer->Player = this;
+	ArtPlayer->OnRep_Player();
 }
 
 void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)

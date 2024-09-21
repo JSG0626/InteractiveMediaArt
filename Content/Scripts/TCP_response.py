@@ -42,7 +42,7 @@ EXCLUDED_LANDMARKS = set(range(1, 11))
 
 # 소켓 설정
 server_ip = socket.gethostbyname(socket.gethostname())
-server_port = 7777
+server_port = 8090
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((server_ip, server_port))

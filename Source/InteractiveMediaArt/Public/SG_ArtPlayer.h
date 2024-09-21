@@ -46,7 +46,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -66,11 +66,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UNiagaraComponent* SmokeNiagaraOnRHandComp;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	class ASG_ServerManager* ServerManager;
 
-	UPROPERTY(EditDefaultsOnly)
-	class ACJS_LobbyPlayer* Me;
+	UPROPERTY(ReplicatedUsing = OnRep_Player, EditDefaultsOnly)
+	class ACJS_LobbyPlayer* Player;
+
+	UFUNCTION()
+	void OnRep_Player();
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ServerManager> ServerManagerFactory;
@@ -106,4 +109,9 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPC_HitLetter(const TArray<struct FBasicParticleData>& Datas);
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SpawnServerManager();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SpawnServerManager();
 };

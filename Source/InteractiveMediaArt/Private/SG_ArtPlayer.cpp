@@ -10,6 +10,7 @@
 #include "CJS/CJS_LobbyPlayer.h"
 #include <InteractiveMediaArt/InteractiveMediaArt.h>
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraDataInterfaceExport.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 ASG_ArtPlayer::ASG_ArtPlayer()
 {
@@ -62,6 +63,7 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 void ASG_ArtPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	bReplicates = true;
 	UE_LOG(LogTemp, Warning, TEXT("ASG_ArtPlayer::BeginPlay()"));
 	PoseableMeshComp->SetRelativeScale3D(MeshScale);
 	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
@@ -69,11 +71,11 @@ void ASG_ArtPlayer::BeginPlay()
 	InitLandmarkField();
 	InitBones();
 
-	FTimerHandle handle;
+	/*FTimerHandle handle;
 	GetWorldTimerManager().SetTimer(handle, [&]()
 		{
 			ActiveComponents();
-		}, 2.0f, false);
+		}, 2.0f, false);*/
 }
 
 void ASG_ArtPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -88,13 +90,29 @@ void ASG_ArtPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	PRINTLOG(TEXT(""));
 }
 
+void ASG_ArtPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	DOREPLIFETIME(ASG_ArtPlayer, ServerManager);
+	DOREPLIFETIME(ASG_ArtPlayer, Player);
+	
+}
+
 // Called every frame
 void ASG_ArtPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("MyName~: %s"), *GetName()));
+	if (Player)
+		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("[%s] [%s]: IsLocallyControlled: %d"), NETMODE, *Player->GetName(), Player->IsLocallyControlled()));
 
 	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
 
+}
+
+void ASG_ArtPlayer::OnRep_Player()
+{
+	SetOwner(Player);
+	ActiveComponents();
 }
 
 void ASG_ArtPlayer::InitLandmarkField()
@@ -147,29 +165,15 @@ void ASG_ArtPlayer::InitBones()
 	Bones.Add(TEXT("foot_r"));
 	Bones.Add(TEXT("ball_l"));
 	Bones.Add(TEXT("ball_r"));
-	Bones.Add(TEXT("MyBoneEMPTY"));
-	Bones.Add(TEXT("MyBoneEMPTY"));
+	Bones.Add(TEXT("ball_l"));
+	Bones.Add(TEXT("ball_r"));
 }
 
 void ASG_ArtPlayer::SpawnServerManager()
 {
-	check(ServerManagerFactory); if (nullptr == ServerManagerFactory) return;
+	PRINTLOG(TEXT("둘 다 서버 매니저 스폰 하냐??"));
+	ServerRPC_SpawnServerManager();
 
-	PRINTLOG(TEXT("SpawnManager"));
-	ServerManager = GetWorld()->SpawnActor<ASG_ServerManager>(ServerManagerFactory);
-	if (nullptr == ServerManager)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%hs is nullptr"), GET_NAME(ServerManager));
-		return;
-	}
-	ServerManager->SetOwner(GetOwner());
-	ServerManager->Me = this;
-
-	ServerManager->Active();
-	/*if (Me->IsLocallyControlled())
-	{
-
-	}*/
 }
 
 void ASG_ArtPlayer::SetJointPosition(const TArray<FVector>& JointPosition)
@@ -180,19 +184,53 @@ void ASG_ArtPlayer::SetJointPosition(const TArray<FVector>& JointPosition)
 
 void ASG_ArtPlayer::ActiveComponents()
 {
+	FString print = FString::Printf(TEXT("%s"), *GetOwner()->GetName());
+	PRINTLOG(TEXT("Owning 있냐?? : %s"), *print);
 	ServerRPC_ActiveComponents();
+}
+
+void ASG_ArtPlayer::ServerRPC_SpawnServerManager_Implementation()
+{
+	PRINTLOG(TEXT("ServerRPC_SpawnServerManager_Implementation"));
+	check(ServerManagerFactory); if (nullptr == ServerManagerFactory) return;
+
+	ServerManager = GetWorld()->SpawnActor<ASG_ServerManager>(ServerManagerFactory);
+	if (nullptr == ServerManager)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%hs is nullptr"), GET_NAME(ServerManager));
+		return;
+	}
+	ServerManager->SetOwner(GetOwner());
+	ServerManager->Player = GetOwner<ACJS_LobbyPlayer>();
+	ServerManager->OnRep_Player();
+	ServerManager->Me = this;
+
+	//MulticastRPC_SpawnServerManager();
+}
+
+void ASG_ArtPlayer::MulticastRPC_SpawnServerManager_Implementation()
+{
+	PRINTLOG(TEXT("MulticastRPC_SpawnServerManager"));
+	if (ServerManager)
+	{
+		ServerManager->Active();
+	}
+	else
+	{
+		PRINTLOG(TEXT("ServerManager is nullptr"));
+	}
 }
 
 void ASG_ArtPlayer::ServerRPC_SetJointPosition_Implementation(const TArray<FVector>& JointPosition)
 {
-	PRINTLOG(TEXT("ServerRPC_SetJointPosition_Implementation"));
+	//PRINTLOG(TEXT("ServerRPC_SetJointPosition_Implementation"));
 	MulticastRPC_SetJointPosition(JointPosition);
 }
 
 void ASG_ArtPlayer::MulticastRPC_SetJointPosition_Implementation(const TArray<FVector>& JointPosition)
 {
 	check(PoseableMeshComp); if (nullptr == PoseableMeshComp) return;
-	PRINTLOG(TEXT("MulticastRPC_SetJointPosition_Implementation"));
+	//PRINTLOG(TEXT("MulticastRPC_SetJointPosition_Implementation"));
 	FVector CurLocation = GetActorLocation();
 	CurLocation.Z += 500;
 	for (int32 i = 0; i < JointPosition.Num(); i++)
@@ -242,7 +280,6 @@ void ASG_ArtPlayer::MulticastRPC_ActiveComponents_Implementation()
 
 void ASG_ArtPlayer::ServerRPC_HitLetter_Implementation(const TArray<FBasicParticleData>& Datas)
 {
-	
 	const float SphereTraceRadius = 100;
 	const float ForceMinValue = -300;
 	const float ForceMaxValue = 300;

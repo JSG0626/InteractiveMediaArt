@@ -76,14 +76,12 @@ void ASG_ServerManager::Tick(float DeltaTime)
 		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("나는 클라이언트 플레이어다~")));
 		if (ServerProcHandle.IsValid() && ClientSocket)
 		{
-			//PRINTLOG(TEXT("Player && Player->IsLocallyControlled() && ServerProcHandle.IsValid() && ClientSocket"));
 			if (bReceiveSuccess) ReceiveData();
 			else ReceiveRestData();
 
 			uint32 pendingData = 0;
 			ClientSocket->HasPendingData(pendingData);
 			GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, FString::Printf(TEXT("%u"), pendingData));
-			//PRINTLOG(TEXT("%s"), *ReceivedJson);
 		}
 		else
 		{
@@ -212,7 +210,6 @@ void ASG_ServerManager::CreateClient()
 
 bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& BytesReceived)
 {	
-	PRINTLOG(TEXT("RecvAll"));
 	bool bSuccess = true;
 	if (Length >= 3000)
 	{
@@ -234,7 +231,6 @@ bool ASG_ServerManager::RecvAll(TArray<uint8>& OutData, uint32 Length, int32& By
 
 void ASG_ServerManager::ReceiveData()
 {
-	PRINTLOG(TEXT("ReceiveData"));
 	//UE_LOG(LogTemp, Warning, TEXT("[ReceiveData]"));
 	uint32 PackedLength = 0;
 	if (ClientSocket && ClientSocket->GetConnectionState() != SCS_Connected)
@@ -296,7 +292,6 @@ void ASG_ServerManager::ReceiveData()
 
 void ASG_ServerManager::ReceiveRestData()
 {
-	PRINTLOG(TEXT("ReceiveRestData"));
 	uint32 bodyPendingData;
 	if (!ClientSocket->HasPendingData(bodyPendingData)) return;
 

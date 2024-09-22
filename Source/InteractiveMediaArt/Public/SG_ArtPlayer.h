@@ -114,4 +114,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SpawnServerManager();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_HitLetter_AddImpulse(class UPrimitiveComponent* HitComp, const FVector& Force);
 };

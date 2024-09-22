@@ -46,7 +46,7 @@ ALHM_ArticleText::ALHM_ArticleText()
             MeshComponent->SetEnableGravity(false);
             MeshComponent->SetMassOverrideInKg(NAME_None, 10.f);
             // JSG
-            MeshComponent->SetIsReplicated(true);
+            //MeshComponent->SetIsReplicated(true);
             //MeshComponent->
 
             // �迭�� �߰�

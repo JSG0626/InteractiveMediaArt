@@ -171,14 +171,12 @@ void ASG_ArtPlayer::InitBones()
 
 void ASG_ArtPlayer::SpawnServerManager()
 {
-	PRINTLOG(TEXT("둘 다 서버 매니저 스폰 하냐??"));
 	ServerRPC_SpawnServerManager();
 
 }
 
 void ASG_ArtPlayer::SetJointPosition(const TArray<FVector>& JointPosition)
 {
-	PRINTLOG(TEXT("SetJointPosition"));
 	ServerRPC_SetJointPosition(JointPosition);
 }
 
@@ -200,6 +198,7 @@ void ASG_ArtPlayer::ServerRPC_SpawnServerManager_Implementation()
 		UE_LOG(LogTemp, Error, TEXT("%hs is nullptr"), GET_NAME(ServerManager));
 		return;
 	}
+	ServerManager->SetReplicates(true);;
 	ServerManager->SetOwner(GetOwner());
 	ServerManager->Player = GetOwner<ACJS_LobbyPlayer>();
 	ServerManager->OnRep_Player();
@@ -219,6 +218,11 @@ void ASG_ArtPlayer::MulticastRPC_SpawnServerManager_Implementation()
 	{
 		PRINTLOG(TEXT("ServerManager is nullptr"));
 	}
+}
+
+void ASG_ArtPlayer::MulticastRPC_HitLetter_AddImpulse_Implementation(class UPrimitiveComponent* HitComp, const FVector& Force)
+{
+	HitComp->AddImpulse(Force);
 }
 
 void ASG_ArtPlayer::ServerRPC_SetJointPosition_Implementation(const TArray<FVector>& JointPosition)
@@ -303,7 +307,7 @@ void ASG_ArtPlayer::ServerRPC_HitLetter_Implementation(const TArray<FBasicPartic
 			if (hitComp)
 			{
 				FVector force = FVector(FMath::FRandRange(ForceMinValue, ForceMaxValue), 0, ForceZValue);
-				hitComp->AddImpulse(force);
+				MulticastRPC_HitLetter_AddImpulse(hitComp, force);
 			}
 		}
 	}

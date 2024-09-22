@@ -398,6 +398,7 @@ void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform Target
 
 	check(ArtPlayerFactory); if (nullptr == ArtPlayerFactory) return;
 	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
+	ArtPlayer->SetReplicates(true);
 	ArtPlayer->Player = this;
 	ArtPlayer->OnRep_Player();
 }

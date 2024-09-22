@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_LobbyPlayer.h"
@@ -29,7 +29,6 @@
 #include "Net/UnrealNetwork.h"
 #include "AudioCaptureComponent.h"
 #include "NiagaraComponent.h"
-#include <InteractiveMediaArt/InteractiveMediaArt.h>
 
 
 
@@ -92,6 +91,33 @@ void ACJS_LobbyPlayer::BeginPlay()
 			subSys->AddMappingContext(IMC_LobbyPlayer, 0);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::BeginPlay()::PlayerController (pc) is null in BeginPlay"));
+		return;
+	}
+
+	
+	// UI 매니저 인스턴스 생성 및 초기화	
+	//if (pc && pc->IsLocalPlayerController()) // APlayerController를 사용하는 경우: IsLocalPlayerController()
+	if (IsLocallyControlled())  // APawn, ACharacter 클래스의 함수로, 해당 폰이 로컬에서 제어되는지 확인
+	{
+		UIManager = NewObject<UCJS_UIManager>(this);
+		if (UIManager)
+		{
+			//UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
+			//UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+		}
+		else
+		{
+			//UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+		}
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Error, TEXT("Not locally controlled, UIManager not initialized"));
+	}
+	
 
 	// AimPointUI 위젯 생성
 	if (WBP_aimpoint)  // WBP_aimpoint가 올바르게 할당되어 있는지 확인
@@ -120,7 +146,6 @@ void ACJS_LobbyPlayer::BeginPlay()
 		EscapeUI->AddToViewport();
 		EscapeUI->SetVisibility(ESlateVisibility::Hidden);
 	}
-
 
 	// AudioCapture 설정
 	FTransform VoiceMeterTransform1 = FTransform(FRotator(0, 0, 0), FVector(-5705, -1980, 670), FVector(1, 1, 1));
@@ -161,19 +186,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn VoiceMeter1, 2 actor"));
 		return;
-	}
-
-	// UI 매니저 인스턴스 생성 및 초기화	
-	UIManager = NewObject<UCJS_UIManager>(this);
-	if (UIManager)
-	{
-		//UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
-	}
-	
+	}	
 }
 
 // Called every frame
@@ -197,9 +210,36 @@ void ACJS_LobbyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		input->BindAction(IA_ClickBnt, ETriggerEvent::Started, this, &ACJS_LobbyPlayer::OnMouseClick);
 		input->BindAction(IA_ClickBnt, ETriggerEvent::Completed, this, &ACJS_LobbyPlayer::OnMouseClickRelease);
 
-		//UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
+		UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
 	}
 }
+
+
+void ACJS_LobbyPlayer::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	pc = Cast<APlayerController>(NewController);
+
+	if (IsLocallyControlled())
+	{
+		UIManager = NewObject<UCJS_UIManager>(this);
+		if (UIManager)
+		{
+			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
+			//UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+		}
+		else
+		{
+			//UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+		}
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
+	}
+}
+
 
 void ACJS_LobbyPlayer::OnMyActionMove(const struct FInputActionValue& Value)
 {
@@ -239,7 +279,7 @@ void ACJS_LobbyPlayer::OnMyActionLook(const struct FInputActionValue& Value)
 
 void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()"));
 
 	FVector Start = FollowCamera->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
@@ -254,12 +294,12 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	
 	if (bHit)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
 
 		if (Outhit.Component.IsValid())
 		{
 			FString HitComponentName = Outhit.Component->GetName();
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitComponentName);
+			UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitComponentName);
 		}
 
 		AActor* HitActor = Outhit.GetActor();
@@ -269,7 +309,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
 			if (HitActorName.Contains("BTN1_1_Single"))
 			{
@@ -283,11 +323,11 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			}
 			else if (HitActorName.Contains("BTN1_1_Multi"))
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
+				UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
 				ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(HitActor);
 				if (btn_MultiPlay != nullptr)
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
 					ServerRPC_StartInteraction();
 
 					btn_MultiPlay->SetActorHiddenInGame(true);
@@ -318,16 +358,24 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if (buttonArt2 != nullptr)
 				{
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonArt2->Art2_TargetCamera));
+					if (!pc)
+					{
+						pc = Cast<APlayerController>(GetController());
+						if (!pc)
+						{
+							UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in OnMouseClick"));
+							return;
+						}
+					}
+
+					pc->SetViewTarget(Cast<AActor>(buttonArt2->Art2_TargetCamera));
 					FInputModeUIOnly UIOnlyMode;
 					pc->SetInputMode(UIOnlyMode);
 
 					HideAimPoint();
 					ShowMouseCursor();
-					ShowEscapeUI();
-
+					UIManager->ShowQuitUI();
 					StartExperience();
-
 					EnableAudioCapture();
 				}
 			}
@@ -361,18 +409,24 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ACJS_AIChatbotBnt* button3 = Cast<ACJS_AIChatbotBnt>(HitActor);
 				if (button3 != nullptr)
 				{
+					//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button3 is existed"));
 					AIChatbot(button3);
+					//UE_LOG(LogTemp, Warning, TEXT("AIChatbot(button3 set"));
+				}
+				else
+				{
+					//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button3 is null"));
 				}
 			}
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::Hit Actor is NULL"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::No Hit Detected"));
 	}
 }
 
@@ -383,73 +437,15 @@ void ACJS_LobbyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ACJS_LobbyPlayer, ArtPlayer);
 }
 
-void ACJS_LobbyPlayer::SpawnArtPlayer(FTransform TargetTransform)
-{
-	ServerRPC_SpawnArtPlayer_Implementation(TargetTransform);
-	ArtPlayer->SpawnServerManager();
-	//ArtPlayer->MulticastRPC_SpawnServerManager();
-}
-
 void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform TargetTransform)
 {
-	PRINTLOG(TEXT("ServerRPC_SpawnArtPlayer"));
 	FActorSpawnParameters params;
 	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	check(ArtPlayerFactory); if (nullptr == ArtPlayerFactory) return;
 	ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, TargetTransform, params);
-	ArtPlayer->SetReplicates(true);
-	ArtPlayer->Player = this;
-	ArtPlayer->OnRep_Player();
-}
-
-void ACJS_LobbyPlayer::MulticastRPC_ReturnToCamera_Implementation()
-{
-	if (pc && pc->IsLocalPlayerController() )
-	{	
-		PRINTLOG(TEXT("if (pc && pc->IsLocalPlayerController() )"));
-		pc->SetViewTarget(this);
-		FInputModeGameOnly InputModeData;
-		pc->SetInputMode(InputModeData);
-
-		ShowAimPoint();
-		pc->bShowMouseCursor = false;
-		HideEscapeUI();
-	}
-}
-
-void ACJS_LobbyPlayer::MulticastRPC_ShowArt1WinUI_Implementation()
-{
-	if ( IsLocallyControlled() )
-	{
-		check(WBP_Art1Win); if ( nullptr == WBP_Art1Win ) return;
-
-		Art1WinUI = CreateWidget(GetWorld(), WBP_Art1Win);
-		Art1WinUI->AddToViewport();
-
-		FTimerHandle handle;
-		GetWorldTimerManager().SetTimer(handle, [&]()
-		{
-			Art1WinUI->RemoveFromParent();
-		}, 2.0f, false);
-	}
-}
-
-void ACJS_LobbyPlayer::MulticastRPC_ShowArt1LoseUI_Implementation()
-{
-	if ( IsLocallyControlled() )
-	{
-		check(WBP_Art1Lose); if ( nullptr == WBP_Art1Lose ) return;
-
-		Art1LoseUI = CreateWidget(GetWorld(), WBP_Art1Lose);
-		Art1LoseUI->AddToViewport();
-
-		FTimerHandle handle;
-		GetWorldTimerManager().SetTimer(handle, [&]()
-		{
-			Art1LoseUI->RemoveFromParent();
-		}, 2.0f, false);
-	}
+	ArtPlayer->Me = this;
+	ArtPlayer->SetOwner(this);
+	//PRINTLOG(TEXT("SpawnServerManager"));
+	ArtPlayer->SpawnServerManager();
 }
 
 void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
@@ -515,40 +511,65 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 
 void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease()"));
+
+	// 카메라 위치에서 라인트레이스를 시작할 위치와 방향 설정
 	FVector Start = FollowCamera->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
+	//UE_LOG(LogTemp, Warning, TEXT("라인트레이스 시작 위치: %s, 종료 위치: %s"), *Start.ToString(), *End.ToString());
+
+	// 라인트레이스 설정
 	FHitResult Outhit;
 	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
+	CollisionParams.AddIgnoredActor(this); // 플레이어 자신은 충돌 무시
 
+	// 라인트레이스 실행
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_GameTraceChannel4);
 	if (bHit)
 	{
-		AActor* HitActor = Outhit.GetActor();
+		//UE_LOG(LogTemp, Warning, TEXT("라인트레이스 히트 감지됨"));
 
+		// 충돌한 액터 가져오기
+		AActor* HitActor = Outhit.GetActor();
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
+			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
-			if (HitActorName.Contains("BNT1_3"))
+			// BNT1_3 버튼 액터인지 확인
+			if (HitActorName.Contains("BTN1_3"))
 			{
-				// BNT1_3을 뗀 상태: 녹음 종료 및 저장
+				//UE_LOG(LogTemp, Warning, TEXT("BNT1_3 버튼 감지됨, 녹음 종료 및 저장 진행"));
+
+				// ACJS_AIChatbotBnt로 캐스팅
 				ACJS_AIChatbotBnt* buttonexp = Cast<ACJS_AIChatbotBnt>(HitActor);
 				if (buttonexp != nullptr)
 				{
+					//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::buttonexp는 유효합니다"));
 					VoiceRecord(buttonexp);
+					//UE_LOG(LogTemp, Warning, TEXT("VoiceRecord(buttonexp) 호출 완료"));
 				}
+				else
+				{
+					//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::buttonexp 캐스팅 실패"));
+				}
+			}
+			else
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Hit Actor가 BNT1_3이 아님"));
 			}
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::Hit Actor가 NULL"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::라인트레이스에서 히트 감지되지 않음"));
 	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease() 끝"));
 }
 
 FString ACJS_LobbyPlayer::GetProjectSavedDir()
@@ -613,7 +634,6 @@ void ACJS_LobbyPlayer::OnExitBnt()
 	if (bExitBnt2_1)
 	{
 		DisableAudioCapture();
-
 		EndExperience();
 
 		if (pc)
@@ -623,21 +643,29 @@ void ACJS_LobbyPlayer::OnExitBnt()
 			
 			// 2. 입력 모드를 게임 전용으로 설정
 			FInputModeGameOnly inputMode;
+			pc->SetInputMode(inputMode);
 			pc->bShowMouseCursor = false;
 			pc->bEnableMouseOverEvents = false;
-			pc->SetInputMode(inputMode);
-
-			// 3. Escape UI 제거
-			if (EscapeUI)
+			
+			// 3. Quit UI 제거
+			if (UIManager)
 			{
-				HideEscapeUI();
+				UIManager->HideQuitUI();
+			}
+			else
+			{
+				//UE_LOG(LogTemp, Error, TEXT("UIManager is null in OnExitBnt"));
 			}
 
 			// 4. AimPoint 다시 표시 (필요하다면)
 			ShowAimPoint();
-			UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
+			//UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
 
 			bExitBnt2_1 = false;	
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in OnExitBnt"));
 		}
 	}
 }
@@ -769,43 +797,55 @@ void ACJS_LobbyPlayer::DisableAudioCapture()
 
 void ACJS_LobbyPlayer::StartExperience()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()"));
 	if (UIManager)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is OK"));
+		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is OK"));
 		UIManager->ShowStartPanel();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is null"));
+		//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is null"));
 	}
 }
 void ACJS_LobbyPlayer::EndExperience()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()"));
 	if (UIManager)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is OK"));
+		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is OK"));
 		UIManager->ShowEndPanel();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is null"));
+		//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is null"));
 	}
 }
 
+
 void ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT(" ACJS_LobbyPlayer::ServerRPC_StartInteraction_Implementation()"));
 	if (auto GM = GetWorld()->GetAuthGameMode<AIMA_GameModeBase>())
 	{
-		if(GM->CountPlayerUIActor) 
-			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1); 
+		if (GM->CountPlayerUIActor)
+		{
+			GM->CountPlayerUIActor->ServerRPC_AddPlayerNum(this, 1);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CountPlayerUIActor is null in GameMode."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to get GameMode."));
 	}
 }
 
 void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 {
-	//UE_LOG(LogTemp, Warning, TEXT(" ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()"));
+	UE_LOG(LogTemp, Warning, TEXT(" ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()"));
 
 	// PlayerController 초기화
 	if (pc == nullptr)
@@ -813,7 +853,7 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 		pc = Cast<APlayerController>(GetController());
 		if (pc == nullptr)
 		{
-			//UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: pc is null"));
+			UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: pc is null"));
 			return;
 		}
 	}
@@ -841,11 +881,11 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 		ShowMouseCursor();
 		ShowEscapeUI();
 
-		//UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
+		UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: Failed to spawn LocalTargetCamera"));
+		UE_LOG(LogTemp, Error, TEXT("ClientRPC_MultiplaySetting: Failed to spawn LocalTargetCamera"));
 	}
 }
 
@@ -869,16 +909,16 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 			if (CancelButton)
 			{
 				CancelButton->ShowCancelBtn();
-				//UE_LOG(LogTemp, Warning, TEXT("CancelButton spawned at location: %s"), *SpawnLocation.ToString());
+				UE_LOG(LogTemp, Warning, TEXT("CancelButton spawned at location: %s"), *SpawnLocation.ToString());
 			}
 			else
 			{
-				//UE_LOG(LogTemp, Error, TEXT("Failed to spawn ACJS_CancelBtn."));
+				UE_LOG(LogTemp, Error, TEXT("Failed to spawn ACJS_CancelBtn."));
 			}
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("CancelButtonClass is not set."));
+			UE_LOG(LogTemp, Error, TEXT("CancelButtonClass is not set."));
 		}
 	}
 	else
@@ -913,7 +953,7 @@ void ACJS_LobbyPlayer::OnCancelButtonClicked()
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found."));
+		UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found."));
 	}
 
 	// 서버에 RPC 호출하여 대기 취소 처리

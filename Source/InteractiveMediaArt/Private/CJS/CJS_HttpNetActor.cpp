@@ -55,7 +55,7 @@ void ACJS_HttpNetActor::OnResPostWaveFile(FHttpRequestPtr Request, FHttpResponse
 	if (bConnectedSuccessfully && Response.IsValid())
 	{
 		int32 ResponseCode = Response->GetResponseCode();
-		//UE_LOG(LogTemp, Warning, TEXT("OnResPostWaveFile OK... %d"), ResponseCode);
+		UE_LOG(LogTemp, Warning, TEXT("OnResPostWaveFile OK... %d"), ResponseCode);
 
 		// 응답 코드가 200(성공)인 경우에만 처리
 		if (ResponseCode == 200)

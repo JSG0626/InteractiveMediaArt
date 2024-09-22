@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_PopUpUI.h"
@@ -44,7 +44,7 @@ void UCJS_PopUpUI::OnCloseButtonClicked()
 
 		if (CurrentController == PlayerController)  // 같을 때만 실행
 		{
-			OwningBnt->ToggleWidgetVisibility(PlayerController);
+			//OwningBnt->ToggleWidgetVisibility(PlayerController);
 		}
 		else
 		{

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_LobbyPlayer.h"
@@ -167,7 +167,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 	UIManager = NewObject<UCJS_UIManager>(this);
 	if (UIManager)
 	{
-		UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
+		//UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
 	}
 	else
 	{

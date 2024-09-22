@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -149,7 +149,7 @@ public:
 
 	UPROPERTY()
 	class APlayerController* pc;
-	virtual void PossessedBy(AController* NewController) override;
+	//virtual void PossessedBy(AController* NewController) override;
 
 	// 작품 2의 Voice Input
 	UPROPERTY(EditDefaultsOnly)

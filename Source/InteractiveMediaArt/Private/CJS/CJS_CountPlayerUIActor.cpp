@@ -279,7 +279,7 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 
 			// 서버에서 플레이어 위치 이동
 			//Player->SetActorTransform(TargetTransforms[i]);
-			Player->ServerRPC_SpawnArtPlayer(TargetTransforms[i]);
+			Player->SpawnArtPlayer(TargetTransforms[i]);
 			PRINTLOG(TEXT("Player->ServerRPC_SpawnArtPlayer(%s);"), *TargetTransforms[i].ToString());
 			// 플레이어의 새로운 위치 로그 출력
 			FVector NewLocation = Player->GetActorLocation();

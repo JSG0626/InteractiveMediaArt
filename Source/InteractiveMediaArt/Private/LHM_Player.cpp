@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "LHM_Player.h"
@@ -79,6 +79,7 @@ void ALHM_Player::BeginPlay()
 	Super::BeginPlay();
 
 	//ShowMouseCursor();
+	pc = Cast<APlayerController>(GetController());
 
 }
 
@@ -154,11 +155,12 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	}
 }
 
-
+// ============================= Art3 =============================
 
 void ALHM_Player::ShowMouseCursor()
 {
-	if (APlayerController* pc = CastChecked<APlayerController>(GetController())) 
+	//if (APlayerController* pc = CastChecked<APlayerController>(GetController())) 
+	if ( pc )
 	{
 		pc->bShowMouseCursor = true;
 		pc->bEnableMouseOverEvents = true;
@@ -166,18 +168,22 @@ void ALHM_Player::ShowMouseCursor()
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		pc->SetInputMode(InputMode);
 
-		// Ä«¸Ş¶ó È¸Àü ºñÈ°¼ºÈ­
+		// ì¹´ë©”ë¼ íšŒì „ ë¹„í™œì„±í™”
 		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;  // ÀÌµ¿ÇÒ ¶§ ÇÃ·¹ÀÌ¾îÀÇ ¹æÇâÀÌ ¿òÁ÷ÀÌ´Â ¹æÇâÀ» ÇâÇÏ°Ô ÇÔ
+		GetCharacterMovement()->bOrientRotationToMovement = true;  // ì´ë™í•  ë•Œ í”Œë ˆì´ì–´ì˜ ë°©í–¥ì´ ì›€ì§ì´ëŠ” ë°©í–¥ì„ í–¥í•˜ê²Œ í•¨
 	}
 }
+
 
 void ALHM_Player::SpawnArt3PlayActor()
 {
 	TSubclassOf<AActor> Art3PlayActor = AArt3PlayActor::StaticClass();
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Art3PlayActor, FTransform(FVector(5960, -1164, 721))); 
+	AArt3PlayActor* SpawnedActor = GetWorld()->SpawnActor<AArt3PlayActor>(Art3PlayActor, FTransform(FVector(5960, -1570, 960))); 
+	//APlayerController* pc = CastChecked<APlayerController>(GetController());
+	SpawnedActor->pc = pc;
+	SpawnedActor->SetPreviousPosition();
 
-	// ½ºÆùµÈ ¾×ÅÍ¸¦ AArt3PlayActor·Î Ä³½ºÆÃÇÏ°í ÀúÀå
+	// ìŠ¤í°ëœ ì•¡í„°ë¥¼ AArt3PlayActorë¡œ ìºìŠ¤íŒ…í•˜ê³  ì €ì¥
 	SpawnedArt3PlayActor = Cast<AArt3PlayActor>(SpawnedActor);
 
 	if (SpawnedArt3PlayActor == nullptr)
@@ -196,7 +202,7 @@ void ALHM_Player::OnMouseClickArt3(const struct FInputActionValue& Value)
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
 
-	// µğ¹ö±× ¼± ±×¸®±â
+	// ë””ë²„ê·¸ ì„  ê·¸ë¦¬ê¸°
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_Visibility);
@@ -242,19 +248,18 @@ void ALHM_Player::MoveToArt3(ALHM_MoveArt3Btn* button)
 		return;
 	}
 
-	
-	// ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯ °¡Á®¿À±â
-	APlayerController* pc = Cast<APlayerController>(GetController());
+	// í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ ê°€ì ¸ì˜¤ê¸°
+	//APlayerController* pc = Cast<APlayerController>(GetController());
 	if (pc && button->Art3_TargetCamera)
 	{
-		// Ä«¸Ş¶ó ºä º¯°æ
+		// ì¹´ë©”ë¼ ë·° ë³€ê²½
 		pc->SetViewTarget(Cast<AActor>(button->Art3_TargetCamera));
 
-		// ÀÔ·Â ¸ğµå º¯°æ
+		// ì…ë ¥ ëª¨ë“œ ë³€ê²½
 		FInputModeUIOnly InputMode;
 		pc->SetInputMode(InputMode);
 
-		// ¸¶¿ì½º Ä¿¼­ ¹× ¿¡ÀÓ Æ÷ÀÎÆ® Ã³¸®
+		// ë§ˆìš°ìŠ¤ ì»¤ì„œ ë° ì—ì„ í¬ì¸íŠ¸ ì²˜ë¦¬
 		//HideAimPoint();
 		ShowMouseCursor();
 		//ShowEscapeUI();

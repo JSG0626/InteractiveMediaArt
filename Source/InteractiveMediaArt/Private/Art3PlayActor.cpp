@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Art3PlayActor.h"
@@ -38,13 +38,15 @@ void AArt3PlayActor::BeginPlay()
 	
 	//ShowMouseCursor();
 
-	pc = UGameplayStatics::GetPlayerController(this, 0);
+	//pc = UGameplayStatics::GetPlayerController(this, 0);
 	//pc = Cast<APlayerController>();
 	//auto* pc = GetWorld()->GetFirstPlayerController();
-	if (pc)
+
+	
+	/*if (pc)
 	{
 		pc->GetMousePosition(PreviousMousePosition.X, PreviousMousePosition.Y);
-	}
+	}*/
 	
 }
 
@@ -53,8 +55,7 @@ void AArt3PlayActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(pc == nullptr) return;
-	//auto* pc = GetWorld()->GetFirstPlayerController();
+	if (pc == nullptr) return;
 	if (pc)
 	{
 		FVector2D CurrentMousePosition;
@@ -64,7 +65,7 @@ void AArt3PlayActor::Tick(float DeltaTime)
 
 		MoveSphereCompWithMouse(MouseDelta);
 
-		// ¸¶¿ì½º À§Ä¡ ¾÷µ¥ÀÌÆ®
+		// ë§ˆìš°ìŠ¤ ìœ„ì¹˜ ì—…ë°ì´íŠ¸
 		PreviousMousePosition = CurrentMousePosition;
 	}
 }
@@ -74,10 +75,10 @@ void AArt3PlayActor::MoveSphereCompWithMouse(FVector2D MouseDelta)
 	//if (SphereComp)
 	//{
 	//	FVector NewLocation = SphereComp->GetComponentLocation();
-	//	NewLocation.Y += MouseDelta.X * 0.8; // YÃà ÀÌµ¿ (ÁÂ¿ì)
-	//	NewLocation.Z -= MouseDelta.Y * 0.8; // ZÃà ÀÌµ¿ (À§¾Æ·¡)
+	//	NewLocation.Y += MouseDelta.X * 0.8; // Yì¶• ì´ë™ (ì¢Œìš°)
+	//	NewLocation.Z -= MouseDelta.Y * 0.8; // Zì¶• ì´ë™ (ìœ„ì•„ëž˜)
 
-	//	// SphereCompÀÇ À§Ä¡¸¦ ¾÷µ¥ÀÌÆ®
+	//	// SphereCompì˜ ìœ„ì¹˜ë¥¼ ì—…ë°ì´íŠ¸
 	//	SphereComp->SetWorldLocation(NewLocation);
 
 	//	UE_LOG(LogTemp, Warning, TEXT("New SphereComp Location: %s"), *NewLocation.ToString());
@@ -89,17 +90,21 @@ void AArt3PlayActor::MoveSphereCompWithMouse(FVector2D MouseDelta)
 		FVector WorldDirection;
 		pc->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
 
-		// Æ¯Á¤ °Å¸®¸¸Å­ ZÃàÀ¸·Î ÀÌµ¿ (¿¹: 1000 units)
+		// íŠ¹ì • ê±°ë¦¬ë§Œí¼ Zì¶•ìœ¼ë¡œ ì´ë™ (ì˜ˆ: 1000 units)
 		float Distance = 500.0f;
 		FVector NewLocation = WorldLocation + (WorldDirection * Distance);
 
-		// SphereCompÀÇ ÇöÀç Z À§Ä¡¸¦ À¯Áö
+		// SphereCompì˜ í˜„ìž¬ Z ìœ„ì¹˜ë¥¼ ìœ ì§€
 		NewLocation.X = SphereComp->GetComponentLocation().X;
 
-		// SphereCompÀÇ À§Ä¡¸¦ ¾÷µ¥ÀÌÆ®
+		// SphereCompì˜ ìœ„ì¹˜ë¥¼ ì—…ë°ì´íŠ¸
 		SphereComp->SetWorldLocation(NewLocation);
 
 		UE_LOG(LogTemp, Warning, TEXT("New SphereComp Location: %s"), *NewLocation.ToString());
 	}
 }
 
+void AArt3PlayActor::SetPreviousPosition()
+{
+	pc->GetMousePosition(PreviousMousePosition.X, PreviousMousePosition.Y);
+}

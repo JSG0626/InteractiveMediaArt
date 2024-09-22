@@ -29,7 +29,7 @@ public:
 
 	FTimerHandle CountDownTimerHandle;
 	UPROPERTY(ReplicatedUsing = OnRep_RestTime)
-	float RestTime = 5;
+	float RestTime = 60;
 
 	UFUNCTION()
 	void OnRep_RestTime();

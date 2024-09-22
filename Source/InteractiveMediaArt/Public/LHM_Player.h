@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -91,10 +91,14 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 
+	// ============================= Art3 =============================
+
 private:
 	class AArt3PlayActor* SpawnedArt3PlayActor;
 
 public:
+	class APlayerController* pc;
+
 	void SpawnArt3PlayActor();
 
 	void OnMouseClickArt3(const struct FInputActionValue& Value);

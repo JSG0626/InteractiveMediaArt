@@ -1,8 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_CountPlayerUI.h"
 #include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
+
 
 void UCJS_CountPlayerUI::InitPlayerNum(int32 curNum, int32 maxNum)
 {
@@ -43,4 +45,12 @@ void UCJS_CountPlayerUI::ShowPlayerNum(int32 curNum, int32 maxNum)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Txt_MaxNum is null"));
 	}
+}
+
+void UCJS_CountPlayerUI::UpdateProgressBar(int32 curNum, int32 maxNum)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::UpdateProgressBar()"));
+
+	ProgressBar_CountNum->SetPercent(curNum / maxNum);
+
 }

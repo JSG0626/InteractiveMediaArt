@@ -22,6 +22,9 @@
 #include "Camera/CameraActor.h"
 #include "EscapeUI.h"
 #include "AimPoint.h"
+#include "Templates/SubclassOf.h"
+#include "Art3PlayActor.h"
+#include "LHM_MoveArt3Btn.h"
 
 
 
@@ -62,7 +65,8 @@ ALHM_Player::ALHM_Player()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
+	//FollowCamera->ProjectionMode = ECameraProjectionMode::Orthographic;
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
@@ -76,14 +80,12 @@ void ALHM_Player::BeginPlay()
 
 	//ShowMouseCursor();
 
-
 }
 
 // Called every frame
 void ALHM_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 
 
 }
@@ -143,79 +145,119 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ALHM_Player::Move);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ALHM_Player::Look);
+		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ALHM_Player::Look);
 
-		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Started, this, &ALHM_Player::OnMouseClick);
+		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Started, this, &ALHM_Player::OnMouseClickArt3);
 
-
-
-		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Completed, this, &ALHM_Player::OnMouseRelease);
 
 
 	}
 }
 
 
-
-void ALHM_Player::OnMouseClick(const struct FInputActionInstance& Instance)
-{
-	//isMouseButtonDown = true;
-
-	FVector start = FollowCamera->GetComponentLocation();
-	FVector end = start + FollowCamera->GetForwardVector() * 1000.f;
-	FHitResult outhit;
-	if (GetWorld()->LineTraceSingleByChannel(outhit, start, end, ECollisionChannel::ECC_Visibility))
-	{
-		auto* hitActor = outhit.GetActor();
-		if (hitActor)
-		{
-			AButtonExp* buttonexp = Cast<AButtonExp>(hitActor);
-			if (buttonexp != nullptr)
-			{
-				if (buttonexp->ButtonComp)
-				{
-					GetWorld()->SpawnActor<ASG_ArtPlayer>(ASG_ArtPlayer::StaticClass(), buttonexp->TargetTransform);
-					GetWorld()->GetFirstPlayerController()->SetViewTarget(Cast<AActor>(buttonexp->TargetCamera));
-					
-					if (buttonexp->AimpointUI != nullptr)
-					{
-						buttonexp->AimpointUI->RemoveFromParent();
-					}
-					
-					ShowMouseCursor();
-					ShowEscapeUI();
-				}
-			}
-
-		}
-	}
-	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1);
-}
-
-void ALHM_Player::OnMouseRelease(const struct FInputActionInstance& Instance)
-{
-	//isMouseButtonDown = false;
-}
-
-void ALHM_Player::ShowEscapeUI()
-{	
-	EscapeUI = CreateWidget<UEscapeUI>(GetWorld(), WBP_EscapeUI);
-
-	if (EscapeUI != nullptr && WBP_EscapeUI != nullptr)
-	{
-		EscapeUI->AddToViewport();
-	}
-}
 
 void ALHM_Player::ShowMouseCursor()
 {
-	if (APlayerController* pc = CastChecked<APlayerController>(GetController()))
+	if (APlayerController* pc = CastChecked<APlayerController>(GetController())) 
 	{
 		pc->bShowMouseCursor = true;
 		pc->bEnableMouseOverEvents = true;
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		pc->SetInputMode(InputMode);
+
+		// 카메라 회전 비활성화
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;  // 이동할 때 플레이어의 방향이 움직이는 방향을 향하게 함
 	}
 }
 
+void ALHM_Player::SpawnArt3PlayActor()
+{
+	TSubclassOf<AActor> Art3PlayActor = AArt3PlayActor::StaticClass();
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Art3PlayActor, FTransform(FVector(5960, -1164, 721))); 
+
+	// 스폰된 액터를 AArt3PlayActor로 캐스팅하고 저장
+	SpawnedArt3PlayActor = Cast<AArt3PlayActor>(SpawnedActor);
+
+	if (SpawnedArt3PlayActor == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("SpawnedArt3PlayActor is null!"));
+	}
+}
+
+void ALHM_Player::OnMouseClickArt3(const struct FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ALHM_Player::OnMouseClickArt3()"));
+
+	FVector Start = FollowCamera->GetComponentLocation();
+	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
+	FHitResult Outhit;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+
+	// 디버그 선 그리기
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_Visibility);
+
+	if (bHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+
+		if (Outhit.Component.IsValid())
+		{
+			FString HitComponentName = Outhit.Component->GetName();
+			UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitComponentName);
+		}
+
+		AActor* HitActor = Outhit.GetActor();
+		auto* hitComp = Outhit.GetComponent();
+		if (hitComp)
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s,  %s"), *HitActor->GetName(), *hitComp->GetName()));
+		if (HitActor)
+		{
+			FString HitActorName = HitActor->GetName();
+			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
+
+			if (HitActorName.Contains("BTN3_1"))
+			{
+				ALHM_MoveArt3Btn* btn_Art3Play = Cast<ALHM_MoveArt3Btn>(HitActor);
+				if (btn_Art3Play != nullptr)
+				{
+					
+					MoveToArt3(btn_Art3Play);
+					SpawnArt3PlayActor();
+
+				}
+			}
+		}
+	}
+}
+
+void ALHM_Player::MoveToArt3(ALHM_MoveArt3Btn* button)
+{
+	if (button == nullptr)
+	{
+		return;
+	}
+
+	
+	// 플레이어 컨트롤러 가져오기
+	APlayerController* pc = Cast<APlayerController>(GetController());
+	if (pc && button->Art3_TargetCamera)
+	{
+		// 카메라 뷰 변경
+		pc->SetViewTarget(Cast<AActor>(button->Art3_TargetCamera));
+
+		// 입력 모드 변경
+		FInputModeUIOnly InputMode;
+		pc->SetInputMode(InputMode);
+
+		// 마우스 커서 및 에임 포인트 처리
+		//HideAimPoint();
+		ShowMouseCursor();
+		//ShowEscapeUI();
+	}
+
+}

@@ -15,8 +15,6 @@ class INTERACTIVEMEDIAART_API UCJS_CountPlayerUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	/*UPROPERTY(meta = (BindWidget))
-	class UTextBlock* Txt_CurNum;*/
 	UPROPERTY(meta = (BindWidget))  
 	class UTextBlock* Txt_CurNum;
 	UPROPERTY(meta = (BindWidget))

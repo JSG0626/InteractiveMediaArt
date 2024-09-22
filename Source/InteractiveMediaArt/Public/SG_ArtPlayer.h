@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -46,7 +46,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -57,6 +57,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UPoseableMeshComponent* PoseableMeshComp;
 
+	UPROPERTY(EditDefaultsOnly, Category = VFX)
+	TSubclassOf<class UNiagaraSystem> SmokeFactory;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UNiagaraComponent* SmokeNiagaraOnHeadComp;
 
@@ -66,11 +69,30 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UNiagaraComponent* SmokeNiagaraOnRHandComp;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(Replicated, BlueprintReadOnly)
 	class ASG_ServerManager* ServerManager;
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Player, EditDefaultsOnly)
+	class ACJS_LobbyPlayer* Player;
+
+	UPROPERTY(BlueprintReadOnly)
+	class APlayerController* pc;
+
 	UPROPERTY(EditDefaultsOnly)
-	class ACJS_LobbyPlayer* Me;
+	TSubclassOf<class UUserWidget> WBP_Art1_Entrance;
+
+	class UUserWidget* EntranceUI;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUserWidget> WBP_Art1_Main;
+
+	class USG_Art1_Main* MainUI;
+
+	UPROPERTY()
+	class ASG_Art1_Manager* ArtManager;
+
+	UFUNCTION()
+	void OnRep_Player();
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ASG_ServerManager> ServerManagerFactory;
@@ -90,6 +112,11 @@ public:
 	FVector MeshScale = FVector(5, 5, 5);
 
 	void ActiveComponents();
+
+	void InitEntranceUI();
+	void InitMainUI();
+	void UpdateMainUI(int32 RestTime);
+
 	// --------------------------------------------RPC--------------------------------------------
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetJointPosition(const TArray<FVector>& JointPosition);
@@ -106,4 +133,12 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPC_HitLetter(const TArray<struct FBasicParticleData>& Datas);
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SpawnServerManager();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_SpawnServerManager();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_HitLetter_AddImpulse(class UPrimitiveComponent* HitComp, const FVector& Force);
 };

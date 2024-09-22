@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -38,7 +38,7 @@ public:
     // Reference to UI widget
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<class UCJS_CountPlayerUI> WBP_CountPlayerUI;
-    UCJS_CountPlayerUI* CountPlayerUI;
+    class UCJS_CountPlayerUI* CountPlayerUI;
 
 
     // Save Clicked Player Info
@@ -49,7 +49,7 @@ public:
     UPROPERTY(ReplicatedUsing=OnRep_CurPlayer, VisibleAnywhere, BlueprintReadOnly, Category = "Player")
     int32 CurPlayer = 0;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-    int32 MaxPlayer = 1;
+    int32 MaxPlayer = 2;
 
 
     // Replicated function called when CurPlayer is updated
@@ -70,9 +70,8 @@ public:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
-
-	void PrintNetLog();
-	void FindOwner();
+	//void PrintNetLog();
+	//void FindOwner();
 
 
 private:

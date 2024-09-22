@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -56,7 +56,6 @@ public:
 	void OnMouseClick(const FInputActionInstance& Value);
 	void OnMouseClickRelease(const FInputActionInstance& Value);
 
-
 	/** Widgets */
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> PopUpUIClass;
@@ -105,8 +104,32 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void SpawnArtPlayer(FTransform TargetTransform);
+
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SpawnArtPlayer(FTransform TargetTransform);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ReturnToCamera();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ShowArt1WinUI();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ShowArt1LoseUI();
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<class UUserWidget> WBP_Art1Win;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<class UUserWidget> WBP_Art1Lose;
+
+	UPROPERTY()
+	class UUserWidget* Art1WinUI;
+
+	UPROPERTY()
+	class UUserWidget* Art1LoseUI;
+
 
 	// ----------------------------------------JSG----------------------------------------
 	
@@ -148,6 +171,7 @@ public:
 
 	UPROPERTY()
 	class APlayerController* pc;
+
 	virtual void PossessedBy(AController* NewController) override;
 
 	// 작품 2의 Voice Input

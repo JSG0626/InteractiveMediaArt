@@ -12,13 +12,13 @@ void UCJS_HttpNetWidget::NativeConstruct()
 
 void UCJS_HttpNetWidget::OnMyClickSendPost()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("UCJS_HttpNetWidget::OnMyClickSendPost()"));
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_HttpNetWidget::OnMyClickSendPost()"));
 	HttpNetActor->ReqPostWaveFile(ServerURL, WavFilePath);
 }
 
 void UCJS_HttpNetWidget::SetHttpNetActor(class ACJS_HttpNetActor* actor)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("UCJS_HttpNetWidget::SetHttpWaveFileActor()"));
+	UE_LOG(LogTemp, Warning, TEXT("UCJS_HttpNetWidget::SetHttpWaveFileActor()"));
 	HttpNetActor = actor;
 }
 

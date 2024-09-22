@@ -105,16 +105,16 @@ void ACJS_LobbyPlayer::BeginPlay()
 		if (UIManager)
 		{
 			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
-			UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+			//UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+			//UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Not locally controlled, UIManager not initialized"));
+		//UE_LOG(LogTemp, Error, TEXT("Not locally controlled, UIManager not initialized"));
 	}
 
 	// AimPointUI 위젯 생성
@@ -208,7 +208,7 @@ void ACJS_LobbyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		input->BindAction(IA_ClickBnt, ETriggerEvent::Started, this, &ACJS_LobbyPlayer::OnMouseClick);
 		input->BindAction(IA_ClickBnt, ETriggerEvent::Completed, this, &ACJS_LobbyPlayer::OnMouseClickRelease);
 
-		//UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
+		UE_LOG(LogTemp, Warning, TEXT("Mouse Click Input Bound"));
 	}
 }
 
@@ -225,16 +225,16 @@ void ACJS_LobbyPlayer::PossessedBy(AController* NewController)
 		if (UIManager)
 		{
 			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
-			UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+			//UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+			//UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
+		//UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
 	}
 }
 
@@ -277,7 +277,7 @@ void ACJS_LobbyPlayer::OnMyActionLook(const struct FInputActionValue& Value)
 
 void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()"));
 
 	FVector Start = FollowCamera->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
@@ -292,12 +292,12 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	
 	if (bHit)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit something!"));
 
 		if (Outhit.Component.IsValid())
 		{
 			FString HitComponentName = Outhit.Component->GetName();
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitComponentName);
+			UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *HitComponentName);
 		}
 
 		AActor* HitActor = Outhit.GetActor();
@@ -307,7 +307,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
 			if (HitActorName.Contains("BTN1_1_Single"))
 			{
@@ -415,22 +415,28 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			}
 			else if (HitActorName.Contains("BTN1_3"))
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("BTN1_3 Clicked"));
+				UE_LOG(LogTemp, Warning, TEXT("BTN1_3 Clicked"));
 				ACJS_AIChatbotBnt* button3 = Cast<ACJS_AIChatbotBnt>(HitActor);
 				if (button3 != nullptr)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button3 is existed"));
 					AIChatbot(button3);
+					UE_LOG(LogTemp, Warning, TEXT("AIChatbot(button3 set"));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClick()::button3 is null"));
 				}
 			}
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::Hit Actor is NULL"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::No Hit Detected"));
 	}
 }
 
@@ -515,40 +521,65 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 
 void ACJS_LobbyPlayer::OnMouseClickRelease(const FInputActionInstance& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease()"));
+
+	// 카메라 위치에서 라인트레이스를 시작할 위치와 방향 설정
 	FVector Start = FollowCamera->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
+	UE_LOG(LogTemp, Warning, TEXT("라인트레이스 시작 위치: %s, 종료 위치: %s"), *Start.ToString(), *End.ToString());
+
+	// 라인트레이스 설정
 	FHitResult Outhit;
 	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(this);
+	CollisionParams.AddIgnoredActor(this); // 플레이어 자신은 충돌 무시
 
+	// 라인트레이스 실행
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Outhit, Start, End, ECollisionChannel::ECC_GameTraceChannel4);
 	if (bHit)
 	{
-		AActor* HitActor = Outhit.GetActor();
+		UE_LOG(LogTemp, Warning, TEXT("라인트레이스 히트 감지됨"));
 
+		// 충돌한 액터 가져오기
+		AActor* HitActor = Outhit.GetActor();
 		if (HitActor)
 		{
 			FString HitActorName = HitActor->GetName();
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
-			if (HitActorName.Contains("BNT1_3"))
+			// BNT1_3 버튼 액터인지 확인
+			if (HitActorName.Contains("BTN1_3"))
 			{
-				// BNT1_3을 뗀 상태: 녹음 종료 및 저장
+				UE_LOG(LogTemp, Warning, TEXT("BNT1_3 버튼 감지됨, 녹음 종료 및 저장 진행"));
+
+				// ACJS_AIChatbotBnt로 캐스팅
 				ACJS_AIChatbotBnt* buttonexp = Cast<ACJS_AIChatbotBnt>(HitActor);
 				if (buttonexp != nullptr)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::buttonexp는 유효합니다"));
 					VoiceRecord(buttonexp);
+					UE_LOG(LogTemp, Warning, TEXT("VoiceRecord(buttonexp) 호출 완료"));
 				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::buttonexp 캐스팅 실패"));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Hit Actor가 BNT1_3이 아님"));
 			}
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor is NULL"));
+			UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::Hit Actor가 NULL"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("No Hit Detected"));
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease::라인트레이스에서 히트 감지되지 않음"));
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClickRelease() 끝"));
 }
 
 FString ACJS_LobbyPlayer::GetProjectSavedDir()
@@ -556,7 +587,7 @@ FString ACJS_LobbyPlayer::GetProjectSavedDir()
 	FString SavedDir = FPaths::ProjectSavedDir();
 
 	// 로그 출력
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::GetProjectSavedDir()::Project Saved Directory: %s"), *SavedDir);
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::GetProjectSavedDir()::Project Saved Directory: %s"), *SavedDir);
 
 	return SavedDir;
 }

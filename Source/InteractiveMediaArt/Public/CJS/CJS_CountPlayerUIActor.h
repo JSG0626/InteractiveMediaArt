@@ -49,7 +49,7 @@ public:
     UPROPERTY(ReplicatedUsing=OnRep_CurPlayer, VisibleAnywhere, BlueprintReadOnly, Category = "Player")
     int32 CurPlayer = 0;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player")
-    int32 MaxPlayer = 1;
+    int32 MaxPlayer = 2;
 
 
     // Replicated function called when CurPlayer is updated

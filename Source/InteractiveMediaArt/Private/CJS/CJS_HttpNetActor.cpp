@@ -25,7 +25,7 @@ void ACJS_HttpNetActor::Tick(float DeltaTime)
 
 void ACJS_HttpNetActor::ReqPostWaveFile(FString url, FString wavFilePath)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::ReqPostWaveFile()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::ReqPostWaveFile()"));
 	TArray<uint8> FileData;
 	//if (FFileHelper::LoadFileToArray(FileData, TEXT("C:/Users/onlys/Desktop/sound/TestVoiceSound.wav")))
 	if (FFileHelper::LoadFileToArray(FileData, *wavFilePath))
@@ -40,22 +40,22 @@ void ACJS_HttpNetActor::ReqPostWaveFile(FString url, FString wavFilePath)
 
 		Request->OnProcessRequestComplete().BindUObject(this, &ACJS_HttpNetActor::OnResPostWaveFile);
 		Request->ProcessRequest();
-		//UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::ReqPostWaveFile()::Request->ProcessRequest()"));
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::ReqPostWaveFile()::Request->ProcessRequest()"));
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("Failed to load wave file."));
+		UE_LOG(LogTemp, Error, TEXT("Failed to load wave file."));
 	}
 }
 
 void ACJS_HttpNetActor::OnResPostWaveFile(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::OnResPostWaveFile()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::OnResPostWaveFile()"));
 
 	if (bConnectedSuccessfully && Response.IsValid())
 	{
 		int32 ResponseCode = Response->GetResponseCode();
-		//UE_LOG(LogTemp, Warning, TEXT("OnResPostWaveFile OK... %d"), ResponseCode);
+		UE_LOG(LogTemp, Warning, TEXT("OnResPostWaveFile OK... %d"), ResponseCode);
 
 		// 응답 코드가 200(성공)인 경우에만 처리
 		if (ResponseCode == 200)
@@ -70,24 +70,24 @@ void ACJS_HttpNetActor::OnResPostWaveFile(FHttpRequestPtr Request, FHttpResponse
 				// 파일 저장
 				if (FFileHelper::SaveArrayToFile(WaveData, *SavePath))
 				{
-					//UE_LOG(LogTemp, Log, TEXT("Wave file saved successfully to %s"), *SavePath);
+					UE_LOG(LogTemp, Log, TEXT("Wave file saved successfully to %s"), *SavePath);
 					// 저장된 파일로부터 사운드 재생
 					PlaySoundFromFile(SavePath);
 				}
 				else
 				{
-					//UE_LOG(LogTemp, Error, TEXT("Failed to save wave file."));
+					UE_LOG(LogTemp, Error, TEXT("Failed to save wave file."));
 				}
 			}
 			else
 			{
-				//UE_LOG(LogTemp, Error, TEXT("Received empty wave data."));
+				UE_LOG(LogTemp, Error, TEXT("Received empty wave data."));
 			}
 		}
 		else
 		{
 			// 응답 코드가 200이 아닌 경우 경고 출력
-			//UE_LOG(LogTemp, Warning, TEXT("Response not OK, received code: %d"), ResponseCode);
+			UE_LOG(LogTemp, Warning, TEXT("Response not OK, received code: %d"), ResponseCode);
 		}
 	}
 	else
@@ -95,19 +95,19 @@ void ACJS_HttpNetActor::OnResPostWaveFile(FHttpRequestPtr Request, FHttpResponse
 		// 연결 실패 또는 응답이 null인 경우 처리
 		if (!bConnectedSuccessfully)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Connection to the server failed."));
+			UE_LOG(LogTemp, Warning, TEXT("Connection to the server failed."));
 		}
 
 		if (!Response.IsValid())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Invalid response received."));
+			UE_LOG(LogTemp, Warning, TEXT("Invalid response received."));
 		}
 	}
 }
 
 void ACJS_HttpNetActor::PlaySoundFromFile(const FString& FilePath)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::PlaySoundFromFile()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_HttpNetActor::PlaySoundFromFile()"));
 
 	// 파일에서 바이너리 데이터를 로드
 	TArray<uint8> FileData;
@@ -127,16 +127,16 @@ void ACJS_HttpNetActor::PlaySoundFromFile(const FString& FilePath)
 
 			// 재생
 			UGameplayStatics::PlaySound2D(this, SoundWave);
-			//UE_LOG(LogTemp, Warning, TEXT("Playing sound from file: %s"), *FilePath);
+			UE_LOG(LogTemp, Warning, TEXT("Playing sound from file: %s"), *FilePath);
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("Failed to create USoundWaveProcedural object."));
+			UE_LOG(LogTemp, Error, TEXT("Failed to create USoundWaveProcedural object."));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("Failed to load file: %s"), *FilePath);
+		UE_LOG(LogTemp, Error, TEXT("Failed to load file: %s"), *FilePath);
 	}
 }
 
@@ -156,7 +156,7 @@ FString ACJS_HttpNetActor::GenerateSavePath()
 	FString FullSavePath = FPaths::Combine(SaveDirectory, FileName);
 
 	// 로그로 경로 출력
-	//UE_LOG(LogTemp, Log, TEXT("Generated file path: %s"), *FullSavePath);
+	UE_LOG(LogTemp, Log, TEXT("Generated file path: %s"), *FullSavePath);
 
 	return FullSavePath;
 }

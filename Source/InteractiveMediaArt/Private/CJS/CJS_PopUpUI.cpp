@@ -44,7 +44,7 @@ void UCJS_PopUpUI::OnCloseButtonClicked()
 
 		if (CurrentController == PlayerController)  // 같을 때만 실행
 		{
-			OwningBnt->ToggleWidgetVisibility(PlayerController);
+			//OwningBnt->ToggleWidgetVisibility(PlayerController);
 		}
 		else
 		{

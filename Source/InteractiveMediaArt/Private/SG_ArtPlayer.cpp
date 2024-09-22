@@ -284,33 +284,33 @@ void ASG_ArtPlayer::MulticastRPC_ActiveComponents_Implementation()
 
 void ASG_ArtPlayer::ServerRPC_HitLetter_Implementation(const TArray<FBasicParticleData>& Datas)
 {
-	//const float SphereTraceRadius = 100;
-	//const float ForceMinValue = -300;
-	//const float ForceMaxValue = 300;
-	//const float ForceZValue = 500;
+	const float SphereTraceRadius = 100;
+	const float ForceMinValue = -300;
+	const float ForceMaxValue = 300;
+	const float ForceZValue = 500;
 
-	//for (auto data : Datas)
-	//{
-	//	float X = data.Position.X;
-	//	float Y = data.Position.Y;
-	//	float Z = data.Position.Z;
+	for (auto data : Datas)
+	{
+		float X = data.Position.X;
+		float Y = data.Position.Y;
+		float Z = data.Position.Z;
 
-	//	ETraceTypeQuery traceChannel = ETraceTypeQuery::TraceTypeQuery3;
-	//	TArray<AActor*> actorsToIgnore;
-	//	TArray<FHitResult> hitInfos;
-	//	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), FVector(X, Y + 50, Z), FVector(X, Y - 100, Z), SphereTraceRadius, traceChannel,
-	//	false, actorsToIgnore, EDrawDebugTrace::None, hitInfos, true);
+		ETraceTypeQuery traceChannel = ETraceTypeQuery::TraceTypeQuery3;
+		TArray<AActor*> actorsToIgnore;
+		TArray<FHitResult> hitInfos;
+		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), FVector(X, Y + 50, Z), FVector(X, Y - 100, Z), SphereTraceRadius, traceChannel,
+		false, actorsToIgnore, EDrawDebugTrace::None, hitInfos, true);
 
-	//	for (auto hitInfo : hitInfos)
-	//	{
-	//		auto hitComp = hitInfo.GetComponent();
-	//		if (hitComp)
-	//		{
-	//			FVector force = FVector(FMath::FRandRange(ForceMinValue, ForceMaxValue), 0, ForceZValue);
-	//			MulticastRPC_HitLetter_AddImpulse(hitComp, force);
-	//		}
-	//	}
-	//}
+		for (auto hitInfo : hitInfos)
+		{
+			auto hitComp = hitInfo.GetComponent();
+			if (hitComp)
+			{
+				FVector force = FVector(FMath::FRandRange(ForceMinValue, ForceMaxValue), 0, ForceZValue);
+				MulticastRPC_HitLetter_AddImpulse(hitComp, force);
+			}
+		}
+	}
 }
 
 

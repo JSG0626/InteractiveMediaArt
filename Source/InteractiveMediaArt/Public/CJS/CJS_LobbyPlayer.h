@@ -110,18 +110,13 @@ public:
 	void ServerRPC_SpawnArtPlayer(FTransform TargetTransform);
 
 	// ----------------------------------------JSG----------------------------------------
+	
 	void ExitArt();
-	UPROPERTY()
-	class APlayerController* pc;
 
 	UFUNCTION()
 	void MoveToArtPos(ACJS_MovePosBnt* button);
 
 	// 작품 1의 멀티 플레이
-	/*UPROPERTY(EditDefaultsOnly, Category = "Buttons")
-	TSubclassOf<class ACJS_MovePosBnt> MultiButtonFactory;*/
-	//UPROPERTY()
-	//class ACJS_MovePosBnt* MultiButton;
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartInteraction();
 
@@ -140,8 +135,6 @@ public:
 	
 
 	// 작품 2의 요소
-	//UPROPERTY(EditDefaultsOnly, Category = "UI")
-	//TSubclassOf<class UCJS_UIManager> UIManagerFactory;
 	UPROPERTY()
 	class UCJS_UIManager* UIManager;
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -149,8 +142,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> EndPanelFactory;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> QuitUIFactory;
+	void StartExperience();
+	void EndExperience();
 
+	UPROPERTY()
+	class APlayerController* pc;
+	virtual void PossessedBy(AController* NewController) override;
 
+	// 작품 2의 Voice Input
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AActor> BP_VoiceMeterClass;
 	UPROPERTY()
@@ -160,8 +161,7 @@ public:
 	void EnableAudioCapture();   // AudioCapture 활성화
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
-	void StartExperience();
-	void EndExperience();
+	
 
 	
 

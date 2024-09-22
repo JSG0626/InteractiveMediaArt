@@ -26,7 +26,7 @@ void UEscapeUI::NativeConstruct()
 
 void UEscapeUI::OnExitButtonClicked()
 {
-    if (Me->bExitBnt2_1)
+   /* if (Me->bExitBnt2_1)
     {
         UE_LOG(LogTemp, Warning, TEXT("UEscapeUI::OnExitButtonClicked()::Me->bExitBnt2_1 "));
         Me->OnExitBnt();
@@ -34,6 +34,15 @@ void UEscapeUI::OnExitButtonClicked()
     else
     {
         Me->ExitArt();
+    }*/
+    if (Me)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UEscapeUI::OnExitButtonClicked()::Me is OK"));
+        Me->ExitArt();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UEscapeUI::OnExitButtonClicked()::Me is null"));
     }
 }
 

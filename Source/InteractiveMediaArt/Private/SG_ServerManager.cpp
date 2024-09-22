@@ -106,7 +106,7 @@ void ASG_ServerManager::OnRep_Player()
 		GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 			{
 				CreateClient();
-			}, 1.0f, false);
+			}, 0.10f, false);
 	}
 	else
 	{

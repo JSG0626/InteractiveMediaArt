@@ -403,6 +403,55 @@ void ACJS_LobbyPlayer::ServerRPC_SpawnArtPlayer_Implementation(FTransform Target
 	ArtPlayer->OnRep_Player();
 }
 
+void ACJS_LobbyPlayer::MulticastRPC_ReturnToCamera_Implementation()
+{
+	if (pc && pc->IsLocalPlayerController() )
+	{	
+		PRINTLOG(TEXT("if (pc && pc->IsLocalPlayerController() )"));
+		pc->SetViewTarget(this);
+		FInputModeGameOnly InputModeData;
+		pc->SetInputMode(InputModeData);
+
+		ShowAimPoint();
+		pc->bShowMouseCursor = false;
+		HideEscapeUI();
+	}
+}
+
+void ACJS_LobbyPlayer::MulticastRPC_ShowArt1WinUI_Implementation()
+{
+	if ( IsLocallyControlled() )
+	{
+		check(WBP_Art1Win); if ( nullptr == WBP_Art1Win ) return;
+
+		Art1WinUI = CreateWidget(GetWorld(), WBP_Art1Win);
+		Art1WinUI->AddToViewport();
+
+		FTimerHandle handle;
+		GetWorldTimerManager().SetTimer(handle, [&]()
+		{
+			Art1WinUI->RemoveFromParent();
+		}, 2.0f, false);
+	}
+}
+
+void ACJS_LobbyPlayer::MulticastRPC_ShowArt1LoseUI_Implementation()
+{
+	if ( IsLocallyControlled() )
+	{
+		check(WBP_Art1Lose); if ( nullptr == WBP_Art1Lose ) return;
+
+		Art1LoseUI = CreateWidget(GetWorld(), WBP_Art1Lose);
+		Art1LoseUI->AddToViewport();
+
+		FTimerHandle handle;
+		GetWorldTimerManager().SetTimer(handle, [&]()
+		{
+			Art1LoseUI->RemoveFromParent();
+		}, 2.0f, false);
+	}
+}
+
 void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 {
 	if (button == nullptr)

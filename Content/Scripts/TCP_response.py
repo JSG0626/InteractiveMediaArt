@@ -67,6 +67,7 @@ while cap.isOpened():
         print("Failed to grab frame")
         break
 
+
     # 이미지 전처리
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     

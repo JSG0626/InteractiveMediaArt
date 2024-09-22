@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_CountPlayerUIActor.h"
@@ -10,6 +10,7 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "../InteractiveMediaArt.h"
+#include <SG_Art1_Manager.h>
 
 
 // Sets default values
@@ -72,8 +73,8 @@ void ACJS_CountPlayerUIActor::BeginPlay()
 	auto* Art1_Multi_TargetCameraComp = Art1_Multi_TargetCamera->GetCameraComponent();
 	Art1_Multi_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
 	Art1_Multi_TargetCameraComp->OrthoWidth = 3200.f;
-	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 300));  // 왼쪽  
-	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3217, -3580, 300));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
+	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 200));  // 왼쪽  
+	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3220, -3580, 200));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
 
 	// 이동할 위치와 카메라 설정
 	TargetTransforms.Add(Art1_Multi1_TargetTransform);
@@ -227,7 +228,7 @@ void ACJS_CountPlayerUIActor::UpdatePlayerNum(int32 NewPlayerNum)
 
 
 void ACJS_CountPlayerUIActor::StartInteractiveExperience()
-{
+{ 
 	//UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::StartInteractiveExperience()"));
 
 	// 플레이어 수 확인
@@ -236,6 +237,11 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 		//UE_LOG(LogTemp, Error, TEXT("StartInteractiveExperience: Expected 2 players, but got %d"), ClickedPlayers.Num());
 		return;
 	}
+
+	auto* Art1_Manager = GetWorld()->SpawnActor<ASG_Art1_Manager>(ASG_Art1_Manager::StaticClass());
+
+	Art1_Manager->InitPlayer(ClickedPlayers[0], ClickedPlayers[1]);
+
 
 	for (int32 i = 0; i < ClickedPlayers.Num(); ++i)
 	{
@@ -263,7 +269,9 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("StartInteractiveExperience: Player is null"));
 		}
+
 	}
+	Art1_Manager->InitArtPlayer();
 
 	// 클릭한 플레이어 목록 초기화 전에 로그 출력
 	//UE_LOG(LogTemp, Warning, TEXT("Before clearing ClickedPlayers:"));

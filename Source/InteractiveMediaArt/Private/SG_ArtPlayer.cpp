@@ -11,6 +11,9 @@
 #include <InteractiveMediaArt/InteractiveMediaArt.h>
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraDataInterfaceExport.h"
 #include "Net/UnrealNetwork.h"
+#include "Blueprint/UserWidget.h"
+#include "SG_Art1_Main.h"
+#include "GameFramework/PlayerController.h"
 // Sets default values
 ASG_ArtPlayer::ASG_ArtPlayer()
 {
@@ -52,6 +55,13 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 		SmokeNiagaraOnLHandComp->SetAsset(tempSmokeNiagara.Object);
 		SmokeNiagaraOnRHandComp->SetAsset(tempSmokeNiagara.Object);
 	}
+
+	/*if ( SmokeFactory )
+	{
+		SmokeNiagaraOnLHandComp->SetAsset(SmokeFactory.GetDefaultObject());
+		SmokeNiagaraOnRHandComp->SetAsset(SmokeFactory.GetDefaultObject());
+
+	}*/
 	SmokeNiagaraOnHeadComp->bAutoActivate = false;
 	SmokeNiagaraOnLHandComp->bAutoActivate = false;
 	SmokeNiagaraOnRHandComp->bAutoActivate = false;
@@ -71,17 +81,18 @@ void ASG_ArtPlayer::BeginPlay()
 	InitLandmarkField();
 	InitBones();
 
-	/*FTimerHandle handle;
-	GetWorldTimerManager().SetTimer(handle, [&]()
-		{
-			ActiveComponents();
-		}, 2.0f, false);*/
+	
 }
 
 void ASG_ArtPlayer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
+	if ( nullptr != MainUI )
+	{
+		if (Player->IsLocallyControlled() )
+			MainUI->RemoveFromParent();
+	}
 	if (nullptr != ServerManager)
 	{
 		ServerManager->Destroy();
@@ -112,7 +123,10 @@ void ASG_ArtPlayer::Tick(float DeltaTime)
 void ASG_ArtPlayer::OnRep_Player()
 {
 	SetOwner(Player);
+	pc = Cast<APlayerController>(Player->Controller);
 	ActiveComponents();
+	InitEntranceUI();
+	
 }
 
 void ASG_ArtPlayer::InitLandmarkField()
@@ -185,6 +199,50 @@ void ASG_ArtPlayer::ActiveComponents()
 	FString print = FString::Printf(TEXT("%s"), *GetOwner()->GetName());
 	PRINTLOG(TEXT("Owning 있냐?? : %s"), *print);
 	ServerRPC_ActiveComponents();
+}
+
+void ASG_ArtPlayer::InitEntranceUI()
+{
+	check(Player); if ( nullptr == Player ) return;
+
+	// Player가 제어중이 아니라면 처리하지 않음
+	if (nullptr == pc ) return;
+
+	if ( Player->IsLocallyControlled() )
+	{
+		EntranceUI = CreateWidget(GetWorld(), WBP_Art1_Entrance);
+		EntranceUI->AddToViewport();
+		EntranceUI->SetVisibility(ESlateVisibility::Visible);
+		FTimerHandle handle;
+		
+		GetWorld()->GetTimerManager().SetTimer(handle, this, &ASG_ArtPlayer::InitMainUI, 1.0f, false);
+	}
+}
+
+void ASG_ArtPlayer::InitMainUI()
+{
+	if ( Player->IsLocallyControlled() )
+	{
+		EntranceUI->RemoveFromParent();
+		//EntranceUI->SetVisibility(ESlateVisibility::Hidden);
+
+		MainUI = CastChecked<USG_Art1_Main>(CreateWidget(GetWorld(), WBP_Art1_Main));
+		if ( MainUI )
+		{
+			MainUI->AddToViewport();
+			MainUI->SetVisibility(ESlateVisibility::Visible);
+
+		}
+
+	}
+}
+
+void ASG_ArtPlayer::UpdateMainUI(int32 RestTime)
+{
+	if ( MainUI && Player->IsLocallyControlled() )
+	{
+		MainUI->SetRestTime(RestTime);
+	}
 }
 
 void ASG_ArtPlayer::ServerRPC_SpawnServerManager_Implementation()

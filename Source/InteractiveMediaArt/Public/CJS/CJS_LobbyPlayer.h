@@ -109,6 +109,28 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SpawnArtPlayer(FTransform TargetTransform);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ReturnToCamera();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ShowArt1WinUI();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ShowArt1LoseUI();
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<class UUserWidget> WBP_Art1Win;
+
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+	TSubclassOf<class UUserWidget> WBP_Art1Lose;
+
+	UPROPERTY()
+	class UUserWidget* Art1WinUI;
+
+	UPROPERTY()
+	class UUserWidget* Art1LoseUI;
+
+
 	// ----------------------------------------JSG----------------------------------------
 	
 	void ExitArt();

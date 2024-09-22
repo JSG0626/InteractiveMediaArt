@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "SG_ServerManager.h"
@@ -74,7 +74,8 @@ void ASG_ServerManager::Tick(float DeltaTime)
 	if (Player && Player->IsLocallyControlled())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("나는 클라이언트 플레이어다~")));
-		if (ServerProcHandle.IsValid() && ClientSocket)
+		//if ( ServerProcHandle.IsValid() && ClientSocket )
+		if (ClientSocket)
 		{
 			if (bReceiveSuccess) ReceiveData();
 			else ReceiveRestData();
@@ -100,12 +101,12 @@ void ASG_ServerManager::OnRep_Player()
 	if (Player && Player->IsLocallyControlled())
 	{
 		PRINTLOG(TEXT("if (Player && Player->IsLocallyControlled())"));
-		RunPythonScript(PyConnectServer);
+		//RunPythonScript(PyConnectServer);
 		FTimerHandle handle;
 		GetWorld()->GetTimerManager().SetTimer(handle, [&]()
 			{
 				CreateClient();
-			}, 2.0f, false);
+			}, 1.0f, false);
 	}
 	else
 	{

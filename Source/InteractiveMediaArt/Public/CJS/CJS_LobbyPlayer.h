@@ -148,7 +148,7 @@ public:
 
 	UPROPERTY()
 	class APlayerController* pc;
-	virtual void PossessedBy(AController* NewController) override;
+	virtual void PossessedBy(AController* NewController) override;  //----> 승건이랑 다른 부분
 
 	// 작품 2의 Voice Input
 	UPROPERTY(EditDefaultsOnly)

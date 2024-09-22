@@ -38,7 +38,7 @@ public:
     // Reference to UI widget
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<class UCJS_CountPlayerUI> WBP_CountPlayerUI;
-    UCJS_CountPlayerUI* CountPlayerUI;
+    class UCJS_CountPlayerUI* CountPlayerUI;
 
 
     // Save Clicked Player Info
@@ -70,9 +70,8 @@ public:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
-
-	void PrintNetLog();
-	void FindOwner();
+	//void PrintNetLog();
+	//void FindOwner();
 
 
 private:

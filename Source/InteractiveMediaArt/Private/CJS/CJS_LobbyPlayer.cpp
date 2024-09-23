@@ -30,6 +30,8 @@
 #include "AudioCaptureComponent.h"
 #include "NiagaraComponent.h"
 #include <InteractiveMediaArt/InteractiveMediaArt.h>
+#include "LHM_MoveArt3Btn.h"
+#include "Art3PlayActor.h"
 
 
 
@@ -391,6 +393,16 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					EnableAudioCapture();
 				}
 			}
+			else if ( HitActorName.Contains("BTN3_1") )
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BTN3_1 Clicked"));
+				ALHM_MoveArt3Btn* btn_Art3Play = Cast<ALHM_MoveArt3Btn>(HitActor);
+				if ( btn_Art3Play != nullptr )
+				{
+					MoveToArt3(btn_Art3Play);
+					SpawnArt3PlayActor();
+				}
+			}
 			else if ( HitActorName.Contains("BTN1_2") )
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("BTN1_2 Clicked"));
@@ -439,6 +451,51 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 	else
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::No Hit Detected"));
+	}
+}
+
+
+void ACJS_LobbyPlayer::SpawnArt3PlayActor()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::SpawnArt3PlayActor()"));
+	TSubclassOf<AActor> Art3PlayActor = AArt3PlayActor::StaticClass();
+	AArt3PlayActor* SpawnedActor = GetWorld()->SpawnActor<AArt3PlayActor>(Art3PlayActor, FTransform(FVector(5960, -1570, 960)));
+	//APlayerController* pc = CastChecked<APlayerController>(GetController());
+	SpawnedActor->pc = pc;
+	SpawnedActor->SetPreviousPosition();
+
+	// 스폰된 액터를 AArt3PlayActor로 캐스팅하고 저장
+	SpawnedArt3PlayActor = Cast<AArt3PlayActor>(SpawnedActor);
+
+	if ( SpawnedArt3PlayActor == nullptr )
+	{
+		UE_LOG(LogTemp, Error, TEXT("SpawnedArt3PlayActor is null!"));
+	}
+}
+
+void ACJS_LobbyPlayer::MoveToArt3(ALHM_MoveArt3Btn* button)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::MoveToArt3()"));
+	if ( button == nullptr )
+	{
+		return;
+	}
+
+	// 플레이어 컨트롤러 가져오기
+	//APlayerController* pc = Cast<APlayerController>(GetController());
+	if (pc && button->Art3_TargetCamera )
+	{
+		// 카메라 뷰 변경
+		pc->SetViewTarget(Cast<AActor>(button->Art3_TargetCamera));
+
+		// 입력 모드 변경
+		//FInputModeUIOnly InputMode;
+		//pc->SetInputMode(InputMode);
+
+		// 마우스 커서 및 에임 포인트 처리
+		HideAimPoint();
+		ShowMouseCursor();
+		ShowEscapeUI();
 	}
 }
 

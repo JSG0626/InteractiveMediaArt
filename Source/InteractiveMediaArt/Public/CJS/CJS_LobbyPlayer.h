@@ -185,7 +185,18 @@ public:
 	void DisableAudioCapture();  // AudioCapture 비활성화
 
 	
+	// ========================================================== Art3 여기서부터 ==========================================================
 
+private:
+	class AArt3PlayActor* SpawnedArt3PlayActor;
+
+public:
+
+	void SpawnArt3PlayActor();
+
+	void MoveToArt3(class ALHM_MoveArt3Btn* button);
+
+	// ========================================================== Art3 여기까지 ==========================================================
 	
 
 

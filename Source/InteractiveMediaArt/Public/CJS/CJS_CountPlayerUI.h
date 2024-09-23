@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -15,6 +15,8 @@ class INTERACTIVEMEDIAART_API UCJS_CountPlayerUI : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(meta = (BindWidget))
+	class UProgressBar* ProgressBar_CountNum;
 	UPROPERTY(meta = (BindWidget))  
 	class UTextBlock* Txt_CurNum;
 	UPROPERTY(meta = (BindWidget))
@@ -22,4 +24,6 @@ public:
 	
 	void InitPlayerNum(int32 curNum, int32 maxNum);
 	void ShowPlayerNum(int32 curNum, int32 maxNum);
+	void UpdateProgressBar(int32 curNum, int32 maxNum);
+
 };

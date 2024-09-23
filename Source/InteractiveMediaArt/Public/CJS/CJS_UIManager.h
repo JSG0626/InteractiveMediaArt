@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -20,6 +20,7 @@ public:
 
     // 초기화 함수
     void Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory, TSubclassOf<UUserWidget> InQuitUIFactory, APlayerController* InPC);
+    //void Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory);
 
     // 시작 및 종료 패널을 표시하는 함수
     void ShowStartPanel();

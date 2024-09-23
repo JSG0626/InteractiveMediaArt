@@ -244,6 +244,8 @@ void ACJS_CountPlayerUIActor::UpdatePlayerNum(int32 NewPlayerNum)
 	if (CountPlayerUI)
 	{
 		CountPlayerUI->ShowPlayerNum(NewPlayerNum, MaxPlayer);
+		CountPlayerUI->UpdateProgressBar(NewPlayerNum, MaxPlayer);
+
 	}
 	else
 	{

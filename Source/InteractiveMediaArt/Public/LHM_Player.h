@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "LHM_SphereCollision.h"
 #include "Camera/CameraActor.h"
+#include "LHM_MoveArt3Btn.h"
 #include "LHM_Player.generated.h"
 
 
@@ -57,17 +58,12 @@ protected:
 	void Look(const struct FInputActionValue& Value);
 
 public:
-	void OnMouseClick(const struct FInputActionInstance& Instance);
-	void OnMouseRelease(const struct FInputActionInstance& Instance);
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf <class UUserWidget> WBP_EscapeUI;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UEscapeUI* EscapeUI;
-
-
-	void ShowEscapeUI();
 
 	void ShowMouseCursor();
 
@@ -95,5 +91,20 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 
+	// ========================================================== Art3 여기서부터 ==========================================================
+
+private:
+	class AArt3PlayActor* SpawnedArt3PlayActor;
+
+public:
+	class APlayerController* pc;
+
+	void SpawnArt3PlayActor();
+
+	void OnMouseClick(const struct FInputActionValue& Value);
+
+	void MoveToArt3(ALHM_MoveArt3Btn* button);
+
+	// ========================================================== Art3 여기까지 ==========================================================
 
 };

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_UIManager.h"
@@ -11,6 +11,7 @@ UCJS_UIManager::UCJS_UIManager() : StartPanelInstance(nullptr), EndPanelInstance
 {}
 
 void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory, TSubclassOf<UUserWidget> InQuitUIFactory, APlayerController* InPC)
+//void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory)
 {
 	WorldRef = World;
 	StartPanelFactory = InStartPanelFactory;
@@ -19,6 +20,7 @@ void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartP
 	PC = InPC;
 
     if (!WorldRef || !PC)
+    //if (!WorldRef)
     {
         UE_LOG(LogTemp, Error, TEXT("UCJS_UIManager::Initialize(): WorldRef or PC is null"));
         return;
@@ -128,6 +130,7 @@ void UCJS_UIManager::HideEndPanel()
 
 void UCJS_UIManager::ShowQuitUI()
 {
+    UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::ShowQuitUI()"));
 	if (QuitUIInstance && PC)
 	{
 		QuitUIInstance->AddToViewport();
@@ -147,6 +150,7 @@ void UCJS_UIManager::ShowQuitUI()
 
 void UCJS_UIManager::HideQuitUI()
 {
+    UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::HideQuitUI()"));
 	if (QuitUIInstance && PC)
 	{
 		QuitUIInstance->RemoveFromViewport();

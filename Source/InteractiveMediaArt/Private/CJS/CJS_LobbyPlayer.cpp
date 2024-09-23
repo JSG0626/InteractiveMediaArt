@@ -106,17 +106,18 @@ void ACJS_LobbyPlayer::BeginPlay()
 		UIManager = NewObject<UCJS_UIManager>(this);
 		if ( UIManager )
 		{
-			//UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
-			//UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
+			//UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
+			UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+			UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("Not locally controlled, UIManager not initialized"));
+		UE_LOG(LogTemp, Error, TEXT("Not locally controlled, UIManager not initialized"));
 	}
 
 	// AimPointUI 위젯 생성
@@ -190,15 +191,15 @@ void ACJS_LobbyPlayer::BeginPlay()
 	}
 
 	// UI 매니저 인스턴스 생성 및 초기화	
-	UIManager = NewObject<UCJS_UIManager>(this);
+	/*UIManager = NewObject<UCJS_UIManager>(this);
 	if ( UIManager )
 	{
-		//UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
+		UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
-	}
+	}*/
 
 }
 
@@ -239,16 +240,16 @@ void ACJS_LobbyPlayer::PossessedBy(AController* NewController)
 		if ( UIManager )
 		{
 			UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory, QuitUIFactory, pc);
-			//UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
+			UE_LOG(LogTemp, Warning, TEXT("UIManager is initialized on local client"));
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
+			UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
+		UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
 	}
 }
 void ACJS_LobbyPlayer::OnMyActionMove(const struct FInputActionValue& Value)
@@ -333,11 +334,11 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			}
 			else if ( HitActorName.Contains("BTN1_1_Multi") )
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
 				ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(HitActor);
 				if ( btn_MultiPlay != nullptr )
 				{
-					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
+					//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
 					ServerRPC_StartInteraction();
 
 					btn_MultiPlay->SetActorHiddenInGame(true);
@@ -364,7 +365,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			else if ( HitActorName.Contains("BTN2_1") )
 			{
 				bExitBnt2_1 = true;
-				//UE_LOG(LogTemp, Warning, TEXT("BTN2_1 Clicked"));
+				UE_LOG(LogTemp, Warning, TEXT("BTN2_1 Clicked"));
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if ( buttonArt2 != nullptr )
 				{
@@ -562,8 +563,8 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 			pc->SetViewTarget(Cast<AActor>(button->Art1_Single_TargetCamera));
 
 			// 입력 모드 변경
-			FInputModeUIOnly UIOnlyMode;
-			pc->SetInputMode(UIOnlyMode);
+			//FInputModeUIOnly UIOnlyMode;
+			//pc->SetInputMode(UIOnlyMode);
 
 			// 마우스 커서 및 에임 포인트 처리
 			HideAimPoint();
@@ -863,28 +864,28 @@ void ACJS_LobbyPlayer::DisableAudioCapture()
 
 void ACJS_LobbyPlayer::StartExperience()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()"));
 	if ( UIManager )
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is OK"));
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is OK"));
 		UIManager->ShowStartPanel();
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is null"));
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::StartExperience()::UIManager is null"));
 	}
 }
 void ACJS_LobbyPlayer::EndExperience()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()"));
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()"));
 	if ( UIManager )
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is OK"));
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is OK"));
 		UIManager->ShowEndPanel();
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is null"));
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::EndExperience()::UIManager is null"));
 	}
 }
 
@@ -938,13 +939,13 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 		pc->SetViewTarget(LocalTargetCamera);
 
 		// 입력 모드 변경
-		FInputModeUIOnly UIOnlyMode;
-		pc->SetInputMode(UIOnlyMode);
+		//FInputModeUIOnly UIOnlyMode;
+		//pc->SetInputMode(UIOnlyMode);
 
 		// 마우스 커서 및 에임 포인트 처리
 		HideAimPoint();
 		ShowMouseCursor();
-		ShowEscapeUI();
+		//ShowEscapeUI();
 
 		UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
 	}

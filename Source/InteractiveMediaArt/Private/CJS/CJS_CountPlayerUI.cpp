@@ -51,6 +51,16 @@ void UCJS_CountPlayerUI::UpdateProgressBar(int32 curNum, int32 maxNum)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_CountPlayerUI::UpdateProgressBar()"));
 
-	ProgressBar_CountNum->SetPercent(curNum / maxNum);
+	// 실수로 변환하여 나눗셈 수행
+	if ( maxNum > 0 ) // maxNum이 0이 아닐 때만 나누기 수행
+	{
+		float PercentValue = static_cast<float>(curNum) / static_cast<float>(maxNum);
+		ProgressBar_CountNum->SetPercent(PercentValue);
+		UE_LOG(LogTemp, Warning, TEXT("ProgressBar Percent set to: %f"), PercentValue);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("maxNum is zero, cannot divide."));
+	}
 
 }

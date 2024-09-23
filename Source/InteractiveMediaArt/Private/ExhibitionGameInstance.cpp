@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ExhibitionGameInstance.h"
@@ -70,7 +70,7 @@ void UExhibitionGameInstance::CreateMySession()
 	// 2. ����(LAN)���� ��ġ�ϴ°�?
 	FName subsystemName = IOnlineSubsystem::Get()->GetSubsystemName();
 	//settings.bIsLANMatch = subsystemName == "NULL";
-	settings.bIsLANMatch = false;
+	settings.bIsLANMatch = true;
 
 	// �κ����� Ȱ��ȭ�Ѵ�. (Host �Ϸ��� �ʿ�)
 	settings.bUseLobbiesIfAvailable = true;
@@ -147,7 +147,7 @@ void UExhibitionGameInstance::FindSessions()
 	//SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 	SessionSearch->QuerySettings.Set(FName("HOST_NAME"), MySessionName, EOnlineComparisonOp::Equals);
 	//SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
-	SessionSearch->bIsLanQuery = false;
+	SessionSearch->bIsLanQuery = true;
 	SessionSearch->MaxSearchResults = 40;
 
 

@@ -81,6 +81,10 @@ void ACJS_LobbyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if ( IsLocallyControlled() )
+	{
+		GetMesh()->SetVisibility(false);
+	}
 	// 컨트롤러를 가져와서 캐스팅
 	pc = Cast<APlayerController>(Controller);
 	//2. 캐스팅 성공했다면 

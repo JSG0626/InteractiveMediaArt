@@ -152,8 +152,13 @@ public:
 	class ACJS_CancelBtn* CancelButton;
 	void SpawnCancelButton();
 	void OnCancelButtonClicked();
+	void RemoveCancelButton();
+	void RemoveServerCancelButton();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_CancelInteraction();
+	// 멀티캐스트 RPC 선언
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastRPC_ResetCancelButtonState();
 	
 
 	// 작품 2의 요소

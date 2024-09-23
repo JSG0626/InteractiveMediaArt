@@ -367,7 +367,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			else if ( HitActorName.Contains("BTN2_1") )
 			{
 				bExitBnt2_1 = true;
-				UE_LOG(LogTemp, Warning, TEXT("BTN2_1 Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BTN2_1 Clicked"));
 				ACJS_MovePosBnt* buttonArt2 = Cast<ACJS_MovePosBnt>(HitActor);
 				if ( buttonArt2 != nullptr )
 				{
@@ -376,7 +376,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 						pc = Cast<APlayerController>(GetController());
 						if ( !pc )
 						{
-							UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in OnMouseClick"));
+							//UE_LOG(LogTemp, Error, TEXT("PlayerController (pc) is null in OnMouseClick"));
 							return;
 						}
 					}
@@ -395,7 +395,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			}
 			else if ( HitActorName.Contains("BTN3_1") )
 			{
-				UE_LOG(LogTemp, Warning, TEXT("BTN3_1 Clicked"));
+				//UE_LOG(LogTemp, Warning, TEXT("BTN3_1 Clicked"));
 				ALHM_MoveArt3Btn* btn_Art3Play = Cast<ALHM_MoveArt3Btn>(HitActor);
 				if ( btn_Art3Play != nullptr )
 				{
@@ -457,7 +457,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 
 void ACJS_LobbyPlayer::SpawnArt3PlayActor()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::SpawnArt3PlayActor()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::SpawnArt3PlayActor()"));
 	TSubclassOf<AActor> Art3PlayActor = AArt3PlayActor::StaticClass();
 	AArt3PlayActor* SpawnedActor = GetWorld()->SpawnActor<AArt3PlayActor>(Art3PlayActor, FTransform(FVector(5960, -1570, 960)));
 	//APlayerController* pc = CastChecked<APlayerController>(GetController());
@@ -475,7 +475,7 @@ void ACJS_LobbyPlayer::SpawnArt3PlayActor()
 
 void ACJS_LobbyPlayer::MoveToArt3(ALHM_MoveArt3Btn* button)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::MoveToArt3()"));
+	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::MoveToArt3()"));
 	if ( button == nullptr )
 	{
 		return;
@@ -1004,6 +1004,8 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 		ShowMouseCursor();
 		//ShowEscapeUI();
 
+		//RemoveCancelButton();  // <----- 추가함 (취소)
+
 		UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
 	}
 	else
@@ -1054,11 +1056,27 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 void ACJS_LobbyPlayer::OnCancelButtonClicked()
 {
 	// CancelButton 제거
+	RemoveCancelButton();
+
+	// 서버에 RPC 호출하여 대기 취소 처리
+	ServerRPC_CancelInteraction();
+}
+
+void ACJS_LobbyPlayer::RemoveCancelButton()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::RemoveCancelButton()"));
+	
+	// CancelButton 제거
 	if ( CancelButton )
 	{
 		//CancelButton->HideCancelBtn();
 		CancelButton->Destroy();
 		CancelButton = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("CancelButton destroyed for %s"), *GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::RemoveCancelButton()::CancelButton is null"));
 	}
 
 	// 멀티 버튼 다시 보이게 설정
@@ -1072,15 +1090,45 @@ void ACJS_LobbyPlayer::OnCancelButtonClicked()
 		{
 			btn_MultiPlay->SetActorHiddenInGame(false);
 			btn_MultiPlay->SetActorEnableCollision(true);
+			UE_LOG(LogTemp, Warning, TEXT("MultiButton shown for %s"), *GetName());
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found."));
+		UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found for %s."), *GetName());
 	}
+}
 
-	// 서버에 RPC 호출하여 대기 취소 처리
-	ServerRPC_CancelInteraction();
+void ACJS_LobbyPlayer::RemoveServerCancelButton()
+{
+	// 서버 측에서도 버튼 상태 초기화 (필요시 추가)
+	if ( HasAuthority() )
+	{
+		// 서버에서 대기 취소 버튼 상태 초기화 (필요 시)
+		if ( CancelButton )
+		{
+			CancelButton->Destroy();
+			CancelButton = nullptr;
+		}
+
+		// 멀티 버튼 다시 활성화 (필요 시)
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("MultiButton"), FoundActors);
+
+		if ( FoundActors.Num() > 0 )
+		{
+			ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(FoundActors[0]);
+			if ( btn_MultiPlay )
+			{
+				btn_MultiPlay->SetActorHiddenInGame(false);
+				btn_MultiPlay->SetActorEnableCollision(true);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found."));
+		}
+	}
 }
 
 void ACJS_LobbyPlayer::ServerRPC_CancelInteraction_Implementation()
@@ -1093,6 +1141,12 @@ void ACJS_LobbyPlayer::ServerRPC_CancelInteraction_Implementation()
 			GM->CountPlayerUIActor->ServerRPC_RemovePlayerNum(this, 1);
 		}
 	}
+}
+
+void ACJS_LobbyPlayer::MulticastRPC_ResetCancelButtonState_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("MulticastRPC_ResetCancelButtonState called for %s"), *GetName());
+	RemoveCancelButton();
 }
 
 void ACJS_LobbyPlayer::ShowAimPoint()

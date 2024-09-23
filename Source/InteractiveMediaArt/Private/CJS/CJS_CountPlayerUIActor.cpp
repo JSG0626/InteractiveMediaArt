@@ -152,7 +152,7 @@ void ACJS_CountPlayerUIActor::ServerRPC_RemovePlayerNum_Implementation(ACJS_Lobb
 		}
 
 		// 클라이언트와 동기화
-		OnRep_CurPlayer();  //---> 자동 호출 안 됨?
+		OnRep_CurPlayer();  
 	}
 	else
 	{
@@ -201,7 +201,7 @@ void ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Implementation(ACJS_LobbyPl
 			CurPlayer = MaxPlayer;
 		}
 		// Sync the value with clients
-		OnRep_CurPlayer();  //----------------------> 자동으로 호출 안 됨
+		OnRep_CurPlayer(); 
 	}
 	else
 	{
@@ -289,6 +289,10 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 
 			// 클라이언트에서 카메라 및 UI 설정을 위해 ClientRPC 호출
 			Player->ClientRPC_MultiplaySetting();
+
+			// 로비 돌아올 시, 캔슬버튼 제거 후 멀티버튼 보이도록 하기
+			Player->MulticastRPC_ResetCancelButtonState();
+
 		}
 		else
 		{
@@ -321,7 +325,7 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 	UE_LOG(LogTemp, Warning, TEXT("ClickedPlayers.Num() = %d"), ClickedPlayers.Num());
 
 	// 클라이언트 동기화
-	OnRep_CurPlayer();  //---> 자동으로 불리도록 해 보기 -->안 됨
+	OnRep_CurPlayer();  
 }
 
 

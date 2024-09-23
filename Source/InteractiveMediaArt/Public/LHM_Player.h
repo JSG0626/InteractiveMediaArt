@@ -91,7 +91,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 
-	// ============================= Art3 =============================
+	// ========================================================== Art3 여기서부터 ==========================================================
 
 private:
 	class AArt3PlayActor* SpawnedArt3PlayActor;
@@ -101,7 +101,10 @@ public:
 
 	void SpawnArt3PlayActor();
 
-	void OnMouseClickArt3(const struct FInputActionValue& Value);
+	void OnMouseClick(const struct FInputActionValue& Value);
 
 	void MoveToArt3(ALHM_MoveArt3Btn* button);
+
+	// ========================================================== Art3 여기까지 ==========================================================
+
 };

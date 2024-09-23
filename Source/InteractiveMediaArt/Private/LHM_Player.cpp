@@ -148,14 +148,22 @@ void ALHM_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		// Looking
 		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ALHM_Player::Look);
 
-		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Started, this, &ALHM_Player::OnMouseClickArt3);
+
+
+
+		// ========================================================== Art3 여기서부터 ==========================================================
+
+		
+		EnhancedInputComponent->BindAction(LeftMouseButtonAction, ETriggerEvent::Started, this, &ALHM_Player::OnMouseClick);
+
+		// ========================================================== Art3 여기까지 ==========================================================
 
 
 
 	}
 }
 
-// ============================= Art3 =============================
+// ========================================================== Art3 여기서부터 ==========================================================
 
 void ALHM_Player::ShowMouseCursor()
 {
@@ -174,7 +182,6 @@ void ALHM_Player::ShowMouseCursor()
 	}
 }
 
-
 void ALHM_Player::SpawnArt3PlayActor()
 {
 	TSubclassOf<AActor> Art3PlayActor = AArt3PlayActor::StaticClass();
@@ -192,10 +199,11 @@ void ALHM_Player::SpawnArt3PlayActor()
 	}
 }
 
-void ALHM_Player::OnMouseClickArt3(const struct FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("ALHM_Player::OnMouseClickArt3()"));
+// ========================================================== Art3 여기서까지 ==========================================================
 
+
+void ALHM_Player::OnMouseClick(const struct FInputActionValue& Value)
+{
 	FVector Start = FollowCamera->GetComponentLocation();
 	FVector End = Start + FollowCamera->GetForwardVector() * 1000.f;
 	FHitResult Outhit;
@@ -226,6 +234,12 @@ void ALHM_Player::OnMouseClickArt3(const struct FInputActionValue& Value)
 			FString HitActorName = HitActor->GetName();
 			//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitActorName);
 
+
+
+
+
+// ========================================================== Art3 여기서부터 ==========================================================
+
 			if (HitActorName.Contains("BTN3_1"))
 			{
 				ALHM_MoveArt3Btn* btn_Art3Play = Cast<ALHM_MoveArt3Btn>(HitActor);
@@ -237,9 +251,16 @@ void ALHM_Player::OnMouseClickArt3(const struct FInputActionValue& Value)
 
 				}
 			}
+
+// ========================================================== Art3 여기까지 ==========================================================
+
 		}
 	}
 }
+
+
+
+// ========================================================== Art3 여기서부터 ==========================================================
 
 void ALHM_Player::MoveToArt3(ALHM_MoveArt3Btn* button)
 {
@@ -266,3 +287,5 @@ void ALHM_Player::MoveToArt3(ALHM_MoveArt3Btn* button)
 	}
 
 }
+
+// ========================================================== Art3 여기까지 ==========================================================

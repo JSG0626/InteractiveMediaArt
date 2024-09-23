@@ -1002,9 +1002,6 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 		// 마우스 커서 및 에임 포인트 처리
 		HideAimPoint();
 		ShowMouseCursor();
-		//ShowEscapeUI();
-
-		//RemoveCancelButton();  // <----- 추가함 (취소)
 
 		UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
 	}
@@ -1018,6 +1015,7 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 {
 	if ( CancelButton == nullptr )
 	{
+		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::SpawnCancelButton()::CancelButton is null"));
 		if ( CancelButtonFactory != nullptr )
 		{
 			// 스폰 위치와 회전을 지정합니다.
@@ -1048,13 +1046,16 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::SpawnCancelButton()::CancelButton is already exsisted"));
 		// 이미 스폰되어 있으면 보이도록 설정
 		CancelButton->SetActorHiddenInGame(false);
+		CancelButton->SetActorEnableCollision(true);
 	}
 }
 
 void ACJS_LobbyPlayer::OnCancelButtonClicked()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnCancelButtonClicked()"));
 	// CancelButton 제거
 	RemoveCancelButton();
 

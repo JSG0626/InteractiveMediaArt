@@ -290,7 +290,7 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 			// 클라이언트에서 카메라 및 UI 설정을 위해 ClientRPC 호출
 			Player->ClientRPC_MultiplaySetting();
 
-			//Player->RemoveServerCancelButton();
+			// 로비 돌아올 시, 캔슬버튼 제거 후 멀티버튼 보이도록 하기
 			Player->MulticastRPC_ResetCancelButtonState();
 
 		}

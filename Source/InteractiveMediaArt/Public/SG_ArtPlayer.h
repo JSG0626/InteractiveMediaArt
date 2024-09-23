@@ -118,10 +118,10 @@ public:
 	void UpdateMainUI(int32 RestTime);
 
 	// --------------------------------------------RPC--------------------------------------------
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, UnReliable)
 	void ServerRPC_SetJointPosition(const TArray<FVector>& JointPosition);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, UnReliable)
 	void MulticastRPC_SetJointPosition(const TArray<FVector>& JointPosition);
 
 	UFUNCTION(Server, Reliable)
@@ -139,6 +139,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SpawnServerManager();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPC_HitLetter_AddImpulse(class UPrimitiveComponent* HitComp, const FVector& Force);
 };

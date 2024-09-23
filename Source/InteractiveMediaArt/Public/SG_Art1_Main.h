@@ -14,6 +14,8 @@ class INTERACTIVEMEDIAART_API USG_Art1_Main : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+
+	virtual void NativeConstruct() override;
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TX_RestTime;
 

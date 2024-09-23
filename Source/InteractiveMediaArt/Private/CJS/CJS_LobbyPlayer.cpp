@@ -558,7 +558,7 @@ void ACJS_LobbyPlayer::MulticastRPC_ShowArt1WinUI_Implementation()
 		GetWorldTimerManager().SetTimer(handle, [&]()
 		{
 			Art1WinUI->RemoveFromParent();
-		}, 2.0f, false);
+		}, 5.0f, false);
 	}
 }
 
@@ -575,7 +575,7 @@ void ACJS_LobbyPlayer::MulticastRPC_ShowArt1LoseUI_Implementation()
 		GetWorldTimerManager().SetTimer(handle, [&]()
 		{
 			Art1LoseUI->RemoveFromParent();
-		}, 2.0f, false);
+		}, 5.0f, false);
 	}
 }
 

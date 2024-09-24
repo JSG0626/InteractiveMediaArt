@@ -36,8 +36,8 @@ public:
 
 	UFUNCTION()
 	void HideCancelBtn();
-
 	UFUNCTION()
 	void ShowCancelBtn();
+
 
 };

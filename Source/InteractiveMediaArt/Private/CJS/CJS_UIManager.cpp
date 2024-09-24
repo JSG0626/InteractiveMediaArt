@@ -12,7 +12,6 @@ UCJS_UIManager::UCJS_UIManager() : StartPanelInstance(nullptr), EndPanelInstance
 {}
 
 void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory, TSubclassOf<UUserWidget> InQuitUIFactory, APlayerController* InPC)
-//void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory)
 {
 	WorldRef = World;
 	StartPanelFactory = InStartPanelFactory;

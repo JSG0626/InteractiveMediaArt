@@ -12,7 +12,8 @@ ACJS_CancelBtn::ACJS_CancelBtn()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	bReplicates = true;
+	bReplicates = false;  // 복제 비활성화
+	SetReplicates(false);
 
 	CancleComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CancleComp"));
 	RootComponent = CancleComp;
@@ -96,4 +97,5 @@ void ACJS_CancelBtn::ShowCancelBtn()
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 }
+
 

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_CancelBtn.h"
@@ -11,6 +11,8 @@ ACJS_CancelBtn::ACJS_CancelBtn()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	CancleComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CancleComp"));
 	RootComponent = CancleComp;
@@ -38,8 +40,8 @@ ACJS_CancelBtn::ACJS_CancelBtn()
 	VisibleBoxComp->SetCollisionProfileName(TEXT("OverlapAll"));
 	VisibleBoxComp->SetGenerateOverlapEvents(true);
 
-	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_CancelBtn::OnOverlapBegin);
-	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_CancelBtn::OnOverlapEnd);
+	//VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_CancelBtn::OnOverlapBegin);
+	//VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_CancelBtn::OnOverlapEnd);
 
 	HideCancelBtn();
 }
@@ -58,28 +60,28 @@ void ACJS_CancelBtn::Tick(float DeltaTime)
 
 }
 
-void ACJS_CancelBtn::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	CancleComp->SetVisibility(true);
-
-	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
-
-	if (Player)
-	{
-		Player->ShowAimPoint();
-	}
-}
-
-void ACJS_CancelBtn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	CancleComp->SetVisibility(false);
-
-	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
-	if (Player)
-	{
-		Player->HideAimPoint();
-	}
-}
+//void ACJS_CancelBtn::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//	CancleComp->SetVisibility(true);
+//
+//	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+//
+//	if (Player)
+//	{
+//		Player->ShowAimPoint();
+//	}
+//}
+//
+//void ACJS_CancelBtn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	CancleComp->SetVisibility(false);
+//
+//	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+//	if (Player)
+//	{
+//		Player->HideAimPoint();
+//	}
+//}
 
 void ACJS_CancelBtn::HideCancelBtn()
 {

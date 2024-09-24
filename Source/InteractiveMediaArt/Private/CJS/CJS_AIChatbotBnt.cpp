@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_AIChatbotBnt.h"
@@ -32,8 +32,8 @@ ACJS_AIChatbotBnt::ACJS_AIChatbotBnt()
 	VisibleBoxComp->SetCollisionProfileName(TEXT("OverlapAll"));
 	VisibleBoxComp->SetGenerateOverlapEvents(true);
 
-	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_AIChatbotBnt::OnOverlapBegin);
-	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_AIChatbotBnt::OnOverlapEnd);
+	//VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_AIChatbotBnt::OnOverlapBegin);
+	//VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_AIChatbotBnt::OnOverlapEnd);
 }
 
 // Called when the game starts or when spawned
@@ -50,27 +50,27 @@ void ACJS_AIChatbotBnt::Tick(float DeltaTime)
 
 }
 
-void ACJS_AIChatbotBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
-		{
-			ButtonComp->SetVisibility(true);
-		}
-	}
-}
-
-void ACJS_AIChatbotBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherActor && (OtherActor != this) && OtherComp)
-	{
-		ACharacter* pc = Cast<ACharacter>(OtherActor);
-		if (pc)
-		{
-			ButtonComp->SetVisibility(false);
-		}
-	}
-}
+//void ACJS_AIChatbotBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//	if (OtherActor && (OtherActor != this) && OtherComp)
+//	{
+//		ACharacter* pc = Cast<ACharacter>(OtherActor);
+//		if (pc)
+//		{
+//			ButtonComp->SetVisibility(true);
+//		}
+//	}
+//}
+//
+//void ACJS_AIChatbotBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	if (OtherActor && (OtherActor != this) && OtherComp)
+//	{
+//		ACharacter* pc = Cast<ACharacter>(OtherActor);
+//		if (pc)
+//		{
+//			ButtonComp->SetVisibility(false);
+//		}
+//	}
+//}
 

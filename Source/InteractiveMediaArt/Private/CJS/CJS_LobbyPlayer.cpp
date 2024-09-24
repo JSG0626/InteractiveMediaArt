@@ -133,7 +133,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 		if ( AimpointUI )
 		{
 			AimpointUI->AddToViewport(true);
-			AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+			//AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 			//UE_LOG(LogTemp, Warning, TEXT("AimpointUI successfully created and added to viewport"));
 		}
 		else
@@ -713,11 +713,11 @@ FString ACJS_LobbyPlayer::GetProjectSavedDir()
 	return SavedDir;
 }
 
-void ACJS_LobbyPlayer::RemoveAimPoint()
-{
-	// AimPoint UI 끄기
-	if ( AimpointUI != nullptr ) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
-}
+//void ACJS_LobbyPlayer::RemoveAimPoint()
+//{
+//	// AimPoint UI 끄기
+//	if ( AimpointUI != nullptr ) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+//}
 
 void ACJS_LobbyPlayer::ShowMouseCursor()
 {

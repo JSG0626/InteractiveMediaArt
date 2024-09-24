@@ -81,7 +81,7 @@ public:
 	UPROPERTY()
 	class UEscapeUI* EscapeUI;
 
-	void RemoveAimPoint();
+	//void RemoveAimPoint();
 	void ShowAimPoint();
 	void HideAimPoint();
 

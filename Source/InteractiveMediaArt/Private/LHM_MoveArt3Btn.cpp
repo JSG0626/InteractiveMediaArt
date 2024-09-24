@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "LHM_MoveArt3Btn.h"
@@ -6,6 +6,8 @@
 #include "Components/BoxComponent.h"
 #include "CJS/CJS_LobbyPlayer.h"
 #include "Camera/CameraActor.h"
+// 현민!!! Love U~ <33333 ㅋㅋ
+
 
 // Sets default values
 ALHM_MoveArt3Btn::ALHM_MoveArt3Btn()
@@ -32,8 +34,8 @@ ALHM_MoveArt3Btn::ALHM_MoveArt3Btn()
 	VisibleBoxComp->SetRelativeLocation(FVector(316.118776, 821.842175, -110));
 	VisibleBoxComp->SetRelativeScale3D(FVector(15, 24, 3));
 
-	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ALHM_MoveArt3Btn::OnOverlapBegin);
-	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ALHM_MoveArt3Btn::OnOverlapEnd);
+	//VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ALHM_MoveArt3Btn::OnOverlapBegin);
+	//VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ALHM_MoveArt3Btn::OnOverlapEnd);
 }
 
 // Called when the game starts or when spawned
@@ -54,26 +56,26 @@ void ALHM_MoveArt3Btn::Tick(float DeltaTime)
 
 }
 
-void ALHM_MoveArt3Btn::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ButtonComp->SetVisibility(true);
-
-	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
-
-	if (Player)
-	{
-		Player->ShowAimPoint();
-	}
-}
-
-void ALHM_MoveArt3Btn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	ButtonComp->SetVisibility(false);
-
-	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
-	if (Player)
-	{
-		Player->HideAimPoint();
-	}
-}
+//void ALHM_MoveArt3Btn::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//	ButtonComp->SetVisibility(true);
+//
+//	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+//
+//	if (Player)
+//	{
+//		Player->ShowAimPoint();
+//	}
+//}
+//
+//void ALHM_MoveArt3Btn::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	ButtonComp->SetVisibility(false);
+//
+//	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+//	if (Player)
+//	{
+//		Player->HideAimPoint();
+//	}
+//}
 

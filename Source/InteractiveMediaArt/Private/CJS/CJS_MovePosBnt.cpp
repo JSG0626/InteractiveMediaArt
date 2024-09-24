@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "CJS/CJS_MovePosBnt.h"
@@ -36,8 +36,8 @@ ACJS_MovePosBnt::ACJS_MovePosBnt()
 	VisibleBoxComp->SetCollisionProfileName(TEXT("OverlapAll"));
 	VisibleBoxComp->SetGenerateOverlapEvents(true);
 
-	VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapBegin);
-	VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapEnd);
+	//VisibleBoxComp->OnComponentBeginOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapBegin);
+	//VisibleBoxComp->OnComponentEndOverlap.AddDynamic(this, &ACJS_MovePosBnt::OnOverlapEnd);
 }
 
 // Called when the game starts or when spawned
@@ -72,26 +72,26 @@ void ACJS_MovePosBnt::Tick(float DeltaTime)
 
 }
 
-void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ButtonComp->SetVisibility(true);
-
-	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
-
-	if (Player)
-	{
-		Player->ShowAimPoint();
-	}
-}
-
-void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	ButtonComp->SetVisibility(false);
-
-	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
-	if (Player)
-	{
-		Player->HideAimPoint();
-	}
-}
+//void ACJS_MovePosBnt::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+//{
+//	ButtonComp->SetVisibility(true);
+//
+//	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+//
+//	if (Player)
+//	{
+//		Player->ShowAimPoint();
+//	}
+//}
+//
+//void ACJS_MovePosBnt::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+//{
+//	ButtonComp->SetVisibility(false);
+//
+//	ACJS_LobbyPlayer* Player = Cast<ACJS_LobbyPlayer>(OtherActor);
+//	if (Player)
+//	{
+//		Player->HideAimPoint();
+//	}
+//}
 

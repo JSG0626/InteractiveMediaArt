@@ -105,6 +105,11 @@ public:
 
 	void MoveToArt3(ALHM_MoveArt3Btn* button);
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_Art3UI;
+	UPROPERTY(EditDefaultsOnly)
+	class ULHM_Art3UI* Art3UI;
+
 	// ========================================================== Art3 여기까지 ==========================================================
 
 };

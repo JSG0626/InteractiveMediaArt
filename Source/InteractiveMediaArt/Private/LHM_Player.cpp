@@ -25,6 +25,7 @@
 #include "Templates/SubclassOf.h"
 #include "Art3PlayActor.h"
 #include "LHM_MoveArt3Btn.h"
+#include "LHM_Art3UI.h"
 
 
 
@@ -81,6 +82,12 @@ void ALHM_Player::BeginPlay()
 	//ShowMouseCursor();
 	pc = Cast<APlayerController>(GetController());
 
+	if ( WBP_Art3UI )
+	{
+		Art3UI = CreateWidget<ULHM_Art3UI>(GetWorld(), WBP_Art3UI);
+		Art3UI->AddToViewport();
+		Art3UI->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 // Called every frame
@@ -245,10 +252,18 @@ void ALHM_Player::OnMouseClick(const struct FInputActionValue& Value)
 				ALHM_MoveArt3Btn* btn_Art3Play = Cast<ALHM_MoveArt3Btn>(HitActor);
 				if (btn_Art3Play != nullptr)
 				{
-					
-					MoveToArt3(btn_Art3Play);
-					SpawnArt3PlayActor();
-
+					if ( Art3UI )
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Art3UI"));
+						Art3UI->SetVisible();
+					}
+					UE_LOG(LogTemp, Warning, TEXT("Hit"));
+					FTimerHandle timer1;
+					FTimerHandle timer2;
+					GetWorld()->GetTimerManager().SetTimer(timer1, FTimerDelegate::CreateUObject(this, &ALHM_Player::MoveToArt3, btn_Art3Play), 10.0f, false);
+					GetWorld()->GetTimerManager().SetTimer(timer2, this, &ALHM_Player::SpawnArt3PlayActor, 10.0f, false);
+					//MoveToArt3(btn_Art3Play);
+					//SpawnArt3PlayActor();
 				}
 			}
 

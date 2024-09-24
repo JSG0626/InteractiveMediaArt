@@ -399,8 +399,8 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					HideAimPoint();
 					ShowMouseCursor();
 
-					UIManager->ShowQuitUI();
 					StartExperience();
+					//UIManager->ShowQuitUI();
 					EnableAudioCapture();
 				}
 			}
@@ -805,13 +805,13 @@ void ACJS_LobbyPlayer::OnExitBnt()
 			{
 				//UE_LOG(LogTemp, Error, TEXT("UIManager is null in OnExitBnt"));
 			}
-
-			// 4. AimPoint 다시 표시 (필요하다면)
-			ShowAimPoint();
 			//UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
 
-			bExitBnt2_1 = false;
+			// 4. AimPoint 다시 표시 (필요하다면)
+			//ShowAimPoint();
 		}
+
+		bExitBnt2_1 = false;
 	}
 }
 

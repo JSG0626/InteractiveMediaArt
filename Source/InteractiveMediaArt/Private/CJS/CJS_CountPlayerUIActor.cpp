@@ -290,8 +290,8 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 			// 클라이언트에서 카메라 및 UI 설정을 위해 ClientRPC 호출
 			Player->ClientRPC_MultiplaySetting();
 
-			// 로비 돌아올 시, 캔슬버튼 제거 후 멀티버튼 보이도록 하기
-			Player->MulticastRPC_ResetCancelButtonState();
+			// 클라이언트에게 UI 재설정을 지시
+			Player->ClientRPC_ResetCancelButtonState();
 
 		}
 		else
@@ -339,106 +339,6 @@ void ACJS_CountPlayerUIActor::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(ACJS_CountPlayerUIActor, CurPlayer);
 }
 
-
-
-
-
-
-
-// Multicast 함수로 모든 클라이언트에 값 전달
-//void ACJS_CountPlayerUIActor::MulticastRPC_UpdatePlayerNum_Implementation(int32 NewPlayerNum)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::MulticastRPC_UpdatePlayerNum_Implementation()"));
-//
-//	// 서버와 클라이언트를 구분하여 출력
-//	if (HasAuthority())
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("This is the server broadcasting the player number update."));
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("This is a client receiving the updated player number."));
-//	}
-//
-//	UpdatePlayerNum(NewPlayerNum);
-//}
-
-
-//void ACJS_CountPlayerUIActor::AddPlayerNum()
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::AddPlayerNum()"));
-//	SetCurPlayerNum(1);
-//	//CountPlayerUI->ShowPlayerNum(CurPlayer, MaxPlayer);
-//}
-//int32 ACJS_CountPlayerUIActor::GetCurPlayerNum()
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::GetCurPlayerNum()"));
-//	return CurPlayer;
-//}
-//void ACJS_CountPlayerUIActor::SetCurPlayerNum(int32 addNum)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("ACJS_CountPlayerUIActor::SetCurPlayerNum()"));
-//	CurPlayer += addNum;
-//	ServerRPC_AddPlayerNum(CurPlayer);
-//}
-
-
-
-//void ACJS_CountPlayerUIActor::PrintNetLog()
-//{
-	//const FString conStr = GetNetConnection() ? TEXT("Valid Connection") : TEXT("Invalid Connection");
-	//const FString ownerName = GetOwner() ? GetOwner()->GetName() : TEXT("No Owner");
-
-	//FString logStr = FString::Printf(TEXT("Connection : %s\nOwner Name : %s\nLocal Role : %s\nRemote Role : %s"), *conStr, *ownerName, *LOCALROLE, *REMOTEROLE);
-	//FVector loc = GetActorLocation() + GetActorUpVector() * 30;
-	//DrawDebugString(GetWorld(), loc, logStr, nullptr, FColor::Yellow, 0, true, 1.f);
-//}
-//void ACJS_CountPlayerUIActor::FindOwner()
-//{
-	//if (HasAuthority())
-	//{
-	//	AActor* newOwner = nullptr;
-
-	//	// TActorIterator에서 명시적으로 ACJS_LobbyPlayer 타입을 지정
-	//	for (TActorIterator<ACJS_LobbyPlayer> it(GetWorld()); it; ++it)
-	//	{
-	//		AActor* otherActor = *it;  // 반복자가 가리키는 액터를 가져옴
-
-	//		// 필요한 로직을 여기에 추가할 수 있음
-	//		newOwner = otherActor;  // 우선 소유자를 해당 액터로 설정
-	//	}
-
-	//	// Owner가 변경된 경우에만 설정
-	//	if (newOwner != GetOwner())
-	//	{
-	//		SetOwner(newOwner);
-	//		UE_LOG(LogTemp, Warning, TEXT("New owner set: %s"), *newOwner->GetName());
-	//	}
-	//}
-
-	//DrawDebugSphere(GetWorld(), GetActorLocation(), SearchDistance, 16, FColor::Cyan, false, 0, 0, 1);
-//}
-
-
-
-
-//bool ACJS_CountPlayerUIActor::ServerRPC_AddPlayerNum_Validate(int32 AddNum)
-//{
-//	return true;
-//}
-
-
-//
-//void ACJS_CountPlayerUIActor::ServerRPC_ChangePlayerNum_Implementation(const int32 playerNum)
-//{
-//	SetCurPlayerNum(playerNum);
-//	MulticastRPC_ChangePlayerNum(playerNum);
-//}
-//
-//void ACJS_CountPlayerUIActor::MulticastRPC_ChangePlayerNum_Implementation(const int32 playerNum)
-//{
-//	CountPlayerUI->ShowPlayerNum(GetCurPlayerNum(), MaxPlayer);
-//}
 
 
 

@@ -100,7 +100,7 @@ void AArt3PlayActor::MoveSphereCompWithMouse(FVector2D MouseDelta)
 		// SphereComp의 위치를 업데이트
 		SphereComp->SetWorldLocation(NewLocation);
 
-		UE_LOG(LogTemp, Warning, TEXT("New SphereComp Location: %s"), *NewLocation.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("New SphereComp Location: %s"), *NewLocation.ToString());
 	}
 }
 

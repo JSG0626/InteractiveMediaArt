@@ -5,13 +5,13 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/TimerHandle.h"
 #include "Components/Button.h"
+#include "CJS/CJS_LobbyPlayer.h"
 
 
 UCJS_UIManager::UCJS_UIManager() : StartPanelInstance(nullptr), EndPanelInstance(nullptr), QuitUIInstance(nullptr), WorldRef(nullptr)
 {}
 
 void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory, TSubclassOf<UUserWidget> InQuitUIFactory, APlayerController* InPC)
-//void UCJS_UIManager::Initialize(UWorld* World, TSubclassOf<UUserWidget> InStartPanelFactory, TSubclassOf<UUserWidget> InEndPanelFactory)
 {
 	WorldRef = World;
 	StartPanelFactory = InStartPanelFactory;
@@ -92,7 +92,7 @@ void UCJS_UIManager::ShowStartPanel()
 		StartPanelInstance->SetVisibility(ESlateVisibility::Visible);
 
 		FTimerHandle HideTimerHandle;
-		WorldRef->GetTimerManager().SetTimer(HideTimerHandle, this, &UCJS_UIManager::HideStartPanel, 3.f, false);
+		WorldRef->GetTimerManager().SetTimer(HideTimerHandle, this, &UCJS_UIManager::HideStartPanel, 10.f, false);
 	}
 	else
 	{
@@ -120,11 +120,45 @@ void UCJS_UIManager::HideStartPanel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::HideStartPanel()"));
 	StartPanelInstance->SetVisibility(ESlateVisibility::Hidden);
+
+    ShowQuitUI();
+
 }
 void UCJS_UIManager::HideEndPanel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UCJS_UIManager::HideEndPanel()"));
 	EndPanelInstance->SetVisibility(ESlateVisibility::Hidden);
+
+    // LobbyPlayer 인스턴스 가져오기
+    if ( WorldRef && PC )
+    {
+        // PlayerController의 Pawn을 가져옴
+        APawn* Pawn = PC->GetPawn();
+        if ( Pawn )
+        {
+            // Pawn을 ACJS_LobbyPlayer로 캐스팅
+            ACJS_LobbyPlayer* LobbyPlayer = Cast<ACJS_LobbyPlayer>(Pawn);
+            if ( LobbyPlayer )
+            {
+                // ShowAimPoint() 호출
+                LobbyPlayer->ShowAimPoint();
+                UE_LOG(LogTemp, Warning, TEXT("ShowAimPoint() called on LobbyPlayer"));
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to cast Pawn to ACJS_LobbyPlayer"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("PlayerController's Pawn is null in HideEndPanel()"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("WorldRef or PC is null in HideEndPanel()"));
+    }
+    
 }
 
 

@@ -5,9 +5,10 @@
 #include "CJS/CJS_PopUpBnt.h"
 #include "CJS/CJS_AIChatbotBnt.h"
 #include "CJS/CJS_MovePosBnt.h"
+#include "CJS/CJS_MultiPlayBTN.h"
+#include "CJS/CJS_CancelBtn.h"
 #include "CJS/CJS_CountPlayerUIActor.h"
 #include "CJS/CJS_CountPlayerUI.h"
-#include "CJS/CJS_CancelBtn.h"
 #include "CJS/CJS_UIManager.h"
 
 #include "ButtonExp.h"
@@ -32,6 +33,8 @@
 #include <InteractiveMediaArt/InteractiveMediaArt.h>
 #include "LHM_MoveArt3Btn.h"
 #include "Art3PlayActor.h"
+#include "LHM_Art3UI.h"
+
 
 
 
@@ -133,7 +136,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 		if ( AimpointUI )
 		{
 			AimpointUI->AddToViewport(true);
-			AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+			//AimpointUI->SetVisibility(ESlateVisibility::Hidden);
 			//UE_LOG(LogTemp, Warning, TEXT("AimpointUI successfully created and added to viewport"));
 		}
 		else
@@ -196,17 +199,21 @@ void ACJS_LobbyPlayer::BeginPlay()
 		return;
 	}
 
-	// UI 매니저 인스턴스 생성 및 초기화	
-	/*UIManager = NewObject<UCJS_UIManager>(this);
-	if ( UIManager )
-	{
-		UIManager->Initialize(GetWorld(), StartPanelFactory, EndPanelFactory);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("UIManager is not set!"));
-	}*/
 
+	// 아트3 UI
+	if ( WBP_Art3UI )
+	{
+		Art3UI = CreateWidget<ULHM_Art3UI>(GetWorld(), WBP_Art3UI);
+		Art3UI->AddToViewport();
+		Art3UI->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+
+	// 멀티 버튼 스폰
+	if ( IsLocallyControlled() )
+	{
+		SpawnMultiButton();
+	}
 }
 
 // Called every frame
@@ -257,6 +264,8 @@ void ACJS_LobbyPlayer::PossessedBy(AController* NewController)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Not locally controlled, UIManager not initialized"));
 	}
+
+	//SpawnMultiButton();
 }
 void ACJS_LobbyPlayer::OnMyActionMove(const struct FInputActionValue& Value)
 {
@@ -340,32 +349,52 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 			}
 			else if ( HitActorName.Contains("BTN1_1_Multi") )
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
-				ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(HitActor);
-				if ( btn_MultiPlay != nullptr )
+				UE_LOG(LogTemp, Warning, TEXT("BTN1_1_Multi Clicked"));
+				//ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(HitActor);
+				//if ( btn_MultiPlay != nullptr )
+				//{
+				//	//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
+				//	// 
+				//	// 서버에 상호작용 시작을 알림
+				//	ServerRPC_StartInteraction();
+
+				//	btn_MultiPlay->SetActorHiddenInGame(true);
+				//	btn_MultiPlay->SetActorEnableCollision(false);
+
+				//	// CancelButton을 스폰하는 함수 호출
+				//	SpawnCancelButton();
+				//}
+
+
+				// 히트된 액터가 자신의 멀티 버튼인지 확인
+				if ( HitActor == MultiButton )
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_MultiPlay is OK"));
+					// 서버에 상호작용 시작을 알림
 					ServerRPC_StartInteraction();
 
-					btn_MultiPlay->SetActorHiddenInGame(true);
-					btn_MultiPlay->SetActorEnableCollision(false);
+					MultiButton->SetActorHiddenInGame(true);
+					MultiButton->SetActorEnableCollision(false);
 
 					// CancelButton을 스폰하는 함수 호출
 					SpawnCancelButton();
 				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Hit MultiButton does not belong to this player."));
+				}
 			}
 			else if ( HitActorName.Contains("CancelBtn") )
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("Cancel_BTN Clicked"));
+				UE_LOG(LogTemp, Warning, TEXT("Cancel_BTN Clicked"));
 				ACJS_CancelBtn* btn_Cancel = Cast<ACJS_CancelBtn>(HitActor);
 				if ( btn_Cancel != nullptr )
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_Cancel is OK"));
-					OnCancelButtonClicked();
+					UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::btn_Cancel is OK"));
+					OnCancelButtonClicked();  
 				}
 				else
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("btn_Cancel is null"));
+					UE_LOG(LogTemp, Warning, TEXT("btn_Cancel is null"));
 				}
 			}
 			else if ( HitActorName.Contains("BTN2_1") )
@@ -392,8 +421,8 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					HideAimPoint();
 					ShowMouseCursor();
 
-					UIManager->ShowQuitUI();
 					StartExperience();
+					//UIManager->ShowQuitUI();
 					EnableAudioCapture();
 				}
 			}
@@ -403,8 +432,18 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 				ALHM_MoveArt3Btn* btn_Art3Play = Cast<ALHM_MoveArt3Btn>(HitActor);
 				if ( btn_Art3Play != nullptr )
 				{
-					MoveToArt3(btn_Art3Play);
-					SpawnArt3PlayActor();
+					if ( Art3UI )
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Art3UI"));
+						Art3UI->SetVisible();
+					}
+					UE_LOG(LogTemp, Warning, TEXT("Hit"));
+					FTimerHandle timer1;
+					FTimerHandle timer2;
+					GetWorld()->GetTimerManager().SetTimer(timer1, FTimerDelegate::CreateUObject(this, &ACJS_LobbyPlayer::MoveToArt3, btn_Art3Play), 10.0f, false);
+					GetWorld()->GetTimerManager().SetTimer(timer2, this, &ACJS_LobbyPlayer::SpawnArt3PlayActor, 10.0f, false);
+					//MoveToArt3(btn_Art3Play);
+					//SpawnArt3PlayActor();
 				}
 			}
 			else if ( HitActorName.Contains("BTN1_2") )
@@ -449,12 +488,12 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::Hit Actor is NULL"));
+			UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::Hit Actor is NULL"));
 		}
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::No Hit Detected"));
+		UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnMouseClick()::No Hit Detected"));
 	}
 }
 
@@ -713,11 +752,11 @@ FString ACJS_LobbyPlayer::GetProjectSavedDir()
 	return SavedDir;
 }
 
-void ACJS_LobbyPlayer::RemoveAimPoint()
-{
-	// AimPoint UI 끄기
-	if ( AimpointUI != nullptr ) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
-}
+//void ACJS_LobbyPlayer::RemoveAimPoint()
+//{
+//	// AimPoint UI 끄기
+//	if ( AimpointUI != nullptr ) AimpointUI->SetVisibility(ESlateVisibility::Hidden);
+//}
 
 void ACJS_LobbyPlayer::ShowMouseCursor()
 {
@@ -788,13 +827,13 @@ void ACJS_LobbyPlayer::OnExitBnt()
 			{
 				//UE_LOG(LogTemp, Error, TEXT("UIManager is null in OnExitBnt"));
 			}
-
-			// 4. AimPoint 다시 표시 (필요하다면)
-			ShowAimPoint();
 			//UE_LOG(LogTemp, Warning, TEXT("Returned to LobbyPlayer camera and original state"));
 
-			bExitBnt2_1 = false;
+			// 4. AimPoint 다시 표시 (필요하다면)
+			//ShowAimPoint();
 		}
+
+		bExitBnt2_1 = false;
 	}
 }
 
@@ -999,10 +1038,6 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 		// 카메라 뷰 변경
 		pc->SetViewTarget(LocalTargetCamera);
 
-		// 입력 모드 변경
-		//FInputModeUIOnly UIOnlyMode;
-		//pc->SetInputMode(UIOnlyMode);
-
 		// 마우스 커서 및 에임 포인트 처리
 		HideAimPoint();
 		ShowMouseCursor();
@@ -1015,21 +1050,64 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 	}
 }
 
+
+
+void ACJS_LobbyPlayer::SpawnMultiButton()
+{
+	if ( MultiButtonFactory )
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		FVector SpawnLocation = FVector(-140.0f, -800.0f, 140.0f); // 원하는 위치로 설정
+		FRotator SpawnRotation = FRotator(0.0f, 90.0f, 0.0f); // 원하는 회전으로 설정
+
+		MultiButton = GetWorld()->SpawnActor<ACJS_MultiPlayBTN>(MultiButtonFactory, SpawnLocation, SpawnRotation, SpawnParams);
+
+		if ( MultiButton )
+		{
+			UE_LOG(LogTemp, Warning, TEXT("MyMultiButton spawned for %s"), *GetName());
+			// 멀티 버튼의 Owner를 설정
+			MultiButton->SetOwner(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to spawn MyMultiButton for %s"), *GetName());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MultiButtonFactory is not set for %s"), *GetName());
+	}
+}
+
 void ACJS_LobbyPlayer::SpawnCancelButton()
 {
+	if ( !IsLocallyControlled() )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SpawnCancelButton() called on server for %s"), *GetName());
+		return;  // 클라이언트에서만 실행
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("SpawnCancelButton() called on client for %s"), *GetName());
+
+
 	if ( CancelButton == nullptr )
 	{
 		UE_LOG(LogTemp, Error, TEXT("ACJS_LobbyPlayer::SpawnCancelButton()::CancelButton is null"));
 		if ( CancelButtonFactory != nullptr )
 		{
 			// 스폰 위치와 회전을 지정합니다.
-			FVector SpawnLocation = FVector(-140.0f, -710.0f, 100.0f);
+			FVector SpawnLocation = FVector(-140.0f, -800.0f, 140.0f);
 			FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
 
 			// 스폰 파라미터 설정
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = this;
 			SpawnParams.Instigator = GetInstigator();
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			// CancelBtn 스폰
 			CancelButton = GetWorld()->SpawnActor<ACJS_CancelBtn>(CancelButtonFactory, SpawnLocation, SpawnRotation, SpawnParams);
@@ -1060,6 +1138,11 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 void ACJS_LobbyPlayer::OnCancelButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnCancelButtonClicked()"));
+
+	if ( !IsLocallyControlled() ) return;  // 클라이언트에서만 실행
+
+	UE_LOG(LogTemp, Warning, TEXT("ACJS_LobbyPlayer::OnCancelButtonClicked() for %s"), *GetName());
+
 	// CancelButton 제거
 	RemoveCancelButton();
 
@@ -1085,7 +1168,7 @@ void ACJS_LobbyPlayer::RemoveCancelButton()
 	}
 
 	// 멀티 버튼 다시 보이게 설정
-	TArray<AActor*> FoundActors;
+	/*TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("MultiButton"), FoundActors);
 
 	if ( FoundActors.Num() > 0 )
@@ -1101,40 +1184,21 @@ void ACJS_LobbyPlayer::RemoveCancelButton()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found for %s."), *GetName());
-	}
-}
+	}*/
 
-void ACJS_LobbyPlayer::RemoveServerCancelButton()
-{
-	// 서버 측에서도 버튼 상태 초기화 (필요시 추가)
-	if ( HasAuthority() )
+	// 자신의 멀티 버튼 다시 보이게 설정
+	if ( MultiButton )
 	{
-		// 서버에서 대기 취소 버튼 상태 초기화 (필요 시)
-		if ( CancelButton )
-		{
-			CancelButton->Destroy();
-			CancelButton = nullptr;
-		}
-
-		// 멀티 버튼 다시 활성화 (필요 시)
-		TArray<AActor*> FoundActors;
-		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("MultiButton"), FoundActors);
-
-		if ( FoundActors.Num() > 0 )
-		{
-			ACJS_MovePosBnt* btn_MultiPlay = Cast<ACJS_MovePosBnt>(FoundActors[0]);
-			if ( btn_MultiPlay )
-			{
-				btn_MultiPlay->SetActorHiddenInGame(false);
-				btn_MultiPlay->SetActorEnableCollision(true);
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("No actors with tag 'MultiButton' found."));
-		}
+		MultiButton->SetActorHiddenInGame(false);
+		MultiButton->SetActorEnableCollision(true);
+		UE_LOG(LogTemp, Warning, TEXT("MyMultiButton shown for %s"), *GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("MyMultiButton is null for %s."), *GetName());
 	}
 }
+
 
 void ACJS_LobbyPlayer::ServerRPC_CancelInteraction_Implementation()
 {
@@ -1147,18 +1211,19 @@ void ACJS_LobbyPlayer::ServerRPC_CancelInteraction_Implementation()
 		}
 	}
 }
-
-void ACJS_LobbyPlayer::MulticastRPC_ResetCancelButtonState_Implementation()
+void ACJS_LobbyPlayer::ClientRPC_ResetCancelButtonState_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("MulticastRPC_ResetCancelButtonState called for %s"), *GetName());
+	UE_LOG(LogTemp, Warning, TEXT("ClientRPC_CancelButton called for %s"), *GetName());
+
+	// 취소 버튼이 있으면 제거
 	RemoveCancelButton();
 }
+
 
 void ACJS_LobbyPlayer::ShowAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Visible);
 }
-
 void ACJS_LobbyPlayer::HideAimPoint()
 {
 	AimpointUI->SetVisibility(ESlateVisibility::Hidden);

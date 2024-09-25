@@ -49,7 +49,7 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 	SmokeNiagaraOnRHandComp->SetupAttachment(Mesh, FName("hand_r_SmokeSocket"));
 	SmokeNiagaraOnRHandComp->SetRelativeLocation(FVector(0));
 
-	ConstructorHelpers::FObjectFinder<UNiagaraSystem> tempSmokeNiagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/LHM/Effects/P_Smoke_01.P_Smoke_01'"));
+	ConstructorHelpers::FObjectFinder<UNiagaraSystem> tempSmokeNiagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/JSG/Particles/NS_Smoke3.NS_Smoke3'"));
 	if (tempSmokeNiagara.Succeeded())
 	{
 		SmokeNiagaraOnHeadComp->SetAsset(tempSmokeNiagara.Object);

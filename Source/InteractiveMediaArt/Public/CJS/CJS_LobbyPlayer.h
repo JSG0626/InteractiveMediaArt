@@ -81,7 +81,7 @@ public:
 	UPROPERTY()
 	class UEscapeUI* EscapeUI;
 
-	void RemoveAimPoint();
+	//void RemoveAimPoint();
 	void ShowAimPoint();
 	void HideAimPoint();
 
@@ -104,6 +104,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintCallable)
 	void SpawnArtPlayer(FTransform TargetTransform);
 
 	UFUNCTION(Server, Reliable)
@@ -134,32 +135,37 @@ public:
 	// ----------------------------------------JSG----------------------------------------
 	
 	void ExitArt();
-
 	UFUNCTION()
 	void MoveToArtPos(ACJS_MovePosBnt* button);
+
 
 	// 작품 1의 멀티 플레이
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_StartInteraction();
-
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_MultiplaySetting();
+
 
 	// 작품 1의 캔슬 Btn
 	UPROPERTY(EditDefaultsOnly, Category = "Buttons")
 	TSubclassOf<class ACJS_CancelBtn> CancelButtonFactory;
 	UPROPERTY()
 	class ACJS_CancelBtn* CancelButton;
+	UPROPERTY(EditDefaultsOnly, Category = "Buttons")
+	TSubclassOf<class ACJS_MultiPlayBTN> MultiButtonFactory;
+	UPROPERTY()
+	class ACJS_MultiPlayBTN* MultiButton;
+
+	void SpawnMultiButton();
 	void SpawnCancelButton();
 	void OnCancelButtonClicked();
 	void RemoveCancelButton();
-	void RemoveServerCancelButton();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_CancelInteraction();
-	// 멀티캐스트 RPC 선언
-    UFUNCTION(NetMulticast, Reliable)
-    void MulticastRPC_ResetCancelButtonState();
-	
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_ResetCancelButtonState();
+
 
 	// 작품 2의 요소
 	UPROPERTY()
@@ -176,8 +182,8 @@ public:
 
 	UPROPERTY()
 	class APlayerController* pc;
-
 	virtual void PossessedBy(AController* NewController) override;
+
 
 	// 작품 2의 Voice Input
 	UPROPERTY(EditDefaultsOnly)
@@ -191,7 +197,6 @@ public:
 
 	
 	// ========================================================== Art3 여기서부터 ==========================================================
-
 private:
 	class AArt3PlayActor* SpawnedArt3PlayActor;
 
@@ -201,6 +206,10 @@ public:
 
 	void MoveToArt3(class ALHM_MoveArt3Btn* button);
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf <class UUserWidget> WBP_Art3UI;
+	UPROPERTY(EditDefaultsOnly)
+	class ULHM_Art3UI* Art3UI;
 	// ========================================================== Art3 여기까지 ==========================================================
 	
 

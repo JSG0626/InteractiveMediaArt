@@ -14,6 +14,7 @@
 #include "Blueprint/UserWidget.h"
 #include "SG_Art1_Main.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/SkeletalMeshComponent.h"
 // Sets default values
 ASG_ArtPlayer::ASG_ArtPlayer()
 {
@@ -23,29 +24,29 @@ ASG_ArtPlayer::ASG_ArtPlayer()
 	//SceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
 	//SceneComp->SetupAttachment(RootComponent);
 
-	PoseableMeshComp = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("PoseableMeshComp"));
-	PoseableMeshComp->SetupAttachment(RootComponent);
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PoseableMeshComp"));
+	Mesh->SetupAttachment(RootComponent);
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
 	if (tempMesh.Succeeded())
 	{
-		PoseableMeshComp->SetSkeletalMesh(tempMesh.Object);
-		PoseableMeshComp->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-		PoseableMeshComp->SetVisibility(false);
+		Mesh->SetSkeletalMesh(tempMesh.Object);
+		Mesh->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+		Mesh->SetVisibility(false);
 	}
 
 	SmokeNiagaraOnHeadComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnHeadComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraOnHeadComp->SetupAttachment(PoseableMeshComp, FName("headSmokeSocket"));
+	SmokeNiagaraOnHeadComp->SetupAttachment(Mesh, FName("headSmokeSocket"));
 	SmokeNiagaraOnHeadComp->SetRelativeLocation(FVector(0));
 
 	SmokeNiagaraOnLHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnLHandComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraOnLHandComp->SetupAttachment(PoseableMeshComp, FName("hand_l_SmokeSocket"));
+	SmokeNiagaraOnLHandComp->SetupAttachment(Mesh, FName("hand_l_SmokeSocket"));
 	SmokeNiagaraOnLHandComp->SetRelativeLocation(FVector(0));
 
 	SmokeNiagaraOnRHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SmokeNiagaraOnRHandComp"));
 	//SmokeNiagaraComp->SetupAttachment(RootComponent);
-	SmokeNiagaraOnRHandComp->SetupAttachment(PoseableMeshComp, FName("hand_r_SmokeSocket"));
+	SmokeNiagaraOnRHandComp->SetupAttachment(Mesh, FName("hand_r_SmokeSocket"));
 	SmokeNiagaraOnRHandComp->SetRelativeLocation(FVector(0));
 
 	ConstructorHelpers::FObjectFinder<UNiagaraSystem> tempSmokeNiagara(TEXT("/Script/Niagara.NiagaraSystem'/Game/ArtProject/LHM/Effects/P_Smoke_01.P_Smoke_01'"));
@@ -75,8 +76,8 @@ void ASG_ArtPlayer::BeginPlay()
 	Super::BeginPlay();
 	bReplicates = true;
 	UE_LOG(LogTemp, Warning, TEXT("ASG_ArtPlayer::BeginPlay()"));
-	PoseableMeshComp->SetRelativeScale3D(MeshScale);
-	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
+	Mesh->SetRelativeScale3D(MeshScale);
+	//SmokeNiagaraComp->SetWorldLocation(Mesh->GetBoneLocation(FName("head")));
 	MeshScale = FVector(3.5, 7, 3.5);
 	InitLandmarkField();
 	InitBones();
@@ -116,7 +117,7 @@ void ASG_ArtPlayer::Tick(float DeltaTime)
 	if (Player)
 		GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("[%s] [%s]: IsLocallyControlled: %d"), NETMODE, *Player->GetName(), Player->IsLocallyControlled()));
 
-	//SmokeNiagaraComp->SetWorldLocation(PoseableMeshComp->GetBoneLocation(FName("head")));
+	//SmokeNiagaraComp->SetWorldLocation(Mesh->GetBoneLocation(FName("head")));
 
 }
 
@@ -291,7 +292,7 @@ void ASG_ArtPlayer::ServerRPC_SetJointPosition_Implementation(const TArray<FVect
 
 void ASG_ArtPlayer::MulticastRPC_SetJointPosition_Implementation(const TArray<FVector>& JointPosition)
 {
-	check(PoseableMeshComp); if (nullptr == PoseableMeshComp) return;
+	check(Mesh); if (nullptr == Mesh) return;
 	//PRINTLOG(TEXT("MulticastRPC_SetJointPosition_Implementation"));
 	FVector CurLocation = GetActorLocation();
 	CurLocation.Z += 500;
@@ -304,24 +305,24 @@ void ASG_ArtPlayer::MulticastRPC_SetJointPosition_Implementation(const TArray<FV
 		float z = JointPosition[i].Z * MeshScale.Z;
 
 		// 관절의 본을 가져옵니다.
-		FTransform JointTransform = PoseableMeshComp->GetBoneTransform(PoseableMeshComp->GetBoneIndex(Bones[i]));
+		FTransform JointTransform = Mesh->GetBoneTransform(Mesh->GetBoneIndex(Bones[i]));
 		FVector JointLocation = JointTransform.GetLocation();
 		// 새로운 위치를 설정합니다.
 		//FVector newLocation = FVector(TargetJointLocations[i].Key, JointTransform.GetLocation().Y, TargetJointLocations[i].Value);
 		FVector newLocation = CurLocation + FVector(x, 0, z);
 		newLocation.Y = CurLocation.Y;
 		// 본의 변환을 설정합니다.
-		PoseableMeshComp->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
+		//Mesh->SetBoneLocationByName(Bones[i], newLocation, EBoneSpaces::WorldSpace);
 	}
 
 	FVector spine_04_loc = CurLocation + (JointPosition[ELandmark::LEFT_SHOULDER] + JointPosition[ELandmark::RIGHT_SHOULDER] +
 		JointPosition[ELandmark::LEFT_HIP] + JointPosition[ELandmark::RIGHT_HIP]) / 4 * MeshScale;
 	spine_04_loc.Y = CurLocation.Y;
-	PoseableMeshComp->SetBoneLocationByName(TEXT("spine_04"), spine_04_loc, EBoneSpaces::WorldSpace);
+	//Mesh->SetBoneLocationByName(TEXT("spine_04"), spine_04_loc, EBoneSpaces::WorldSpace);
 
 	FVector pelvis_loc = CurLocation + (JointPosition[ELandmark::LEFT_HIP] + JointPosition[ELandmark::RIGHT_HIP]) / 2 * MeshScale;
 	pelvis_loc.Y = CurLocation.Y;
-	PoseableMeshComp->SetBoneLocationByName(TEXT("pelvis"), pelvis_loc, EBoneSpaces::WorldSpace);
+	//Mesh->SetBoneLocationByName(TEXT("pelvis"), pelvis_loc, EBoneSpaces::WorldSpace);
 
 	GEngine->AddOnScreenDebugMessage(-1, -1, FColor::Green, FString::Printf(TEXT("curLocation: %s, pelvis_loc: %s"), *CurLocation.ToString(), *pelvis_loc.ToString()));
 }
@@ -333,11 +334,11 @@ void ASG_ArtPlayer::ServerRPC_ActiveComponents_Implementation()
 
 void ASG_ArtPlayer::MulticastRPC_ActiveComponents_Implementation()
 {
-	PoseableMeshComp->SetVisibility(true);
+	Mesh->SetVisibility(true);
 	//SmokeNiagaraOnHeadComp->Activate(true);
 	SmokeNiagaraOnLHandComp->Activate(true);
 	SmokeNiagaraOnRHandComp->Activate(true);
-	UE_LOG(LogTemp, Warning, TEXT("PoseableMeshComp->Setvisibility: %d"), PoseableMeshComp->GetVisibleFlag());
+	UE_LOG(LogTemp, Warning, TEXT("PoseableMeshComp->Setvisibility: %d"), Mesh->GetVisibleFlag());
 }
 
 void ASG_ArtPlayer::ServerRPC_HitLetter_Implementation(const TArray<FBasicParticleData>& Datas)

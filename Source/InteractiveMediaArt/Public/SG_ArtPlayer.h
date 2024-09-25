@@ -55,7 +55,7 @@ public:
 	class USceneComponent* SceneComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	class UPoseableMeshComponent* PoseableMeshComp;
+	class USkeletalMeshComponent* Mesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = VFX)
 	TSubclassOf<class UNiagaraSystem> SmokeFactory;

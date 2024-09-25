@@ -85,4 +85,6 @@ public:
 
 	// �� ���� ����	
 	void OnMyDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+
+	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 };

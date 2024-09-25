@@ -53,6 +53,8 @@ void UExhibitionGameInstance::Init()
 		SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UExhibitionGameInstance::OnMyDestroySessionComplete);
 	}
 
+	GEngine->OnNetworkFailure().AddUObject(this, &UExhibitionGameInstance::OnNetworkFailure);
+
 	/*FTimerHandle handle;
 	GetWorld()->GetTimerManager().SetTimer(handle , [&]()
 	{
@@ -285,7 +287,19 @@ void UExhibitionGameInstance::OnMyDestroySessionComplete(FName SessionName, bool
 		// 클라이언트는 로비로 여행을 가고싶다.
 		auto* pc = GetWorld()->GetFirstPlayerController();
 		pc->ClientTravel(TEXT("/Game/ArtProject/LHM/Maps/LHM_Exit"), ETravelType::TRAVEL_Absolute);
+
 		// 세션을 종료시키고 싶다.
 		FGenericPlatformMisc::RequestExit(false);
+	}
+}
+
+void UExhibitionGameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	PRINTLOG(TEXT("Network Failure: %s"), *ErrorString);
+
+	if ( FailureType == ENetworkFailure::FailureReceived )
+	{
+		PRINTLOG(TEXT("Host closed connection, returning to Exit Map"));
+		UGameplayStatics::OpenLevel(this, FName("/Game/ArtProject/LHM/Maps/LHM_Exit"));
 	}
 }

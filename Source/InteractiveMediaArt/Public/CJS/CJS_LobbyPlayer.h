@@ -104,6 +104,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintCallable)
 	void SpawnArtPlayer(FTransform TargetTransform);
 
 	UFUNCTION(Server, Reliable)

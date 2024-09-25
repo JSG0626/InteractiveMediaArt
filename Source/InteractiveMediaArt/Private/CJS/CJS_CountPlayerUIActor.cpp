@@ -291,7 +291,10 @@ void ACJS_CountPlayerUIActor::StartInteractiveExperience()
 			Player->ClientRPC_MultiplaySetting();
 
 			// 클라이언트에게 UI 재설정을 지시
-			Player->ClientRPC_ResetCancelButtonState();
+			//Player->ClientRPC_ResetCancelButtonState();
+
+			// 전체 클라에게 캔슬 버튼 초기화 지시
+			Player->MulticastRPC_ResetCancelButtonState();
 
 		}
 		else

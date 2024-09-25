@@ -163,8 +163,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_CancelInteraction();
 
-	UFUNCTION(Client, Reliable)
-	void ClientRPC_ResetCancelButtonState();
+	//UFUNCTION(Client, Reliable)
+	//void ClientRPC_ResetCancelButtonState();
+
+	// 멀티캐스트 RPC 선언
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastRPC_ResetCancelButtonState();
 
 
 	// 작품 2의 요소

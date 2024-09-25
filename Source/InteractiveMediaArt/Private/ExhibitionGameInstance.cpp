@@ -282,7 +282,10 @@ void UExhibitionGameInstance::OnMyDestroySessionComplete(FName SessionName, bool
 {
 	if (bWasSuccessful)
 	{
-		// ���α׷��� �����ϰ� �ʹ�.
+		// 클라이언트는 로비로 여행을 가고싶다.
+		auto* pc = GetWorld()->GetFirstPlayerController();
+		pc->ClientTravel(TEXT("/Game/ArtProject/LHM/Maps/LHM_Exit"), ETravelType::TRAVEL_Absolute);
+		// 세션을 종료시키고 싶다.
 		FGenericPlatformMisc::RequestExit(false);
 	}
 }

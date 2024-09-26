@@ -34,6 +34,7 @@
 #include "LHM_MoveArt3Btn.h"
 #include "Art3PlayActor.h"
 #include "LHM_Art3UI.h"
+#include "Components/BoxComponent.h"
 
 
 
@@ -330,8 +331,32 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 
 		AActor* HitActor = Outhit.GetActor();
 		auto* hitComp = Outhit.GetComponent();
-		if ( hitComp )
+		if ( HitActor && hitComp )
+		{
 			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s,  %s"), *HitActor->GetName(), *hitComp->GetName()));
+
+			// ============================== 아트1 작품설명 버튼 닫기 ==============================
+			//ACJS_PopUpBnt* button2 = Cast<ACJS_PopUpBnt>(HitActor); // HitActor가 ACJS_PopUpBnt인지 확인
+			//if ( button2 && hitComp == button2->ClickPopUpUIComp ) // HitComp가 ClickPopUpUIComp인지 확인
+			//{
+			//	UE_LOG(LogTemp, Warning, TEXT("button2 && hitComp == button2->ClickPopUpUIComp"));
+			//	if ( bPopUpUIShowing )
+			//	{
+			//		UE_LOG(LogTemp, Warning, TEXT("if ( bPopUpUIShowing )"));
+			//		if ( nullptr == button2->ClickPopUpUIComp ) return;
+			//		if ( button2->ClickPopUpUIComp )
+			//		{
+			//			button2->WidgetComp->SetVisibility(false);
+			//			button2->ClickPopUpUIComp->SetHiddenInGame(true);
+			//			bPopUpUIShowing = false;
+			//			UE_LOG(LogTemp, Warning, TEXT("button2->ClickPopUpUIComp"));
+			//		}
+			//		
+			//	}
+
+			//}
+			// ============================== 아트1 작품설명 버튼 닫기 ==============================
+		}
 		if ( HitActor )
 		{
 			FString HitActorName = HitActor->GetName();
@@ -462,6 +487,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					{
 						if ( nullptr == button2->WidgetComp ) return;
 						button2->WidgetComp->SetVisibility(true);
+						//button2->ClickPopUpUIComp->SetHiddenInGame(false);
 						bPopUpUIShowing = true;
 						//UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget shown"));
 					}
@@ -472,7 +498,6 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 						bPopUpUIShowing = false;
 						//UE_LOG(LogTemp, Warning, TEXT("Overlap Begin - PopUpUIWidget hidden"));
 					}
-
 				}
 			}
 			else if ( HitActorName.Contains("BTN1_3") )

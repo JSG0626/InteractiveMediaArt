@@ -592,7 +592,8 @@ void ACJS_LobbyPlayer::MulticastRPC_ReturnToCamera_Implementation()
 void ACJS_LobbyPlayer::MulticastRPC_ShowArt1WinUI_Implementation()
 {
 	if ( IsLocallyControlled() )
-	{
+	{	
+		PRINTLOG(TEXT("%s"), *GetName());
 		check(WBP_Art1Win); if ( nullptr == WBP_Art1Win ) return;
 
 		Art1WinUI = CreateWidget(GetWorld(), WBP_Art1Win);
@@ -610,6 +611,7 @@ void ACJS_LobbyPlayer::MulticastRPC_ShowArt1LoseUI_Implementation()
 {
 	if ( IsLocallyControlled() )
 	{
+		PRINTLOG(TEXT("%s"), *GetName());
 		check(WBP_Art1Lose); if ( nullptr == WBP_Art1Lose ) return;
 
 		Art1LoseUI = CreateWidget(GetWorld(), WBP_Art1Lose);

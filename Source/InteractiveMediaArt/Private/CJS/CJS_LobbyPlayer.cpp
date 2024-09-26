@@ -212,7 +212,7 @@ void ACJS_LobbyPlayer::BeginPlay()
 	// 멀티 버튼 스폰
 	if ( IsLocallyControlled() )
 	{
-		SpawnMultiButton();
+		//SpawnMultiButton();
 	}
 }
 
@@ -633,38 +633,28 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 
 	if ( ArtPlayer == nullptr )
 	{
-		FActorSpawnParameters params;
-		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
 		// ArtPlayer 생성
-		ArtPlayer = GetWorld()->SpawnActor<ASG_ArtPlayer>(ArtPlayerFactory, button->Art1_Single_TargetTransform, params);
-
-		// Art1_Single_TargetTransform의 값 로그 출력
-		/*UE_LOG(LogTemp, Warning, TEXT("Art1_Single_TargetTransform: Location = %s, Rotation = %s, Scale = %s"),
-			*button->Art1_Single_TargetTransform.GetLocation().ToString(),
-			*button->Art1_Single_TargetTransform.GetRotation().Rotator().ToString(),
-			*button->Art1_Single_TargetTransform.GetScale3D().ToString());*/
+		SpawnArtPlayer(button->Art1_Single_TargetTransform);
+		ClientRPC_MultiplaySetting();
 
 		if ( ArtPlayer )
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("ArtPlayer spawned successfully"));
+			UE_LOG(LogTemp, Warning, TEXT("ArtPlayer spawned successfully"));
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Error, TEXT("Failed to spawn ArtPlayer"));
+			UE_LOG(LogTemp, Error, TEXT("Failed to spawn ArtPlayer"));
 			return;
 		}
 
-		// 플레이어 컨트롤러 가져오기
-		//APlayerController* pc = Cast<APlayerController>(GetController());
 		if ( pc && button->Art1_Single_TargetCamera )
 		{
 			// Art1_Single_TargetCamera의 값 로그 출력
 			/*UE_LOG(LogTemp, Warning, TEXT("Art1_Single_TargetCamera: Name = %s, Location = %s"),
-				*button->Art1_Single_TargetCamera->GetName(),
-				*button->Art1_Single_TargetCamera->GetActorLocation().ToString());*/
+			   *button->Art1_Single_TargetCamera->GetName(),
+			   *button->Art1_Single_TargetCamera->GetActorLocation().ToString());*/
 
-				// 카메라 뷰 변경
+			   // 카메라 뷰 변경
 			pc->SetViewTarget(Cast<AActor>(button->Art1_Single_TargetCamera));
 
 			// 입력 모드 변경
@@ -673,7 +663,17 @@ void ACJS_LobbyPlayer::MoveToArtPos(ACJS_MovePosBnt* button)
 
 			// 마우스 커서 및 에임 포인트 처리
 			HideAimPoint();
-			ShowMouseCursor();
+			if ( pc )
+			{
+				// 마우스 커서를 보이게 하고 카메라 회전을 비활성화
+				pc->bShowMouseCursor = true;
+				pc->bEnableMouseOverEvents = true;
+				FInputModeUIOnly InputMode;
+				pc->SetInputMode(InputMode);
+
+				// 카메라 회전 비활성화
+				bUseControllerRotationYaw = false;
+			}
 			ShowEscapeUI();
 		}
 		else
@@ -1046,8 +1046,17 @@ void ACJS_LobbyPlayer::ClientRPC_MultiplaySetting_Implementation()
 
 		// 마우스 커서 및 에임 포인트 처리
 		HideAimPoint();
-		ShowMouseCursor();
+		if ( pc )
+		{
+			// 마우스 커서를 보이게 하고 카메라 회전을 비활성화
+			pc->bShowMouseCursor = true;
+			pc->bEnableMouseOverEvents = true;
+			FInputModeGameOnly InputMode;
+			pc->SetInputMode(InputMode);
 
+			// 카메라 회전 비활성화
+			bUseControllerRotationYaw = false;
+		}
 		UE_LOG(LogTemp, Warning, TEXT("ClientRPC_MultiplaySetting: LocalTargetCamera created and view set"));
 	}
 	else
@@ -1106,8 +1115,8 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 		if ( CancelButtonFactory != nullptr )
 		{
 			// 스폰 위치와 회전을 지정합니다.
-			FVector SpawnLocation = FVector(-140.0f, -800.0f, 140.0f);
-			FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
+			FVector SpawnLocation = FVector(-170.0f, -650.0f, 140.0f);
+			FRotator SpawnRotation = FRotator(0.0f, -360.0f, 160.0f);
 
 			// 스폰 파라미터 설정
 			FActorSpawnParameters SpawnParams;

@@ -16,7 +16,7 @@ ACJS_CancelBtn::ACJS_CancelBtn()
 	SetReplicates(false);
 
 	CancleComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CancleComp"));
-	RootComponent = CancleComp;
+	CancleComp->SetupAttachment(RootComponent);
 	// CancleComp 콜리전 설정 추가
 	CancleComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CancleComp->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel4);

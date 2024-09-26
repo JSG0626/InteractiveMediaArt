@@ -1106,7 +1106,7 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 		if ( CancelButtonFactory != nullptr )
 		{
 			// 스폰 위치와 회전을 지정합니다.
-			FVector SpawnLocation = FVector(-140.0f, -800.0f, 250.0f);
+			FVector SpawnLocation = FVector(-140.0f, -800.0f, 140.0f);
 			FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
 
 			// 스폰 파라미터 설정

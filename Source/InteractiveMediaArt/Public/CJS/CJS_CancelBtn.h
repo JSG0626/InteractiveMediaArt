@@ -24,9 +24,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Cancel BTN
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UStaticMeshComponent* CancleComp;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UBoxComponent* VisibleBoxComp;
 
 	//UFUNCTION()

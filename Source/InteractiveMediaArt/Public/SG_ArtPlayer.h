@@ -44,12 +44,16 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UArtPlayerAnimInstance* Anim;
 
 	UPROPERTY(EditDefaultsOnly)
 	class USceneComponent* SceneComp;
@@ -116,6 +120,16 @@ public:
 	void InitEntranceUI();
 	void InitMainUI();
 	void UpdateMainUI(int32 RestTime);
+
+	inline void PreprocessJointPosition(const FVector& Root, FVector& DestPosition, const FVector& SrcPosition);
+	FVector root_Position;
+	FVector hand_l_Position;
+	FVector hand_r_Position;
+	FVector foot_l_Position;
+	FVector foot_r_Position;
+	FVector head_Position;
+	FVector spine5_Position;
+	FVector pelvis_Position;
 
 	// --------------------------------------------RPC--------------------------------------------
 	UFUNCTION(Server, UnReliable)

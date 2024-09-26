@@ -24,11 +24,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Multi BTN
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UStaticMeshComponent* ButtonComp;
-	UPROPERTY()
-	class UBoxComponent* VisibleBoxComp;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class UBoxComponent* VisibleBoxComp;
 
 	UPROPERTY(EditDefaultsOnly)
 	class ACameraActor* Art1_Multi_TargetCamera;

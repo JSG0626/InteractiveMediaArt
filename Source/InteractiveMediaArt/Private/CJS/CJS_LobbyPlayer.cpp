@@ -435,6 +435,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					if ( Art3UI )
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Art3UI"));
+						HideAimPoint();
 						Art3UI->SetVisible();
 
 						// 입력 모드 변경
@@ -808,8 +809,7 @@ void ACJS_LobbyPlayer::OnExitBnt()
 	if ( bExitBnt2_1 )
 	{
 		DisableAudioCapture();
-
-		EndExperience();
+		//EndExperience();
 
 		if ( pc )
 		{
@@ -838,6 +838,8 @@ void ACJS_LobbyPlayer::OnExitBnt()
 		}
 
 		bExitBnt2_1 = false;
+
+		ShowAimPoint();
 	}
 }
 
@@ -1104,7 +1106,7 @@ void ACJS_LobbyPlayer::SpawnCancelButton()
 		if ( CancelButtonFactory != nullptr )
 		{
 			// 스폰 위치와 회전을 지정합니다.
-			FVector SpawnLocation = FVector(-140.0f, -800.0f, 250.0f);
+			FVector SpawnLocation = FVector(-140.0f, -800.0f, 140.0f);
 			FRotator SpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
 
 			// 스폰 파라미터 설정

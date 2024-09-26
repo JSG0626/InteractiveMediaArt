@@ -435,6 +435,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 					if ( Art3UI )
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Art3UI"));
+						HideAimPoint();
 						Art3UI->SetVisible();
 
 						// 입력 모드 변경
@@ -808,8 +809,7 @@ void ACJS_LobbyPlayer::OnExitBnt()
 	if ( bExitBnt2_1 )
 	{
 		DisableAudioCapture();
-
-		EndExperience();
+		//EndExperience();
 
 		if ( pc )
 		{
@@ -838,6 +838,8 @@ void ACJS_LobbyPlayer::OnExitBnt()
 		}
 
 		bExitBnt2_1 = false;
+
+		ShowAimPoint();
 	}
 }
 

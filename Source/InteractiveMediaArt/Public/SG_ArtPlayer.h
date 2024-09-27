@@ -109,7 +109,7 @@ public:
 	//TArray<TPair<float, float>> TargetJointLocations;
 	UPROPERTY()
 	TArray<FVector> TargetJointLocations;
-	void SetJointPosition(const TArray<FVector>& JointPosition);
+	void SetJointPosition(TArray<FVector>& JointPosition);
 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -121,8 +121,11 @@ public:
 	void InitMainUI();
 	void UpdateMainUI(int32 RestTime);
 
-	inline void PreprocessJointPosition(const FVector& Root, FVector& DestPosition, const FVector& SrcPosition);
+	inline void PreprocessJointPosition(const FVector& Root, FVector& DestPosition, const FVector& SrcPosition, float x_scale, float z_scale);
 	FVector root_Position;
+
+	FVector lowerarm_l_Position;
+	FVector lowerarm_r_Position;
 	FVector hand_l_Position;
 	FVector hand_r_Position;
 	FVector foot_l_Position;

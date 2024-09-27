@@ -19,6 +19,10 @@ public:
 
 	UPROPERTY()
 	class ASG_ArtPlayer* Me;
+	UPROPERTY(BlueprintReadOnly, Category = Position)
+	FVector lowerarm_l_position;
+	UPROPERTY(BlueprintReadOnly, Category = Position)
+	FVector lowerarm_r_position;
 
 	UPROPERTY(BlueprintReadOnly, Category = Position)
 	FVector hand_l_position;

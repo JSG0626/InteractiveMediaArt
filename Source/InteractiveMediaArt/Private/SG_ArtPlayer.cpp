@@ -18,7 +18,7 @@
 #include "ArtPlayerAnimInstance.h"
 
 const float X_SCALE = 80;
-const float Y_SCALE = 20;
+const float Y_SCALE = 5;
 const float Z_SCALE = 80;
 
 // Sets default values
@@ -209,8 +209,16 @@ void ASG_ArtPlayer::SpawnServerManager()
 
 }
 
-void ASG_ArtPlayer::SetJointPosition(const TArray<FVector>& JointPosition)
+void ASG_ArtPlayer::SetJointPosition(TArray<FVector>& JointPosition)
 {
+	// 루트 좌표의 로컬 좌표계로 환산
+	int32 JointPositionSize = JointPosition.Num();
+	root_Position = ((JointPosition[LEFT_HEEL] + JointPosition[RIGHT_HEEL]) / 2);
+	for ( int i = 0; i < JointPositionSize; i++ )
+	{
+		JointPosition[i] = JointPosition[i] - root_Position;
+	}
+
 	ServerRPC_SetJointPosition(JointPosition);
 }
 
@@ -265,15 +273,14 @@ void ASG_ArtPlayer::UpdateMainUI(int32 RestTime)
 	}
 }
 
-inline void ASG_ArtPlayer::PreprocessJointPosition(const FVector& Root, FVector& DestPosition, const FVector& SrcPosition)
+inline void ASG_ArtPlayer::PreprocessJointPosition(const FVector& Root, FVector& DestPosition, const FVector& SrcPosition, float x_scale, float z_scale)
 {
-	FVector TargetPosition = (SrcPosition - root_Position);
+	FVector TargetPosition = SrcPosition - root_Position;
+	TargetPosition.X *= x_scale;
+	TargetPosition.Y *= 5;
+	TargetPosition.Z *= z_scale;
 
-	TargetPosition.X *= X_SCALE;
-	TargetPosition.Y *= Y_SCALE;
-	TargetPosition.Z *= Z_SCALE;
-
-	float additionalScale = FMath::Max(0.0f, (-TargetPosition.Y + 150) / 100);
+	//float additionalScale = FMath::Max(0.0f, (-TargetPosition.Y + 150) / 80);
 	DestPosition = FMath::Lerp(DestPosition, TargetPosition, 0.5);
 }
 
@@ -327,18 +334,22 @@ void ASG_ArtPlayer::MulticastRPC_SetJointPosition_Implementation(const TArray<FV
 
 	root_Position = ((JointPosition[LEFT_HEEL] + JointPosition[RIGHT_HEEL]) / 2);
 	head_Position = JointPosition[NOSE];
-
-	PreprocessJointPosition(root_Position, hand_l_Position, JointPosition[LEFT_WRIST]);
-	PreprocessJointPosition(root_Position, hand_r_Position, JointPosition[RIGHT_WRIST]);
-	PreprocessJointPosition(root_Position, foot_l_Position, JointPosition[LEFT_HEEL]);
-	PreprocessJointPosition(root_Position, foot_r_Position, JointPosition[RIGHT_HEEL]);
-	PreprocessJointPosition(root_Position, head_Position, JointPosition[NOSE]);
+	float x_scale = (float)50 / (JointPosition[RIGHT_WRIST].X - JointPosition[LEFT_WRIST].X);
+	float z_scale = (float)160 / (JointPosition[NOSE].Z - root_Position.Z);
+	PreprocessJointPosition(root_Position, lowerarm_l_Position, JointPosition[LEFT_ELBOW], x_scale, z_scale);
+	PreprocessJointPosition(root_Position, lowerarm_r_Position, JointPosition[RIGHT_ELBOW], x_scale, z_scale);
+	PreprocessJointPosition(root_Position, hand_l_Position, JointPosition[LEFT_WRIST], x_scale, z_scale);
+	PreprocessJointPosition(root_Position, hand_r_Position, JointPosition[RIGHT_WRIST], x_scale, z_scale);
+	PreprocessJointPosition(root_Position, foot_l_Position, JointPosition[LEFT_HEEL], x_scale, z_scale);
+	PreprocessJointPosition(root_Position, foot_r_Position, JointPosition[RIGHT_HEEL], x_scale, z_scale);
+	PreprocessJointPosition(root_Position, head_Position, JointPosition[NOSE], x_scale, z_scale);
 
 	FVector expected_spine5_Position = (JointPosition[LEFT_SHOULDER] + JointPosition[RIGHT_SHOULDER] +
 				JointPosition[RIGHT_HIP] + JointPosition[LEFT_HIP]) / 4;
-	PreprocessJointPosition(root_Position, spine5_Position, expected_spine5_Position);
+	expected_spine5_Position.Z *= 1.5;
+	PreprocessJointPosition(root_Position, spine5_Position, expected_spine5_Position, x_scale, z_scale);
 	FVector expected_pelvis_Position = (JointPosition[ELandmark::LEFT_HIP] + JointPosition[ELandmark::RIGHT_HIP]) / 2;
-	PreprocessJointPosition(root_Position, pelvis_Position, expected_pelvis_Position);
+	PreprocessJointPosition(root_Position, pelvis_Position, expected_pelvis_Position, x_scale, z_scale);
 
 	////PRINTLOG(TEXT("MulticastRPC_SetJointPosition_Implementation"));
 	//FVector CurLocation = GetActorLocation();

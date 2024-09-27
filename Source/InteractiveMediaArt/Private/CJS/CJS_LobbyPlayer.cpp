@@ -333,7 +333,7 @@ void ACJS_LobbyPlayer::OnMouseClick(const FInputActionInstance& Value)
 		auto* hitComp = Outhit.GetComponent();
 		if ( HitActor && hitComp )
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s,  %s"), *HitActor->GetName(), *hitComp->GetName()));
+			//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("%s,  %s"), *HitActor->GetName(), *hitComp->GetName()));
 
 			// ============================== 아트1 작품설명 버튼 닫기 ==============================
 			//ACJS_PopUpBnt* button2 = Cast<ACJS_PopUpBnt>(HitActor); // HitActor가 ACJS_PopUpBnt인지 확인

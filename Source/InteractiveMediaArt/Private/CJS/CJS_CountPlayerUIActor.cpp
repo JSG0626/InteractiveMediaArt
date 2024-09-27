@@ -82,8 +82,8 @@ void ACJS_CountPlayerUIActor::BeginPlay()
 	auto* Art1_Multi_TargetCameraComp = Art1_Multi_TargetCamera->GetCameraComponent();
 	Art1_Multi_TargetCameraComp->ProjectionMode = ECameraProjectionMode::Orthographic;
 	Art1_Multi_TargetCameraComp->OrthoWidth = 3200.f;
-	Art1_Multi1_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(1650, -3580, 200));  // 왼쪽  
-	Art1_Multi2_TargetTransform = FTransform(FRotator(0, -90, 0), FVector(3220, -3580, 200));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
+	Art1_Multi1_TargetTransform = FTransform(FRotator(0, 90, 0), FVector(1650, -3580, 200));  // 왼쪽  
+	Art1_Multi2_TargetTransform = FTransform(FRotator(0, 90, 0), FVector(3220, -3580, 200));  // 오른쪽 (X=3217.214946,Y=-3580.000000,Z=210.000014)
 
 	// 이동할 위치와 카메라 설정
 	TargetTransforms.Add(Art1_Multi1_TargetTransform);

@@ -256,6 +256,9 @@ void ALHM_Player::OnMouseClick(const struct FInputActionValue& Value)
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Art3UI"));
 						Art3UI->SetVisible();
+						// 입력 모드 변경
+						FInputModeUIOnly InputMode;
+						pc->SetInputMode(InputMode);
 					}
 					UE_LOG(LogTemp, Warning, TEXT("Hit"));
 					FTimerHandle timer1;
@@ -292,8 +295,8 @@ void ALHM_Player::MoveToArt3(ALHM_MoveArt3Btn* button)
 		pc->SetViewTarget(Cast<AActor>(button->Art3_TargetCamera));
 
 		// 입력 모드 변경
-		FInputModeUIOnly InputMode;
-		pc->SetInputMode(InputMode);
+		//FInputModeUIOnly InputMode;
+		//pc->SetInputMode(InputMode);
 
 		// 마우스 커서 및 에임 포인트 처리
 		//HideAimPoint();

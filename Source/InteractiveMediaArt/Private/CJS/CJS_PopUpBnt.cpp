@@ -44,13 +44,17 @@ ACJS_PopUpBnt::ACJS_PopUpBnt()
 	WidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComp"));
 	WidgetComp->SetupAttachment(ButtonComp);
 	WidgetComp->SetWidgetSpace(EWidgetSpace::World); // 3D 공간에 배치
-	WidgetComp->SetRelativeLocation(FVector(-585, -60, 800)); // 위젯 위치 조정 
-	WidgetComp->SetRelativeRotation(FRotator(270, 90, 0)); // 위젯 위치 조정
+	WidgetComp->SetRelativeLocation(FVector(20, 277, 150)); // 위젯 위치 조정  (X=20.000000,Y=277.000000,Z=150.000000)
+	WidgetComp->SetRelativeRotation(FRotator(-40, 90, 0)); // 위젯 위치 조정 (Pitch=-40.000000,Yaw=90.000000,Roll=0.000000)
 	WidgetComp->SetRelativeScale3D(FVector(1, 1.5, 10));
 	WidgetComp->SetDrawSize(FVector2D(1000, 1000)); // 위젯 크기 설정
 	WidgetComp->SetVisibility(false); // 처음에는 보이지 않게 설정
 
-
+	/*ClickPopUpUIComp = CreateDefaultSubobject<UBoxComponent>(TEXT("ClickPopUpUI"));
+	ClickPopUpUIComp->SetupAttachment(ButtonComp);
+	ClickPopUpUIComp->SetRelativeLocation(FVector(20, 277, 150));
+	ClickPopUpUIComp->SetRelativeRotation(FRotator(-40, 90, 0));
+	ClickPopUpUIComp->SetHiddenInGame(true);*/
 }
 
 // Called when the game starts or when spawned

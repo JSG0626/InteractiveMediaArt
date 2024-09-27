@@ -140,7 +140,8 @@ void ASG_Art1_Manager::GetScore()
 		Player1Score = hitInfos1.Num();
 		Player2Score = hitInfos2.Num();
 
-		if ( Player1Score >= Player2Score )
+		PRINTLOG(TEXT("Player1Score: %d, 2Score: %d"), Player1Score, Player2Score);
+		if ( Player1Score <= Player2Score )
 		{
 			Player1->MulticastRPC_ShowArt1WinUI();
 			Player2->MulticastRPC_ShowArt1LoseUI();
@@ -151,7 +152,6 @@ void ASG_Art1_Manager::GetScore()
 			Player2->MulticastRPC_ShowArt1WinUI();
 		}
 
-		PRINTLOG(TEXT("Player1Score: %d, 2Score: %d"), Player1Score, Player2Score);
 	}
 }
 

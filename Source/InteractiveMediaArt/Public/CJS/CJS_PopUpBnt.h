@@ -33,6 +33,9 @@ public:
 	TSubclassOf <class UUserWidget> PopUpUIClass;
 	 UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
     class UWidgetComponent* WidgetComp;
+
+	//UPROPERTY(EditDefaultsOnly)
+	//class UBoxComponent* ClickPopUpUIComp;
 	
 	//UFUNCTION()
     //void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

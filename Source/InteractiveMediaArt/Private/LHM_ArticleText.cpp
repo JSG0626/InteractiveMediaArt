@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "LHM_ArticleText.h"
@@ -35,7 +35,7 @@ ALHM_ArticleText::ALHM_ArticleText()
             }
 
             MeshComponent->SetupAttachment(RootComp);
-            MeshComponent->SetRelativeScale3D(FVector(1, 10, 1));
+            MeshComponent->SetRelativeScale3D(FVector(1, 23, 1));
             MeshComponent->SetVisibility(true);
             MeshComponent->SetCastShadow(false);
 

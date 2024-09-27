@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "DoorActor.h"
@@ -115,7 +115,8 @@ void ADoorActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 			{
 				if (GetWorld()->GetFirstPlayerController() == pc)
 				{
-					// 1ÃÊ ÈÄ¿¡ CallExitUI ÇÔ¼ö È£Ãâ
+					// 1ì´ˆ í›„ì— CallExitUI í•¨ìˆ˜ í˜¸ì¶œ
+					player->HideAimPoint();
 					FTimerHandle TimerHandle;
 					GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ADoorActor::CallExitUI, 1.0f, false);
 				}
@@ -127,6 +128,11 @@ void ADoorActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 void ADoorActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	Return();
+	auto* player = Cast<ACJS_LobbyPlayer>(OtherActor);
+	if ( player )
+	{
+		player->ShowAimPoint();
+	}
 }
 
 void ADoorActor::CallExitUI()

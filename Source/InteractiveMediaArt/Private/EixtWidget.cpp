@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EixtWidget.h"
@@ -45,7 +45,7 @@ void UEixtWidget::OnRetry()
 
 void UEixtWidget::OnExit()
 {
-	// ÇÁ·Î±×·¥ Á¾·á
+	// í”„ë¡œê·¸ëž¨ ì¢…ë£Œ
 	auto* gi = Cast<UExhibitionGameInstance>(GetWorld()->GetGameInstance());
 	if (gi)
 	{
